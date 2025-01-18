@@ -91,7 +91,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           repository: Xposed-Modules-Repo/fansirsqi.xposed.sesame # 目标仓库的拥有者和仓库名称
-          nanme: Sesame-${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
+          name: Sesame-${{ github.event.release.tag_name || github.ref_name }} # 发布的名称。默认为标签名称
           files: |
             ${{ steps.sign_normal_apk.outputs.signedFile }}
             ${{ steps.sign_compatible_apk.outputs.signedFile }}
