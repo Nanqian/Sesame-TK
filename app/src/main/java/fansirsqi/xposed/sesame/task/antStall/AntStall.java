@@ -62,6 +62,11 @@ public class AntStall extends ModelTask {
         return ModelGroup.STALL;
     }
 
+    @Override
+    public String getIcon() {
+        return "AntStall.png";
+    }
+
     private BooleanModelField stallAutoOpen;
     private ChoiceModelField stallOpenType;
     private SelectModelField stallOpenList;

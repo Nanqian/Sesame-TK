@@ -23,6 +23,11 @@ public class AnswerAI extends Model {
         return ModelGroup.OTHER;
     }
 
+    @Override
+    public String getIcon() {
+        return "AnswerAI.svg";
+    }
+
     private static AnswerAIInterface answerAIInterface = AnswerAIInterface.getInstance();
 
     private final BooleanModelField useGeminiAI = new BooleanModelField("useGeminiAI", "GeminiAI | 使用答题", false);

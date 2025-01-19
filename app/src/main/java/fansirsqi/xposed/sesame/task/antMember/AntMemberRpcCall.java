@@ -82,7 +82,6 @@ public class AntMemberRpcCall {
     }
 
     /* 商家服务任务 */
-
     public static String taskFinish(String bizId) {
         return RequestManager.requestString("com.alipay.adtask.biz.mobilegw.service.task.finish",
                 "[{\"bizId\":\"" + bizId + "\"}]");
@@ -184,9 +183,47 @@ public class AntMemberRpcCall {
     }
 
     /**
+     * 芝麻信用首页
+     */
+    public static String queryHome() {
+        return RequestManager.requestString("com.antgroup.zmxy.zmcustprod.biz.rpc.home.api.HomeV7RpcManager.queryHome",
+                "[{\"invokeSource\":\"zmHome\",\"miniZmGrayInside\":\"\",\"version\":\"week\"}]");
+    }
+
+    /**
+     * 获取芝麻信用任务列表
+     */
+    public static String queryAvailableSesameTask() {
+        return RequestManager.requestString("com.antgroup.zmxy.zmmemberop.biz.rpc.creditaccumulate.CreditAccumulateStrategyRpcManager.queryListV3", "[{}]");
+    }
+
+    /**
+     * 芝麻信用领取任务
+     */
+    public static String joinSesameTask(String taskTemplateId) {
+        return RequestManager.requestString("com.antgroup.zmxy.zmmemberop.biz.rpc.promise.PromiseRpcManager.joinActivity",
+                "[{\"chInfo\":\"seasameList\",\"joinFromOuter\":false,\"templateId\":\"" + taskTemplateId + "\"}]");
+    }
+
+    /**
+     * 芝麻信用获取任务回调
+     */
+    public static String feedBackSesameTask(String taskTemplateId) {
+        return RequestManager.requestString("com.antgroup.zmxy.zmmemberop.biz.rpc.creditaccumulate.CreditAccumulateStrategyRpcManager.taskFeedback",
+                "[{\"actionType\":\"TO_COMPLETE\",\"templateId\":\"" + taskTemplateId + "\"}]",
+                "zmmemberop", "taskFeedback", "CreditAccumulateStrategyRpcManager");
+    }
+
+    /**
+     * 芝麻信用完成任务
+     */
+    public static String finishSesameTask(String recordId) {
+        return RequestManager.requestString("com.antgroup.zmxy.zmmemberop.biz.rpc.promise.PromiseRpcManager.pushActivity",
+                "[{\"recordId\":\""+recordId+"\"}]");
+    }
+
+    /**
      * 查询可收取的芝麻粒
-     *
-     * @return 结果
      */
     public static String queryCreditFeedback() {
         return RequestManager.requestString(
@@ -195,20 +232,17 @@ public class AntMemberRpcCall {
     }
 
     /**
-     * 芝麻信用首页
-     *
-     * @return 结果
+     * 一键收取芝麻粒
      */
-    public static String queryHome() {
-        return RequestManager.requestString("com.antgroup.zmxy.zmcustprod.biz.rpc.home.api.HomeV6RpcManager.queryHome",
-                "[{\"miniZmGrayInside\":\"\"}]");
+    public static String collectAllCreditFeedback() {
+        return RequestManager.requestString(
+                "com.antgroup.zmxy.zmcustprod.biz.rpc.home.creditaccumulate.api.CreditAccumulateRpcManager.collectCreditFeedback",
+                "[{\"collectAll\":true,\"status\":\"UNCLAIMED\"}]");
     }
 
     /**
      * 收取芝麻粒
-     *
      * @param creditFeedbackId creditFeedbackId
-     * @return 结果
      */
     public static String collectCreditFeedback(String creditFeedbackId) {
         return RequestManager.requestString(
@@ -216,6 +250,30 @@ public class AntMemberRpcCall {
                 "[{\"collectAll\":false,\"creditFeedbackId\":\"" + creditFeedbackId + "\",\"status\":\"UNCLAIMED\"}]");
     }
 
+    /**
+     * 获取保障金信息
+     */
+    public static String queryInsuredHome () {
+        return RequestManager.requestString("com.alipay.insplatformbff.insgift.accountService.queryAccountForPlat",
+                "[{\"includePolicy\":true,\"specialChannel\":\"wealth_entry\"}]");
+    }
+
+    /**
+     * 获取所有可领取的保障金
+     */
+    public static String queryAvailableCollectInsuredGold() {
+        return RequestManager.requestString("com.alipay.insgiftbff.insgiftMain.queryMultiSceneWaitToGainList",
+                "[{\"entrance\":\"wealth_entry\",\"eventToWaitParamDTO\":{\"giftProdCode\":\"GIFT_UNIVERSAL_COVERAGE\",\"rightNoList\":[\"UNIVERSAL_ACCIDENT\",\"UNIVERSAL_HOSPITAL\",\"UNIVERSAL_OUTPATIENT\",\"UNIVERSAL_SERIOUSNESS\",\"UNIVERSAL_WEALTH\",\"UNIVERSAL_TRANS\",\"UNIVERSAL_FRAUD_LIABILITY\"]},\"helpChildParamDTO\":{\"giftProdCode\":\"GIFT_HEALTH_GOLD_CHILD\",\"rightNoList\":[\"UNIVERSAL_ACCIDENT\",\"UNIVERSAL_HOSPITAL\",\"UNIVERSAL_OUTPATIENT\",\"UNIVERSAL_SERIOUSNESS\",\"UNIVERSAL_WEALTH\",\"UNIVERSAL_TRANS\",\"UNIVERSAL_FRAUD_LIABILITY\"]},\"priorityChannelParamDTO\":{\"giftProdCode\":\"GIFT_UNIVERSAL_COVERAGE\",\"rightNoList\":[\"UNIVERSAL_ACCIDENT\",\"UNIVERSAL_HOSPITAL\",\"UNIVERSAL_OUTPATIENT\",\"UNIVERSAL_SERIOUSNESS\",\"UNIVERSAL_WEALTH\",\"UNIVERSAL_TRANS\",\"UNIVERSAL_FRAUD_LIABILITY\"]},\"signInParamDTO\":{\"giftProdCode\":\"GIFT_UNIVERSAL_COVERAGE\",\"rightNoList\":[\"UNIVERSAL_ACCIDENT\",\"UNIVERSAL_HOSPITAL\",\"UNIVERSAL_OUTPATIENT\",\"UNIVERSAL_SERIOUSNESS\",\"UNIVERSAL_WEALTH\",\"UNIVERSAL_TRANS\",\"UNIVERSAL_FRAUD_LIABILITY\"]}}]",
+                "insgiftbff", "queryMultiSceneWaitToGainList", "insgiftMain");
+    }
+
+    /**
+     * 领取保障金
+     */
+    public static String collectInsuredGold(JSONObject goldBallObj) {
+        return RequestManager.requestString("com.alipay.insgiftbff.insgiftMain.gainMyAndFamilySumInsured",
+                goldBallObj.toString(), "insgiftbff", "gainMyAndFamilySumInsured", "insgiftMain");
+    }
     /**
      * 查询生活记录
      *

@@ -53,6 +53,9 @@ public final class ModelConfig implements Serializable {
         this.name = model.getName();
         // 设置模型所属组
         this.group = model.getGroup();
+        // 设置模型的图标文件名称（图标位置app/src/main/assets/web/images/icon/model[/selected]，正常状态和选中状态）
+        // 无图标定义时使用default.svg
+        this.icon = model.getIcon();
         // 获取模型的启用字段，并将其加入到字段列表中
         BooleanModelField enableField = model.getEnableField();
         fields.put(enableField.getCode(), enableField);

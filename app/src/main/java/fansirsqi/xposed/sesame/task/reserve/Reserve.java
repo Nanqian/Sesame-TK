@@ -32,6 +32,11 @@ public class Reserve extends ModelTask {
         return ModelGroup.FOREST;
     }
 
+    @Override
+    public String getIcon() {
+        return "Reserve.png";
+    }
+
     private SelectAndCountModelField reserveList;
 
     @Override

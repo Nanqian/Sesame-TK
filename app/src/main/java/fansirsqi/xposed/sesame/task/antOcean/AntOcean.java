@@ -45,6 +45,11 @@ public class AntOcean extends ModelTask {
         return ModelGroup.FOREST;
     }
 
+    @Override
+    public String getIcon() {
+        return "AntOcean.png";
+    }
+
     /**每日海洋任务*/
     private BooleanModelField dailyOceanTask;
     /**领取碎片奖励*/

@@ -169,6 +169,11 @@ public class BaseModel extends Model {
     }
 
     @Override
+    public String getIcon() {
+        return "BaseModel.png";
+    }
+
+    @Override
     public String getEnableFieldName() {
         return "启用模块";
     }

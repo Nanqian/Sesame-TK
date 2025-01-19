@@ -213,6 +213,11 @@ public class AntForest extends ModelTask {
         return ModelGroup.FOREST;
     }
 
+    @Override
+    public String getIcon() {
+        return "AntForest.png";
+    }
+
     @SuppressWarnings("unused")
     public interface applyPropType {
         int CLOSE = 0;

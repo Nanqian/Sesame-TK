@@ -34,6 +34,11 @@ public class AntDodo extends ModelTask {
         return ModelGroup.FOREST;
     }
 
+    @Override
+    public String getIcon() {
+        return "AntDodo.png";
+    }
+
     private BooleanModelField collectToFriend;
     private ChoiceModelField collectToFriendType;
     private SelectModelField collectToFriendList;

@@ -51,6 +51,11 @@ public class GreenFinance extends ModelTask {
     }
 
     @Override
+    public String getIcon() {
+        return "GreenFinance.png";
+    }
+
+    @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
         modelFields.addField(greenFinanceLsxd = new BooleanModelField("greenFinanceLsxd", "打卡 | 绿色行动", false));

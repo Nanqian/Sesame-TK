@@ -26,6 +26,11 @@ public class AntBookRead extends ModelTask {
     }
 
     @Override
+    public String getIcon() {
+        return "AntBookRead.png";
+    }
+
+    @Override
     public ModelFields getFields() {
         return new ModelFields();
     }

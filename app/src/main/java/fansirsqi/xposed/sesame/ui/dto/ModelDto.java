@@ -22,6 +22,11 @@ public class ModelDto implements Serializable {
     private String modelName;
 
     /**
+     * 模型图标
+     */
+    private String modelIcon;
+
+    /**
      * 组代码。
      */
     private String groupCode;
@@ -44,9 +49,10 @@ public class ModelDto implements Serializable {
      * @param groupCode 组代码
      * @param modelFields 模型字段展示信息列表
      */
-    public ModelDto(String modelCode, String modelName, String groupCode, List<ModelFieldShowDto> modelFields) {
+    public ModelDto(String modelCode, String modelName, String icon, String groupCode, List<ModelFieldShowDto> modelFields) {
         this.modelCode = modelCode;
         this.modelName = modelName;
+        this.modelIcon = icon;
         this.groupCode = groupCode;
         this.modelFields = modelFields;
     }

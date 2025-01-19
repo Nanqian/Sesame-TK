@@ -1,5 +1,7 @@
 package fansirsqi.xposed.sesame.entity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import lombok.Getter;
 
 /**
@@ -28,6 +30,21 @@ public class RpcEntity {
      * 请求关联信息，用于标识或描述该请求的上下文。
      */
     private final String requestRelation;
+
+    /**
+     * 方法名称
+     */
+    private final String methodName;
+
+    /**
+     * 请求的App名称
+     */
+    private final String appName;
+
+    /**
+     * 请求的RpcManager名称
+     */
+    private final String facadeName;
 
     /**
      * 标识请求是否有结果（线程安全）。
@@ -67,6 +84,19 @@ public class RpcEntity {
     }
 
     /**
+     * 构造方法
+     *
+     * @param requestMethod 请求的方法名称
+     * @param requestData 请求的数据
+     * @param appName 请求的App名称
+     * @param methodName 方法名称
+     * @param facadeName 请求的RpcManager名称
+     */
+    public RpcEntity(String requestMethod, String requestData, String appName, String methodName, String facadeName) {
+        this(requestMethod, requestData, null, appName, methodName, facadeName);
+    }
+
+    /**
      * 构造方法，初始化请求方法、请求数据和请求关联信息。
      *
      * @param requestMethod   请求的方法名称
@@ -74,10 +104,27 @@ public class RpcEntity {
      * @param requestRelation 请求的关联信息
      */
     public RpcEntity(String requestMethod, String requestData, String requestRelation) {
+        this(requestMethod, requestData, requestRelation, null, "taskFeedback", null);
+    }
+
+    /**
+     * 构造方法
+     *
+     * @param requestMethod 请求的方法名称
+     * @param requestData 请求的数据
+     * @param requestRelation 请求的关联信息
+     * @param appName 请求的App名称
+     * @param methodName 方法名称
+     * @param facadeName 请求的RpcManager名称
+     */
+    public RpcEntity(String requestMethod, String requestData, String requestRelation, String appName, String methodName, String facadeName) {
         this.requestThread = Thread.currentThread(); // 记录发起请求的线程
         this.requestMethod = requestMethod;
         this.requestData = requestData;
         this.requestRelation = requestRelation;
+        this.appName = appName;
+        this.methodName = methodName;
+        this.facadeName = facadeName;
     }
 
     /**
@@ -97,5 +144,25 @@ public class RpcEntity {
      */
     public void setError() {
         this.hasError = true; // 标记请求发生错误
+    }
+
+    /**
+     * 获取Rpc请求字符串
+     * @return Rpc请求字符串
+     * @throws JSONException json解析错误，需要处理
+     */
+    public String getRpcFullRequestData() throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("__apiCallStartTime",System.currentTimeMillis());
+        // [__apiNativeCallId]不传是否有影响，取值又如何获取
+        jo.put("apiCallLink", "XRiverNotFound");
+        jo.put("appName", this.appName);
+        jo.put("execEngine", "XRiver");
+        jo.put("facadeName", this.facadeName);
+        jo.put("methodName", this.methodName);
+        jo.put("operationType", this.requestMethod);
+        jo.put("requestData", this.requestData);
+        jo.put("relationLocal", this.requestRelation);
+        return jo.toString();
     }
 }

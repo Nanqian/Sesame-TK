@@ -141,7 +141,7 @@ android {
                     output.outputFileName = "${applicationName}-${variant.productFlavors[0].ext.applicationType}-${defaultConfig.versionName}.apk"
                 }
                 if (variant.buildType.name == 'debug') {
-                    output.outputFileName = "${applicationName}-${variant.productFlavors[0].ext.applicationType}-${defaultConfig.versionName}-debug.apk"
+                    output.outputFileName = "${applicationName}-${variant.productFlavors[0].ext.applicationType}-${defaultConfig.versionName}-debug.${buildTargetCode}.apk"
                 }
             }
         }

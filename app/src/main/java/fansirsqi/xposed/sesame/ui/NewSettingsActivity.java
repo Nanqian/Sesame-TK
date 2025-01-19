@@ -193,7 +193,7 @@ public class NewSettingsActivity extends BaseActivity {
         Map<String, ModelConfig> modelConfigMap = ModelTask.getModelConfigMap();
         for (Map.Entry<String, ModelConfig> configEntry : modelConfigMap.entrySet()) {
             ModelConfig modelConfig = configEntry.getValue();
-            tabList.add(new ModelDto(configEntry.getKey(), modelConfig.getName(), modelConfig.getIcon(), null));
+            tabList.add(new ModelDto(configEntry.getKey(), modelConfig.getName(), modelConfig.getIcon(), modelConfig.getGroup().getCode(), null));
         }
         for (ModelGroup modelGroup : ModelGroup.values()) {
             groupList.add(new ModelGroupDto(modelGroup.getCode(), modelGroup.getName(), modelGroup.getIcon()));
@@ -262,7 +262,7 @@ public class NewSettingsActivity extends BaseActivity {
                 for (ModelField<?> modelField : modelConfig.getFields().values()) {
                     modelFields.add(ModelFieldShowDto.toShowDto(modelField));
                 }
-                modelDtoList.add(new ModelDto(modelConfig.getCode(), modelConfig.getName(), groupCode, modelFields));
+                modelDtoList.add(new ModelDto(modelConfig.getCode(), modelConfig.getName(), modelConfig.getIcon(), groupCode, modelFields));
             }
             String result = JsonUtil.formatJson(modelDtoList, false);
             if (isApkInDebug()) {

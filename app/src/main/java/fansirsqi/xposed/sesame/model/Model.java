@@ -1,5 +1,6 @@
 package fansirsqi.xposed.sesame.model;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +33,8 @@ public abstract class Model {
 
     private static final List<Model> modelList = new LinkedList<>(Arrays.asList(modelArray));
 
-    private static final List<Model> readOnlyModelList = Collections.unmodifiableList(modelList);
+    @Getter
+    public static final List<Model> readOnlyModelList = Collections.unmodifiableList(modelList);
 
     private final BooleanModelField enableField;
 
@@ -59,6 +61,8 @@ public abstract class Model {
     public abstract String getName();
 
     public abstract ModelGroup getGroup();
+
+    public abstract String getIcon();
 
     public abstract ModelFields getFields();
 
@@ -96,34 +100,34 @@ public abstract class Model {
         return modelMap.containsKey(modelClazz);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Model> T getModel(Class<T> modelClazz) {
-        return (T) modelMap.get(modelClazz);
+        Model model = modelMap.get(modelClazz);
+        if (modelClazz.isInstance(model)) {
+            return modelClazz.cast(model);
+        } else {
+            Log.error("Model " + modelClazz.getSimpleName() + " not found.");
+            return null;
+        }
     }
 
-    public static List<Model> getModelList() {
-        return readOnlyModelList;
-    }
 
     public static synchronized void initAllModel() {
         destroyAllModel();
         for (int i = 0, len = modelClazzList.size(); i < len; i++) {
             Class<? extends Model> modelClazz = modelClazzList.get(i);
             try {
-                Model model = modelClazz.newInstance();
+                // 使用getDeclaredConstructor().newInstance()代替newInstance()
+                Model model = modelClazz.getDeclaredConstructor().newInstance();
                 ModelConfig modelConfig = new ModelConfig(model);
                 modelArray[i] = model;
                 modelMap.put(modelClazz, model);
                 String modelCode = modelConfig.getCode();
                 modelConfigMap.put(modelCode, modelConfig);
                 ModelGroup group = modelConfig.getGroup();
-                Map<String, ModelConfig> modelConfigMap = groupModelConfigMap.get(group);
-                if (modelConfigMap == null) {
-                    modelConfigMap = new LinkedHashMap<>();
-                    groupModelConfigMap.put(group, modelConfigMap);
-                }
+                Map<String, ModelConfig> modelConfigMap = groupModelConfigMap.computeIfAbsent(group, k -> new LinkedHashMap<>());
                 modelConfigMap.put(modelCode, modelConfig);
-            } catch (IllegalAccessException | InstantiationException e) {
+            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
+                     InvocationTargetException e) {
                 Log.printStackTrace(e);
             }
         }

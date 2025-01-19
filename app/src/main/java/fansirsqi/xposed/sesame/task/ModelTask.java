@@ -13,6 +13,7 @@ import fansirsqi.xposed.sesame.model.Model;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelType;
 import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import lombok.Getter;
@@ -50,11 +51,13 @@ public abstract class ModelTask extends Model {
             }
             MAIN_TASK_MAP.put(task, Thread.currentThread());
             try {
+                Notify.setStatusTextExec();
                 task.run();
             } catch (Exception e) {
                 Log.printStackTrace(e);
             } finally {
                 MAIN_TASK_MAP.remove(task);
+                Notify.updateNextExecText(-1);
             }
         }
 
@@ -425,6 +428,13 @@ public abstract class ModelTask extends Model {
             }
         }
 
+    }
+
+    /**
+     * 返回是否还有未结束的任务
+     */
+    public static boolean isAllTaskFinished() {
+        return MAIN_TASK_MAP.isEmpty();
     }
 
     public interface CancelTask {

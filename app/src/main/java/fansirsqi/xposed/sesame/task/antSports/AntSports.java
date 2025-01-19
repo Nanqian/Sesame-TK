@@ -61,6 +61,11 @@ public class AntSports extends ModelTask {
     }
 
     @Override
+    public String getIcon() {
+        return "AntSports.png";
+    }
+
+    @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
         modelFields.addField(walk = new BooleanModelField("walk", "行走路线 | 开启", false));

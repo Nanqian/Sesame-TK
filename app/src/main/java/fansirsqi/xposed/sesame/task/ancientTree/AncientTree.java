@@ -34,6 +34,11 @@ public class AncientTree extends ModelTask {
         return ModelGroup.FOREST;
     }
 
+    @Override
+    public String getIcon() {
+        return "AncientTree.png";
+    }
+
     private BooleanModelField ancientTreeOnlyWeek;
     private SelectModelField ancientTreeCityCodeList;
 

@@ -33,6 +33,11 @@ public class OmegakoiTown extends ModelTask {
         return new ModelFields();
     }
 
+    @Override
+    public String getIcon() {
+        return "OmegakoiTown.png";
+    }
+
     public enum RewardType {
         gold, diamond, dyestuff, rubber, glass, certificate, shipping, tpuPhoneCaseCertificate,
         glassPhoneCaseCertificate, canvasBagCertificate, notebookCertificate, box, paper, cotton;

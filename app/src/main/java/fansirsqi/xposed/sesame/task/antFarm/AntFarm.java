@@ -101,6 +101,11 @@ public class AntFarm extends ModelTask {
         return ModelGroup.FARM;
     }
 
+    @Override
+    public String getIcon() {
+        return "AntFarm.png";
+    }
+
     /**
      * 小鸡睡觉时间
      */

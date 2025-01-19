@@ -116,19 +116,14 @@ public class NewRpcBridge implements RpcBridge {
         if (ApplicationHook.isOffline()) {
             return null;
         }
-        int id = rpcEntity.hashCode();
-        String method = rpcEntity.getRequestMethod();
-        String data = rpcEntity.getRequestData();
-        String relation = rpcEntity.getRequestRelation();
         try {
             int count = 0;
             do {
                 count++;
                 try {
-                    RpcIntervalLimit.enterIntervalLimit(method);
+                    RpcIntervalLimit.enterIntervalLimit(rpcEntity.getRequestMethod());
                     newRpcCallMethod.invoke(
-                            newRpcInstance, method, false, false, "json", parseObjectMethod.invoke(null, "{\"__apiCallStartTime\":" + System.currentTimeMillis() + ",\"apiCallLink\":\"XRiverNotFound\",\"execEngine\":\"XRiver\",\"operationType\":\"" + method + "\",\"requestData\":" + data + (relation == null ? "" : "," +
-                                    "\"relationLocal\":" + relation) + "}"), "", null, true, false, 0, false, "", null, null, null, Proxy.newProxyInstance(loader, bridgeCallbackClazzArray, (proxy, innerMethod, args) -> {
+                            newRpcInstance, rpcEntity.getRequestMethod(), false, false, "json", parseObjectMethod.invoke(null, rpcEntity.getRpcFullRequestData()), "", null, true, false, 0, false, "", null, null, null, Proxy.newProxyInstance(loader, bridgeCallbackClazzArray, (proxy, innerMethod, args) -> {
                                 if (args.length == 1 && "sendJSONResponse".equals(innerMethod.getName())) {
                                     try {
                                         Object obj = args[0];
@@ -140,7 +135,7 @@ public class NewRpcBridge implements RpcBridge {
                                         }
                                     } catch (Exception e) {
                                         rpcEntity.setError();
-                                        Log.error("new rpc response | id: " + id + " | method: " + method + " err:");
+                                        Log.error("new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " err:");
                                         Log.printStackTrace(e);
                                     }
                                 }
@@ -168,7 +163,7 @@ public class NewRpcBridge implements RpcBridge {
                         }
                         return rpcEntity;
                     } catch (Exception e) {
-                        Log.error("new rpc response | id: " + id + " | method: " + method + " get err:");
+                        Log.error("new rpc response | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " get err:");
                         Log.printStackTrace(e);
                     }
                     if (retryInterval < 0) {
@@ -185,7 +180,7 @@ public class NewRpcBridge implements RpcBridge {
                         }
                     }
                 } catch (Throwable t) {
-                    Log.error("new rpc request | id: " + id + " | method: " + method + " err:");
+                    Log.error("new rpc request | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " err:");
                     Log.printStackTrace(t);
                     if (retryInterval < 0) {
                         try {
@@ -204,7 +199,7 @@ public class NewRpcBridge implements RpcBridge {
             } while (count < tryCount);
             return null;
         } finally {
-            Log.system(TAG, "New RPC\n方法: " + method + "\n参数: " + data + "\n数据: " + rpcEntity.getResponseString() + "\n");
+            Log.system(TAG, "New RPC\n方法: " + rpcEntity.getRequestMethod() + "\n参数: " + rpcEntity.getRequestData() + "\n数据: " + rpcEntity.getResponseString() + "\n");
         }
     }
 }

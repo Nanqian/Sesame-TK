@@ -593,21 +593,20 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         Object[] recordArray = rpcHookMap.remove(object);
                                         if (recordArray != null) {
                                             Map<String, Object> HookResponse = new HashMap<>();
+                                            String TimeStamp = String.valueOf(recordArray[0]);
+                                            String Method = String.valueOf(recordArray[1]);
+                                            String Params = String.valueOf(recordArray[2]);
+                                            String rawData = String.valueOf(recordArray[3]);
+
                                             HookResponse.put("TimeStamp", recordArray[0]);
                                             HookResponse.put("Method", recordArray[1]);
                                             HookResponse.put("Params", recordArray[2]);
-                                            String rawData = String.valueOf(recordArray[3]);
-                                            try {
-                                                JSONObject jsonData = new JSONObject(rawData.replace("\\\"", "\"").replace("\\\\", "\\"));
-                                                HookResponse.put("Data", jsonData.toString());
-                                            } catch (Exception e) {
-                                                HookResponse.put("Data", rawData);
-                                            }
+                                            HookResponse.put("Data", recordArray[3]);
                                             if (BaseModel.getSendHookData().getValue()) {
                                                 HookSender.sendHookData(HookResponse);
                                             }
-                                            String logMessage = JsonUtil.formatJson(HookResponse, false);
-                                            if (logMessage != null && !logMessage.isEmpty()) {
+                                            String logMessage = "\n========================>\n" + "TimeStamp: " + TimeStamp + "\n" + "Method: " + Method + "\n" + "Params: " + Params + "\n" + "Data: " + rawData.replace("\\", "") + "\n<========================\n";
+                                            if (!logMessage.trim().isEmpty()) {
                                                 Log.capture(logMessage);
                                             }
                                         } else {

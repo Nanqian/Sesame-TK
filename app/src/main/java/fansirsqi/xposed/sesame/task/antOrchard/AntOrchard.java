@@ -46,6 +46,11 @@ public class AntOrchard extends ModelTask {
   }
 
   @Override
+  public String getIcon() {
+    return "AntOrchard.png";
+  }
+
+  @Override
   public ModelFields getFields() {
     ModelFields modelFields = new ModelFields();
     modelFields.addField(executeInterval = new IntegerModelField("executeInterval", "执行间隔(毫秒)", 500));

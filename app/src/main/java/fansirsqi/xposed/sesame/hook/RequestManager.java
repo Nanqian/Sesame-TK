@@ -25,6 +25,10 @@ public class RequestManager {
         return ApplicationHook.rpcBridge.requestString(method, data, relation);
     }
 
+    public static String requestString(String method, String data, String appName, String methodName, String facadeName) {
+        return ApplicationHook.rpcBridge.requestString(method, data, appName, methodName, facadeName);
+    }
+
     public static String requestString(String method, String data, int tryCount, int retryInterval) {
         return ApplicationHook.rpcBridge.requestString(method, data, tryCount, retryInterval);
     }

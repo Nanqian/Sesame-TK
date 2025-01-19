@@ -24,6 +24,10 @@ public interface RpcBridge {
         return requestString(method, data, relation, 3, -1);
     }
 
+    default String requestString(String method, String data, String appName, String methodName, String facadeName) {
+        return requestString(new RpcEntity(method, data, appName, methodName, facadeName), 3, -1);
+    }
+
     /*default String requestString(String method, String data, String relation, Long time) {
         return requestString(method, data, relation, time, 3, -1);
     }*/
