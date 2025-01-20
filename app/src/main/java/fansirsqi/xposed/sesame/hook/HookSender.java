@@ -30,25 +30,25 @@ public class HookSender {
 
     public static void sendHookData(Map<String, Object> hookResponse) {
         try {
-            JSONObject jsonObject = new JSONObject();
+            JSONObject jo = new JSONObject();
             for (Map.Entry<String, Object> entry : hookResponse.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                if (value instanceof String stringValue) {
+                String k = entry.getKey();
+                Object v = entry.getValue();
+                if (v instanceof String stringValue) {
                     try {
                         JSONObject valueAsJson = new JSONObject(stringValue);
-                        Log.debug("Converting " + key + " to JSONObject");
-                        jsonObject.put(key, valueAsJson);
+                        Log.debug("Converting " + k + " to JSONObject");
+                        jo.put(k, valueAsJson);
                     } catch (JSONException e) {
-                        Log.debug("Not Converting " + key + " to JSONObject");
-                        jsonObject.put(key, value);
+                        Log.debug("Not Converting " + k + " to JSONObject");
+                        jo.put(k, v);
                     }
                 } else {
-                    jsonObject.put(key, value);
+                    jo.put(k, v);
                 }
             }
 
-            RequestBody body = RequestBody.create(jsonObject.toString(), JSON_MEDIA_TYPE);
+            RequestBody body = RequestBody.create(jo.toString(), JSON_MEDIA_TYPE);
 
             Request request = new Request.Builder()
                     .url(BaseModel.getSendHookDataUrl().getValue())

@@ -79,7 +79,7 @@ public class Files {
      * @return mainDir 主路径
      */
     private static File getMainDir() {
-        String storageDirStr = Environment.getExternalStorageDirectory() + File.separator + "Android" + File.separator + "media" + File.separator + ClassUtil.PACKAGE_NAME;
+        String storageDirStr = Environment.getExternalStorageDirectory() + File.separator + "Android" + File.separator + "media" + File.separator + General.PACKAGE_NAME;
         File storageDir = new File(storageDirStr);
         File mainDir = new File(storageDir, CONFIG_DIR_NAME);
         ensureDir(mainDir);

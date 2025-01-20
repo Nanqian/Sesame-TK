@@ -36,7 +36,7 @@ public class BaseModel extends Model {
      */
     @Getter
     private static final IntegerModelField.MultiplyIntegerModelField checkInterval =
-            new IntegerModelField.MultiplyIntegerModelField("checkInterval", "执行间隔(分钟)", 30, 1, 12 * 60, 60_000);//此处调整至30分钟执行一次，可能会比平常耗电一点。。
+            new IntegerModelField.MultiplyIntegerModelField("checkInterval", "执行间隔(分钟)", 50, 1, 12 * 60, 60_000);//此处调整至30分钟执行一次，可能会比平常耗电一点。。
 
     /**
      * 定时执行的时间点列表
@@ -53,18 +53,7 @@ public class BaseModel extends Model {
     @Getter
     private static final ListModelField.ListJoinCommaToStringModelField wakenAtTimeList =
             new ListModelField.ListJoinCommaToStringModelField("wakenAtTimeList", "定时唤醒(关闭:-1)", ListUtil.newArrayList(
-                    "2359", "0629", "0659",
-                    "0729", "0759", "0829",
-                    "0859", "0929", "0959",
-                    "1029", "1059", "1129",
-                    "1159", "1229", "1259",
-                    "1329", "1359", "1429",
-                    "1459", "1529", "1559",
-                    "1629", "1659", "1729",
-                    "1759", "1829", "1859",
-                    "1929", "1959", "2029",
-                    "2059", "2129", "2159",
-                    "2229", "2259", "2329"
+                    "0650", "2350"
 
             ));
 

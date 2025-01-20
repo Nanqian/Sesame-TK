@@ -37,6 +37,7 @@ public class StatusUtil {
     private boolean exchangeCollectToFriendTimes7Days = false;
     private boolean youthPrivilege = true;
     private boolean studentTask = true;
+    private Map<String, Integer> VitalityStoreList = new HashMap<>();
 
     // ===========================farm
     private Boolean answerQuestion = false;
@@ -99,6 +100,26 @@ public class StatusUtil {
      */
     private Set<String> antOrchardAssistFriend = new HashSet<>();
 
+
+
+    public static int getVitalityCount(String skuId) {
+        Integer exchangedCount = INSTANCE.VitalityStoreList.get(skuId);
+        if (exchangedCount == null) {
+            exchangedCount = 0;
+        }
+        return exchangedCount;
+    }
+
+    public static Boolean canVitalityExchangeToday(String skuId, int count) {
+        return !hasFlagToday("forest::VitalityExchangeLimit::" + skuId)
+                && getVitalityCount(skuId) < count;
+    }
+
+    public static void vitalityExchangeToday(String skuId) {
+        int count = getVitalityCount(skuId) + 1;
+        INSTANCE.VitalityStoreList.put(skuId, count);
+        save();
+    }
 
     public static boolean canStudentTask() {
         return INSTANCE.studentTask;
@@ -404,60 +425,8 @@ public class StatusUtil {
         }
     }
 
-    public static boolean canExchangeDoubleCardToday() {
 
-        if (INSTANCE.exchangeDoubleCard < StatisticsUtil.INSTANCE.getDay().time) {
-            return true;
-        }
-        AntForest task = ModelTask.getModel(AntForest.class);
-        if (task == null) {
-            return false;
-        }
-        return INSTANCE.exchangeTimes < task.getExchangeEnergyDoubleClickCount().getValue();
-    }
 
-    public static void exchangeDoubleCardToday(boolean isSuccess) {
-
-        if (INSTANCE.exchangeDoubleCard != StatisticsUtil.INSTANCE.getDay().time) {
-            INSTANCE.exchangeDoubleCard = StatisticsUtil.INSTANCE.getDay().time;
-        }
-        if (isSuccess) {
-            INSTANCE.exchangeTimes += 1;
-        } else {
-            AntForest task = ModelTask.getModel(AntForest.class);
-            if (task == null) {
-                INSTANCE.exchangeTimes = 0;
-            } else {
-                INSTANCE.exchangeTimes = task.getExchangeEnergyDoubleClickCount().getValue();
-            }
-        }
-        save();
-    }
-
-    public static boolean canExchangeDoubleCardTodayLongTime() {
-
-        if (INSTANCE.exchangeDoubleCard < StatisticsUtil.INSTANCE.getDay().time) {
-            return true;
-        }
-        AntForest task = ModelTask.getModel(AntForest.class);
-        if (task == null) {
-            return false;
-        }
-        return INSTANCE.exchangeTimesLongTime < task.getExchangeEnergyDoubleClickCountLongTime().getValue();
-    }
-
-    public static void exchangeDoubleCardTodayLongTime(boolean isSuccess) {
-
-        if (INSTANCE.exchangeDoubleCard != StatisticsUtil.INSTANCE.getDay().time) {
-            INSTANCE.exchangeDoubleCard = StatisticsUtil.INSTANCE.getDay().time;
-        }
-        if (isSuccess) {
-            INSTANCE.exchangeTimesLongTime += 1;
-        } /*else {
-            INSTANCE.exchangeTimesLongTime = AntForest.exchangeEnergyDoubleClickCountLongTime.getValue();
-        }*/
-        save();
-    }
 
     /**
      * 是否可以贴罚单

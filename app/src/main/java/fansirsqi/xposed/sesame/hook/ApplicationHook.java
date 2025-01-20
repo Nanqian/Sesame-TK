@@ -17,8 +17,6 @@ import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
 
-import org.json.JSONObject;
-
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -60,8 +58,7 @@ import fansirsqi.xposed.sesame.task.BaseTask;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
-import fansirsqi.xposed.sesame.util.ClassUtil;
-import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.General;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
@@ -213,7 +210,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             } catch (ClassNotFoundException e) {
                 Log.printStackTrace(e);
             }
-        } else if (ClassUtil.PACKAGE_NAME.equals(lpparam.packageName) && ClassUtil.PACKAGE_NAME.equals(lpparam.processName)) {
+        } else if (General.PACKAGE_NAME.equals(lpparam.packageName) && General.PACKAGE_NAME.equals(lpparam.processName)) {
             if (hooked) return;
             classLoader = lpparam.classLoader;
             //hook Application类的attach方法
@@ -249,7 +246,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             //hook "com.alipay.mobile.nebulaappproxy.api.rpc.H5AppRpcUpdate" 类的matchVersion方法
             try {
                 XposedHelpers.findAndHookMethod("com.alipay.mobile.nebulaappproxy.api.rpc.H5AppRpcUpdate", classLoader, "matchVersion",
-                        classLoader.loadClass(ClassUtil.H5PAGE_NAME), Map.class, String.class,
+                        classLoader.loadClass(General.H5PAGE_NAME), Map.class, String.class,
                         XC_MethodReplacement.returnConstant(false));
                 Log.runtime(TAG, "hook matchVersion successfully");
             } catch (Throwable t) {
@@ -306,7 +303,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             @Override
                             protected void afterHookedMethod(MethodHookParam param) {
                                 Service appService = (Service) param.thisObject;
-                                if (!ClassUtil.CURRENT_USING_SERVICE.equals(appService.getClass().getCanonicalName())) {
+                                if (!General.CURRENT_USING_SERVICE.equals(appService.getClass().getCanonicalName())) {
                                     return;
                                 }
                                 Log.runtime(TAG, "Service onCreate");
@@ -370,7 +367,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             @Override
                             protected void afterHookedMethod(MethodHookParam param) {
                                 Service service = (Service) param.thisObject;
-                                if (!ClassUtil.CURRENT_USING_SERVICE.equals(service.getClass().getCanonicalName()))
+                                if (!General.CURRENT_USING_SERVICE.equals(service.getClass().getCanonicalName()))
                                     return;
                                 Log.record("支付宝前台服务被销毁");
                                 Notify.updateStatusText("支付宝前台服务被销毁");
@@ -571,7 +568,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         rpcRequestUnhook = XposedHelpers.findAndHookMethod(
                                 "com.alibaba.ariver.commonability.network.rpc.RpcBridgeExtension", classLoader
                                 , "rpc"
-                                , String.class, boolean.class, boolean.class, String.class, classLoader.loadClass(ClassUtil.JSON_OBJECT_NAME), String.class, classLoader.loadClass(ClassUtil.JSON_OBJECT_NAME), boolean.class, boolean.class, int.class, boolean.class, String.class, classLoader.loadClass("com.alibaba" +
+                                , String.class, boolean.class, boolean.class, String.class, classLoader.loadClass(General.JSON_OBJECT_NAME), String.class, classLoader.loadClass(General.JSON_OBJECT_NAME), boolean.class, boolean.class, int.class, boolean.class, String.class, classLoader.loadClass("com.alibaba" +
                                         ".ariver.app.api.App"), classLoader.loadClass("com.alibaba.ariver.app.api.Page"), classLoader.loadClass("com.alibaba.ariver.engine.api.bridge.model.ApiContext"), classLoader.loadClass("com.alibaba.ariver.engine.api.bridge.extension.BridgeCallback")
                                 , new XC_MethodHook() {
                                     @SuppressLint("WakelockTimeout")
@@ -600,7 +597,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
 
                                             HookResponse.put("TimeStamp", recordArray[0]);
                                             HookResponse.put("Method", recordArray[1]);
-                                            HookResponse.put("Params", recordArray[2]);
+                                            HookResponse.put("Params", Params);
                                             HookResponse.put("Data", recordArray[3]);
                                             if (BaseModel.getSendHookData().getValue()) {
                                                 HookSender.sendHookData(HookResponse);
@@ -624,7 +621,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         rpcResponseUnhook = XposedHelpers.findAndHookMethod(
                                 "com.alibaba.ariver.engine.common.bridge.internal.DefaultBridgeCallback", classLoader
                                 , "sendJSONResponse"
-                                , classLoader.loadClass(ClassUtil.JSON_OBJECT_NAME)
+                                , classLoader.loadClass(General.JSON_OBJECT_NAME)
                                 , new XC_MethodHook() {
 
                                     @SuppressLint("WakelockTimeout")
@@ -894,7 +891,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                         execDelayedHandler(Math.max(BaseModel.getCheckInterval().getValue(), 180_000));
                     }
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setClassName(ClassUtil.PACKAGE_NAME, ClassUtil.CURRENT_USING_ACTIVITY);
+                    intent.setClassName(General.PACKAGE_NAME, General.CURRENT_USING_ACTIVITY);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     offline = true;
                     context.startActivity(intent);

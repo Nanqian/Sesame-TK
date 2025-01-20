@@ -10,7 +10,7 @@ import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.hook.rpc.intervallimit.RpcIntervalLimit;
 import fansirsqi.xposed.sesame.model.BaseModel;
-import fansirsqi.xposed.sesame.util.ClassUtil;
+import fansirsqi.xposed.sesame.util.General;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.RandomUtil;
@@ -74,9 +74,9 @@ public class NewRpcBridge implements RpcBridge {
                     , boolean.class
                     , boolean.class
                     , String.class
-                    , loader.loadClass(ClassUtil.JSON_OBJECT_NAME)
+                    , loader.loadClass(General.JSON_OBJECT_NAME)
                     , String.class
-                    , loader.loadClass(ClassUtil.JSON_OBJECT_NAME)
+                    , loader.loadClass(General.JSON_OBJECT_NAME)
                     , boolean.class
                     , boolean.class
                     , int.class
@@ -179,7 +179,8 @@ public class NewRpcBridge implements RpcBridge {
                             Log.printStackTrace(e);
                         }
                     }
-                } catch (Throwable t) {
+                }
+                catch (Throwable t) {
                     Log.error("new rpc request | id: " + rpcEntity.hashCode() + " | method: " + rpcEntity.getRequestMethod() + " err:");
                     Log.printStackTrace(t);
                     if (retryInterval < 0) {

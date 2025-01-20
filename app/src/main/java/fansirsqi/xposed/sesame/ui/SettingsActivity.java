@@ -40,6 +40,7 @@ import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
@@ -79,6 +80,7 @@ public class SettingsActivity extends BaseActivity {
         UserMap.setCurrentUserId(this.userId);
         UserMap.load(this.userId);
         CooperateMap.getInstance(CooperateMap.class).load(this.userId);
+        IdMapManager.getInstance(VitalityRewardsMap.class).load(this.userId);
         IdMapManager.getInstance(ReserveaMap.class).load();
         IdMapManager.getInstance(BeachMap.class).load();
         Config.load(this.userId);

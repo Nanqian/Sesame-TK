@@ -1,11 +1,11 @@
 package fansirsqi.xposed.sesame.entity;
 
-import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
-import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
+import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 
 /**
  * 表示合作用户的实体类，包含 ID 和名称。
@@ -28,10 +28,7 @@ public class CooperateEntity extends MapperEntity {
      */
     public static List<CooperateEntity> getList() {
         List<CooperateEntity> list = new ArrayList<>();
-        // Set<Map.Entry<String, String>> idSet = CooperateMap.getMap().entrySet();
-        // 获取 CooperateMap 的单例实例
         Map<String, String> idSet = IdMapManager.getInstance(CooperateMap.class).getMap();
-        // 遍历映射表的每一项，添加到用户列表中
         for (Map.Entry<String, String> entry : idSet.entrySet()) {
             list.add(new CooperateEntity(entry.getKey(), entry.getValue()));
         }

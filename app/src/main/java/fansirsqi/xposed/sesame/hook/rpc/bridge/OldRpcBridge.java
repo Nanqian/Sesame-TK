@@ -33,7 +33,7 @@ public class OldRpcBridge implements RpcBridge {
     public void load() throws Exception {
         loader = ApplicationHook.getClassLoader();
         try {
-            h5PageClazz = loader.loadClass(ClassUtil.H5PAGE_NAME);
+            h5PageClazz = loader.loadClass(General.H5PAGE_NAME);
             Log.runtime(TAG, "RPC 类加载成功");
             loadRpcMethods(); // 加载 RPC 方法
         } catch (ClassNotFoundException e) {
@@ -56,7 +56,7 @@ public class OldRpcBridge implements RpcBridge {
                 Class<?> rpcUtilClass = loader.loadClass("com.alipay.mobile.nebulaappproxy.api.rpc.H5RpcUtil");
                 Class<?> responseClass = loader.loadClass("com.alipay.mobile.nebulaappproxy.api.rpc.H5Response");
                 rpcCallMethod = rpcUtilClass.getMethod("rpcCall", String.class, String.class, String.class,
-                        boolean.class, loader.loadClass(ClassUtil.JSON_OBJECT_NAME), String.class,
+                        boolean.class, loader.loadClass(General.JSON_OBJECT_NAME), String.class,
                         boolean.class, h5PageClazz, int.class, String.class, boolean.class, int.class, String.class);
                 getResponseMethod = responseClass.getMethod("getResponse");
                 Log.runtime(TAG, "RPC 调用方法加载成功");

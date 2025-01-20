@@ -6,13 +6,12 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
-import lombok.Getter;
 
 public class OmegakoiTown extends ModelTask {
     private static final String TAG = OmegakoiTown.class.getSimpleName();
@@ -47,13 +46,11 @@ public class OmegakoiTown extends ModelTask {
                 "玻璃", "合格证", "包邮券", "TPU手机壳合格证",
                 "玻璃手机壳合格证", "帆布袋合格证", "记事本合格证",
                 "快递包装盒", "纸张", "棉花"};
-
         public CharSequence rewardName() {
             return rewardNames[ordinal()];
         }
     }
 
-    @Getter
     public enum HouseType {
         houseTrainStation("火车站"),
         houseStop("停车场"),
@@ -122,10 +119,7 @@ public class OmegakoiTown extends ModelTask {
         houseCatHouse("喵小馆"),
         houseStarPickingPavilion("神秘研究所");
 
-        private final String name;
-
         HouseType(String name) {
-            this.name = name;
         }
 
     }
@@ -244,11 +238,8 @@ public class OmegakoiTown extends ModelTask {
                             NumberFormat numberFormat = NumberFormat.getNumberInstance();
                             ((DecimalFormat) numberFormat).applyPattern("#.00");
                             String formattedAmount = numberFormat.format(amount);
-                            Log.other("小镇收金🌇[" + houseType.getName() + "]#" + formattedAmount
+                            Log.other("小镇收金🌇[" + houseType.name() + "]#" + formattedAmount
                                     + rewardType.rewardName());
-
-//                            Log.other("小镇收金🌇[" + houseType.getName() + "]#" + String.format("%.2f", amount)
-//                                    + rewardType.rewardName());
                         }
                     }
                 }

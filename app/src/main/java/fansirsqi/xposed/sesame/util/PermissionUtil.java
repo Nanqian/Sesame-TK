@@ -100,7 +100,7 @@ public class PermissionUtil {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         // 请求设置精确闹钟的权限
         Intent appIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-        appIntent.setData(Uri.parse("package:" + ClassUtil.PACKAGE_NAME));
+        appIntent.setData(Uri.parse("package:" + General.PACKAGE_NAME));
         startActivitySafely(context, appIntent, Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
       }
     } catch (Exception e) {
@@ -121,7 +121,7 @@ public class PermissionUtil {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       // 检查是否被豁免电池优化
       PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-      return powerManager != null && powerManager.isIgnoringBatteryOptimizations(ClassUtil.PACKAGE_NAME);
+      return powerManager != null && powerManager.isIgnoringBatteryOptimizations(General.PACKAGE_NAME);
     }
     return true;
   }
@@ -144,8 +144,8 @@ public class PermissionUtil {
         Intent appIntent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
         appIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         appIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        appIntent.setData(Uri.parse("package:" + ClassUtil.PACKAGE_NAME));
-        // appIntent.setData(Uri.fromParts("package", ClassUtil.PACKAGE_NAME, null));
+        appIntent.setData(Uri.parse("package:" + General.PACKAGE_NAME));
+        // appIntent.setData(Uri.fromParts("package", General.PACKAGE_NAME, null));
         try {
           context.startActivity(appIntent);
         } catch (ActivityNotFoundException ex) {
