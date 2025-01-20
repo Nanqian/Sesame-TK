@@ -91,9 +91,6 @@ public class AntMember extends ModelTask {
       if (collectInsuredGold.getValue()) {
         collectInsuredGold();
       }
-      if (enableKb.getValue()) {
-        kbMember();
-      }
       if (enableGoldTicket.getValue()) {
         goldTicket();
       }
