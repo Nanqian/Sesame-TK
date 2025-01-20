@@ -2491,6 +2491,44 @@ public class AntForest extends ModelTask {
     }
 
     /**
+     * 查找商店道具
+     * @param spuName xxx
+     */
+    private JSONObject findPropShopBySkuName(String spuName) {
+        JSONObject skuJsonObj;
+        try {
+            JSONObject itemListResponse = new JSONObject(AntForestRpcCall.itemList("SC_ASSETS"));
+            if (!itemListResponse.optBoolean("success")) {
+                Log.record(itemListResponse.getString("desc"));
+                Log.runtime(itemListResponse.toString());
+                return null;
+            }
+            JSONArray itemInfoVOList = itemListResponse.optJSONArray("itemInfoVOList");
+            if (itemInfoVOList == null) return null;
+            for (int i = 0; i < itemInfoVOList.length(); i++) {
+                JSONObject itemInfo = itemInfoVOList.getJSONObject(i);
+                if (itemInfo.optString("spuName").contains(spuName)) {
+                    JSONArray skuModelList = itemInfo.optJSONArray("skuModelList");
+                    if (skuModelList != null) {
+                        for (int j = 0; j < skuModelList.length(); j++) {
+                            JSONObject skuModel = skuModelList.getJSONObject(j);
+                            if (skuModel.optString("skuName").contains(spuName)) {
+                                skuJsonObj = skuModel;
+                                return skuJsonObj;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            Log.runtime("findPropShop", "Error finding prop in shop:");
+            Log.printStackTrace("findPropShop", e);
+        }
+        return null;
+    }
+
+    /**
      * 活力值兑换商店道具
      * sku spuId, skuId, skuName, exchangedCount, price[amount] exchangedCount == 0......
      */
@@ -2592,9 +2630,17 @@ public class AntForest extends ModelTask {
             // 背包查找 限时能量雨机会
             JSONObject jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
             // 活力值商店兑换
-            if (jo == null && !StatusUtil.hasFlagToday("exchangePropShop::SK20241231005469")) {
-                if (exchangePropShop(findPropShop("SP20241231002189", "SK20241231005469"), 1, "能量雨兑换")) {
-                    StatusUtil.setFlagToday("exchangePropShop::SK20241231005469");
+            if (jo == null) {
+                JSONObject skuInfo = findPropShopBySkuName("能量雨次卡");
+                if(skuInfo == null){
+                    return;
+                }
+                String skuId = skuInfo.getString("skuId");
+                if(StatusUtil.hasFlagToday("exchangePropShop::"+skuId)){
+                    return;
+                }
+                if (exchangePropShop(findPropShop(skuInfo.getString("spuId"), skuId), 1, "能量雨兑换")) {
+                    StatusUtil.setFlagToday("exchangePropShop::"+skuId);
                     // 兑换成功后再次查找限时能量双击卡
                     jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_RAIN_CHANCE");
                 }
