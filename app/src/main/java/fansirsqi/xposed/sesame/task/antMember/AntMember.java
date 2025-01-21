@@ -1,18 +1,23 @@
 package fansirsqi.xposed.sesame.task.antMember;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Arrays;
+
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
-import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import fansirsqi.xposed.sesame.util.ResUtil;
+import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
+import fansirsqi.xposed.sesame.util.TimeUtil;
 
 public class AntMember extends ModelTask {
   private static final String TAG = AntMember.class.getSimpleName();
@@ -73,7 +78,7 @@ public class AntMember extends ModelTask {
   @Override
   public void run() {
     try {
-      Log.record("执行开始-" + getName());
+      Log.other("执行开始-" + getName());
       if (memberSign.getValue()) {
         doMemberSign();
       }
@@ -129,7 +134,7 @@ public class AntMember extends ModelTask {
     } catch (Throwable t) {
       Log.printStackTrace(TAG, t);
     }finally {
-      Log.record("执行结束-" + getName());
+      Log.other("执行结束-" + getName());
     }
   }
 

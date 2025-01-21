@@ -3,18 +3,22 @@ package fansirsqi.xposed.sesame.task.antCooperate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.LinkedHashMap;
+
+import fansirsqi.xposed.sesame.entity.CooperateEntity;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectAndCountModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.entity.CooperateEntity;
 import fansirsqi.xposed.sesame.task.TaskCommon;
-import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-
-import java.util.LinkedHashMap;
+import fansirsqi.xposed.sesame.util.RandomUtil;
+import fansirsqi.xposed.sesame.util.ResUtil;
+import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 public class AntCooperate extends ModelTask {
     private static final String TAG = AntCooperate.class.getSimpleName();
@@ -56,7 +60,7 @@ public class AntCooperate extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.other("执行开始-" + getName());
             if (cooperateWater.getValue()) {
                 String s = AntCooperateRpcCall.queryUserCooperatePlantList();
                 if (s == null) {
@@ -108,7 +112,7 @@ public class AntCooperate extends ModelTask {
             Log.printStackTrace(TAG, t);
         } finally {
             CooperateMap.getInstance(CooperateMap.class).save(UserId);
-            Log.record("执行结束-" + getName());
+            Log.other("执行结束-" + getName());
         }
     }
 

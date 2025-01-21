@@ -47,7 +47,7 @@ public class AntBookRead extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.other("执行开始-" + getName());
             RuntimeInfo.getInstance().put("consumeGold", System.currentTimeMillis());
             queryTaskCenterPage();
             queryTask();
@@ -56,7 +56,7 @@ public class AntBookRead extends ModelTask {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }finally {
-            Log.record("执行结束-" + getName());
+            Log.other("执行结束-" + getName());
         }
     }
 

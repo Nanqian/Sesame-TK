@@ -1,22 +1,39 @@
 package fansirsqi.xposed.sesame.task.antStall;
 
 import android.util.Base64;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+
+import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
-import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.entity.AlipayUser;
-import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.AnswerAI.ReadingDada;
-import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.task.ModelTask;
+import fansirsqi.xposed.sesame.task.TaskCommon;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-
-import java.util.*;
+import fansirsqi.xposed.sesame.util.RandomUtil;
+import fansirsqi.xposed.sesame.util.ResUtil;
+import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.util.StringUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
+import fansirsqi.xposed.sesame.util.TimeUtil;
 
 /**
  * @author Constanline
@@ -138,7 +155,7 @@ public class AntStall extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.other("执行开始-" + getName());
             String s = AntStallRpcCall.home();
             JSONObject jo = new JSONObject(s);
             if (ResUtil.checkResCode(jo)) {
@@ -192,7 +209,7 @@ public class AntStall extends ModelTask {
             Log.runtime(TAG, "home err:");
             Log.printStackTrace(TAG, t);
         }finally {
-            Log.record("执行结束-" + getName());
+            Log.other("执行结束-" + getName());
         }
     }
 

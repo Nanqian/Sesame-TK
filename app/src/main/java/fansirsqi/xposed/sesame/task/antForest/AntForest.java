@@ -202,7 +202,7 @@ public class AntForest extends ModelTask {
             "🍎", "🍌", "🍇", "🍊", "🍋", "🍓", "🍈", "🍉", "🍒", "🍑", "🍍", "🥥", "🥝", "🍅", "🍆",
             "🥦", "🥦", "🥒", "🌶️", "🌽", "🥕", "🥔", "🍠", "🧄", "🧅", "🍄", "🥜", "🌰", "🍞"
     ));
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @Override
     public String getName() {
@@ -488,15 +488,15 @@ public class AntForest extends ModelTask {
                         count = taskCount.get();
                     }
                     if (count > 0) {
-                        Log.record("执行超时-蚂蚁森林");
+                        Log.forest("执行超时-蚂蚁森林");
                     } else if (count == 0) {
-                        Log.record("执行结束-蚂蚁森林");
+                        Log.forest("执行结束-蚂蚁森林");
                     } else {
-                        Log.record("执行完成-蚂蚁森林");
+                        Log.forest("执行完成-蚂蚁森林");
                     }
                 }
             } catch (InterruptedException ie) {
-                Log.runtime(TAG, "执行中断-蚂蚁森林");
+                Log.forest(TAG, "执行中断-蚂蚁森林");
             }
             StatisticsUtil.save();
             FriendWatch.save();
@@ -884,44 +884,42 @@ public class AntForest extends ModelTask {
                     }
                 }
             }
-
-            // 收集用户的能量
-            JSONArray jaBubbles = userHomeObj.getJSONArray("bubbles");
-            List<Long> bubbleIdList = new ArrayList<>();
-            for (int i = 0; i < jaBubbles.length(); i++) {
-                JSONObject bubble = jaBubbles.getJSONObject(i);
-                long bubbleId = bubble.getLong("id");
-                switch (CollectStatus.valueOf(bubble.getString("collectStatus"))) {
-                    case AVAILABLE:
-                        bubbleIdList.add(bubbleId); // 如果能量可收取，加入列表
-                        break;
-                    case WAITING:
-                        long produceTime = bubble.getLong("produceTime");
-                        if (checkIntervalInt + checkIntervalInt / 2 > produceTime - serverTime) {
-                            if (!hasChildTask(AntForest.getEnergyTimerTid(userId, bubbleId))) {
-                                addChildTask(new EnergyTimerTask(userId, bubbleId, produceTime));
-                                Log.record("添加蹲点⏰[" + userName + "]在[" + TimeUtil.getCommonDate(produceTime) + "]执行");
+            if (isCollectEnergy) {
+                // 收集用户的能量
+                JSONArray jaBubbles = userHomeObj.getJSONArray("bubbles");
+                List<Long> bubbleIdList = new ArrayList<>();
+                for (int i = 0; i < jaBubbles.length(); i++) {
+                    JSONObject bubble = jaBubbles.getJSONObject(i);
+                    long bubbleId = bubble.getLong("id");
+                    switch (CollectStatus.valueOf(bubble.getString("collectStatus"))) {
+                        case AVAILABLE:
+                            bubbleIdList.add(bubbleId); // 如果能量可收取，加入列表
+                            break;
+                        case WAITING:
+                            long produceTime = bubble.getLong("produceTime");
+                            if (checkIntervalInt + checkIntervalInt / 2 > produceTime - serverTime) {
+                                if (!hasChildTask(AntForest.getEnergyTimerTid(userId, bubbleId))) {
+                                    addChildTask(new EnergyTimerTask(userId, bubbleId, produceTime));
+                                    Log.record("添加蹲点⏰[" + userName + "]在[" + TimeUtil.getCommonDate(produceTime) + "]执行");
+                                }
+                            } else {
+                                Log.runtime("用户[" + userName + "]能量成熟时间: " + TimeUtil.getCommonDate(produceTime));
                             }
-                        } else {
-                            Log.runtime("用户[" + userName + "]能量成熟时间: " + TimeUtil.getCommonDate(produceTime));
-                        }
-                        break;
+                            break;
+                    }
+                }
+                // 批量收取或逐一收取能量
+                if (bubbleIdList.isEmpty()) return userHomeObj;
+                if (batchRobEnergy.getValue()) {//一键收取
+                    // 每次最多收取6个能量
+                    for (int i = 0; i < bubbleIdList.size(); i += 6) {
+                        List<Long> batchBubbleIdList = bubbleIdList.subList(i, Math.min(i + 6, bubbleIdList.size()));
+                        collectEnergy(new CollectEnergyEntity(userId, userHomeObj, AntForestRpcCall.getCollectBatchEnergyRpcEntity(userId, batchBubbleIdList)));
+                    }
+                } else {//逐一收取
+                    bubbleIdList.forEach(bubbleId -> collectEnergy(new CollectEnergyEntity(userId, userHomeObj, AntForestRpcCall.getCollectEnergyRpcEntity(null, userId, bubbleId))));
                 }
             }
-
-            // 批量收取或逐一收取能量
-            if (bubbleIdList.isEmpty()) return userHomeObj;
-
-            if (batchRobEnergy.getValue()) {
-                // 每次最多收取6个能量
-                for (int i = 0; i < bubbleIdList.size(); i += 6) {
-                    List<Long> batchBubbleIdList = bubbleIdList.subList(i, Math.min(i + 6, bubbleIdList.size()));
-                    collectEnergy(new CollectEnergyEntity(userId, userHomeObj, AntForestRpcCall.getCollectBatchEnergyRpcEntity(userId, batchBubbleIdList)));
-                }
-            } else {
-                bubbleIdList.forEach(bubbleId -> collectEnergy(new CollectEnergyEntity(userId, userHomeObj, AntForestRpcCall.getCollectEnergyRpcEntity(null, userId, bubbleId))));
-            }
-
             return userHomeObj;
         } catch (Throwable t) {
             Log.runtime(TAG, "collectUserEnergy err:"); // 记录错误日志
@@ -968,9 +966,9 @@ public class AntForest extends ModelTask {
                         }
                         if (collectEnergy) {
                             userHomeObj = collectFriendEnergy(userId);
-                        } /* else {
-                  Log.i("不收取[" + UserMap.getNameById(userId) + "], userId=" + userId);
-              }*/
+                        } else {
+                            Log.runtime("不收取[" + UserMap.getMaskName(userId) + "]");
+                        }
                     }
                     if (helpFriendCollect.getValue() && friendObject.optBoolean("canProtectBubble") && StatusUtil.canProtectBubbleToday(selfId)) {
                         boolean isHelpCollect = helpFriendCollectList.getValue().contains(userId);

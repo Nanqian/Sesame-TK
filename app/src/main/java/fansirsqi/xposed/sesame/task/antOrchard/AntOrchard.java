@@ -1,6 +1,15 @@
 package fansirsqi.xposed.sesame.task.antOrchard;
 
 import android.util.Base64;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
@@ -9,12 +18,12 @@ import fansirsqi.xposed.sesame.model.modelFieldExt.IntegerModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
-import fansirsqi.xposed.sesame.util.*;
+import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-
-import java.util.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import fansirsqi.xposed.sesame.util.RandomUtil;
+import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 public class AntOrchard extends ModelTask {
   private static final String TAG = AntOrchard.class.getSimpleName();
@@ -71,7 +80,7 @@ public class AntOrchard extends ModelTask {
   @Override
   public void run() {
     try {
-      Log.record("执行开始-" + getName());
+      Log.other("执行开始-" + getName());
       executeIntervalInt = Math.max(executeInterval.getValue(), 500);
       String s = AntOrchardRpcCall.orchardIndex();
       JSONObject jo = new JSONObject(s);
@@ -107,7 +116,7 @@ public class AntOrchard extends ModelTask {
           }
         } else {
           getEnableField().setValue(false);
-          Log.record("请先开启芭芭农场！");
+          Log.other("请先开启芭芭农场！");
         }
       } else {
         Log.runtime(TAG, jo.getString("resultDesc"));
@@ -116,7 +125,7 @@ public class AntOrchard extends ModelTask {
       Log.runtime(TAG, "start.run err:");
       Log.printStackTrace(TAG, t);
     }finally {
-      Log.record("执行结束-" + getName());
+      Log.other("执行结束-" + getName());
     }
   }
 

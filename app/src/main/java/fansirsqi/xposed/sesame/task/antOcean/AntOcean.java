@@ -92,7 +92,7 @@ public class AntOcean extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.other("执行开始-" + getName());
             String s = AntOceanRpcCall.queryOceanStatus();
             JSONObject jo = new JSONObject(s);
             if (ResUtil.checkResCode(jo)) {
@@ -100,7 +100,7 @@ public class AntOcean extends ModelTask {
                     queryHomePage();
                 } else {
                     getEnableField().setValue(false);
-                    Log.record("请先开启神奇海洋，并完成引导教程");
+                    Log.other("请先开启神奇海洋，并完成引导教程");
                 }
             } else {
                 Log.runtime(TAG, jo.getString("resultDesc"));
@@ -113,7 +113,7 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
         finally {
-            Log.record("执行结束-" + getName());
+            Log.other("执行结束-" + getName());
         }
     }
 

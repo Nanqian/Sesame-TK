@@ -5,6 +5,14 @@ import static fansirsqi.xposed.sesame.task.greenFinance.GreenFinanceRpcCall.task
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.TreeMap;
+
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -14,13 +22,6 @@ import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.TreeMap;
 
 /**
  * @author Constanline
@@ -76,7 +77,7 @@ public class GreenFinance extends ModelTask {
     @Override
     public void  run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.other("执行开始-" + getName());
             String s = GreenFinanceRpcCall.greenFinanceIndex();
             JSONObject jo = new JSONObject(s);
             if (!jo.optBoolean("success")) {
@@ -123,6 +124,8 @@ public class GreenFinance extends ModelTask {
         } catch (Throwable th) {
             Log.runtime(TAG, "index err:");
             Log.printStackTrace(TAG, th);
+        }finally {
+            Log.other("执行结束-" + getName());
         }
 
     }

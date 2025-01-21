@@ -2,13 +2,18 @@ package fansirsqi.xposed.sesame.task.antDodo;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+
+import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.ChoiceModelField;
 import fansirsqi.xposed.sesame.model.modelFieldExt.SelectModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
-import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antFarm.AntFarm.TaskStatus;
 import fansirsqi.xposed.sesame.util.Log;
@@ -16,10 +21,6 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
 
 public class AntDodo extends ModelTask {
     private static final String TAG = AntDodo.class.getSimpleName();
@@ -72,7 +73,7 @@ public class AntDodo extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("执行开始-" + getName());
+            Log.other("执行开始-" + getName());
             receiveTaskAward();
             propList();
             collect();
@@ -86,7 +87,7 @@ public class AntDodo extends ModelTask {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }finally {
-            Log.record("执行结束-" + getName());
+            Log.other("执行结束-" + getName());
         }
     }
 

@@ -52,17 +52,19 @@ public class Reserve extends ModelTask {
 
     public void run() {
         try {
-            Log.record("开始检测保护地");
+            Log.other("开始保护地任务");
             animalReserve();
         } catch (Throwable t) {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
+        } finally {
+            Log.other("保护地任务");
         }
     }
 
     private void animalReserve() {
         try {
-            Log.record("开始执行-"+getName());
+            Log.record("开始执行-" + getName());
             String s = ReserveRpcCall.queryTreeItemsForExchange();
             if (s == null) {
                 ThreadUtil.sleep(RandomUtil.delay());
@@ -101,8 +103,8 @@ public class Reserve extends ModelTask {
         } catch (Throwable t) {
             Log.runtime(TAG, "animalReserve err:");
             Log.printStackTrace(TAG, t);
-        }finally {
-            Log.record("结束执行-"+getName());
+        } finally {
+            Log.record("结束执行-" + getName());
         }
     }
 

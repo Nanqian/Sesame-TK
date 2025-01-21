@@ -258,7 +258,7 @@ public class AntFarm extends ModelTask {
     @Override
     public void run() {
         try {
-            Log.record("执行开始-蚂蚁" + getName());
+            Log.farm("执行开始-蚂蚁" + getName());
             if (enterFarm() == null) {
                 return;
             }
@@ -438,7 +438,7 @@ public class AntFarm extends ModelTask {
             Log.runtime(TAG, "AntFarm.start.run err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            Log.record("执行结束-蚂蚁" + getName());
+            Log.farm("执行结束-蚂蚁" + getName());
         }
     }
 
