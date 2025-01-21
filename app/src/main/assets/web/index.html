@@ -157,7 +157,7 @@
                             >
                                 <div
                                         class="flex-space-between"
-                                        @click="()=>{loadList(tabs_item.modelCode,item.code,item.name,item.type)}"
+                                        @click="()=>{loadList(tabs_item.modelCode,item.code,item.name,item.type,item.desc)}"
                                 >
                                     <div class="title">{{item.name}}</div>
                                     <div class="link">
@@ -308,7 +308,7 @@
                             >
                                 <div
                                         class="flex-space-between"
-                                        @click="()=>{loadList(tabs_item.modelCode,item.code,item.name,item.type)}"
+                                        @click="()=>{loadList(tabs_item.modelCode,item.code,item.name,item.type,item.desc)}"
                                 >
                                     <div class="title">{{item.name}}</div>
                                     <div class="link">
@@ -475,7 +475,7 @@
                 localStorage.setItem("theme", theme.value);
             });
 
-            function loadList(modelName, code, name, type) {
+            function loadList(modelName, code, name, type, desc) {
                 person_list.value.isLoading = true;
                 window.history.pushState({ list: 1 }, "", "");
                 person_list.value.visible = true;
@@ -526,11 +526,14 @@
 
                 refreshFrameCount();
                 // person_list.value.list = array.slice(0,60)
-
+                person_list.value.desc = "";
                 person_list.value.title = name;
                 person_list.value.code = code;
                 person_list.value.modelName = modelName;
                 person_list.value.type = type;
+                if(desc){
+                    person_list.value.desc = desc;
+                }
             }
 
             function changeAll(bol) {

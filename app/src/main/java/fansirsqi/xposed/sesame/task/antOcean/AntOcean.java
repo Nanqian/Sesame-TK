@@ -513,6 +513,7 @@ public class AntOcean extends ModelTask {
         }
     }
 
+    @SuppressWarnings("unused")
     private static boolean isTargetTask(String taskType) {
         // 在这里添加其他任务类型，以便后续扩展
         return "DAOLIU_TAOJINBI".equals(taskType) // 去逛淘金币看淘金仔
@@ -527,51 +528,16 @@ public class AntOcean extends ModelTask {
 
     private static void doOceanDailyTask() {
         try {
-            String s = AntOceanRpcCall.queryTaskList();
-            JSONObject jo = new JSONObject(s);
+            JSONObject jo = new JSONObject(AntOceanRpcCall.queryTaskList());
             if (ResUtil.checkResCode(jo)) {
                 JSONArray jaTaskList = jo.getJSONArray("antOceanTaskVOList");
                 for (int i = 0; i < jaTaskList.length(); i++) {
                     JSONObject taskJson = jaTaskList.getJSONObject(i);
-                    if (!TaskStatus.TODO.name().equals(taskJson.getString("taskStatus")))
-                        continue;
-                    JSONObject bizInfo = new JSONObject(taskJson.getString("bizInfo"));
-                    if (!taskJson.has("taskType"))
-                        continue;
-                    String taskType = taskJson.getString("taskType");
-                    if (bizInfo.optBoolean("autoCompleteTask", false) || taskType.startsWith("DAOLIU_")) {
-                        String sceneCode = taskJson.getString("sceneCode");
-                        jo = new JSONObject(AntOceanRpcCall.finishTask(sceneCode, taskType));
-                        ThreadUtil.sleep(500);
-                        if (jo.optBoolean("success")) {
-                            String taskTitle = bizInfo.optString("taskTitle", taskType);
-                            Log.forest("海洋任务🧾[完成:" + taskTitle + "]");
-                            // 答题操作
-                            answerQuestion();
-                        } else {
-                            Log.record(jo.getString("desc"));
-                            Log.runtime(jo.toString());
-                        }
+                    if (TaskStatus.TODO.name().equals(taskJson.getString("taskStatus"))){
+                        finishTask(taskJson);
                     }
-                    // 多个任务类型的处理逻辑
-                    if (isTargetTask(taskType)) {
-                        String sceneCode = taskJson.getString("sceneCode");
-                        jo = new JSONObject(AntOceanRpcCall.finishTask(sceneCode, taskType));
-                        ThreadUtil.sleep(500);
-                        if (jo.optBoolean("success")) {
-                            String taskTitle = bizInfo.optString("taskTitle", taskType);
-                            Log.forest("海洋任务🧾[完成:" + taskTitle + "]");
-                            // 答题操作
-                            answerQuestion();
-                        } else {
-                            Log.record(jo.getString("desc"));
-                            Log.runtime(jo.toString());
-                        }
-                    }
+                    ThreadUtil.sleep(500);
                 }
-            } else {
-                Log.record(jo.getString("resultCode"));
-                Log.runtime(s);
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "doOceanDailyTask err:");
@@ -579,10 +545,41 @@ public class AntOcean extends ModelTask {
         }
     }
 
+    private static void finishTask(JSONObject task) {
+        try {
+            if (task.has("taskProgress")) {
+                return;
+            }
+            JSONObject bizInfo = new JSONObject(task.getString("bizInfo"));
+            String taskTitle = bizInfo.optString("taskTitle");
+            if (taskTitle.contains("答题学海洋知识")) {
+                // 答题操作
+                answerQuestion();
+            } else if (taskTitle.startsWith("随机任务：") || taskTitle.startsWith("绿色任务：")) {
+                String sceneCode = task.getString("sceneCode");
+                String taskType = task.getString("taskType");
+                int rightsTimes = task.optInt("rightsTimes", 1);
+                int rightsTimesLimit = task.optInt("rightsTimesLimit", 1);
+                int times = rightsTimesLimit - rightsTimes;
+                for (int i = 0; i < times; i++) {
+                    JSONObject jo = new JSONObject(AntOceanRpcCall.finishTask(sceneCode, taskType));
+                    if (ResUtil.checkSuccess(TAG, jo)) {
+                        Log.forest("海洋任务🧾️完成[" + taskTitle + "]" + (times > 1 ? "#第" + (i + 1) + "次" : ""));
+                    } else {
+                        return;
+                    }
+                    ThreadUtil.sleep(2000);
+                }
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "finishOceanTask err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+
     private static void receiveTaskAward() {
         try {
-            String s = AntOceanRpcCall.queryTaskList();
-            JSONObject jo = new JSONObject(s);
+            JSONObject jo = new JSONObject(AntOceanRpcCall.queryTaskList());
             if (ResUtil.checkResCode(jo)) {
                 JSONArray jaTaskList = jo.getJSONArray("antOceanTaskVOList");
                 for (int i = 0; i < jaTaskList.length(); i++) {
@@ -605,9 +602,6 @@ public class AntOcean extends ModelTask {
                         Log.runtime(jo.toString());
                     }
                 }
-            } else {
-                Log.record(jo.getString("resultCode"));
-                Log.runtime(s);
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "receiveTaskAward err:");
@@ -924,6 +918,7 @@ public class AntOcean extends ModelTask {
     }
 
 
+    @SuppressWarnings("unused")
     public interface CleanOceanType {
 
         int CLEAN = 0;

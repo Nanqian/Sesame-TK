@@ -191,6 +191,7 @@ public class AntFarm extends ModelTask {
     private SelectModelField familyOptions;
     private SelectModelField inviteFriendVisitFamily;
     private SelectModelField familyBatchInviteP2P;
+    private StringModelField giftFamilyDrawFragment;
 
 
     @Override
@@ -241,6 +242,7 @@ public class AntFarm extends ModelTask {
         modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), AntFarmFamilyOption::getAntFarmFamilyOptions));
         modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(familyBatchInviteP2P = new SelectModelField("familyBatchInviteP2P", "家庭 | 串门送扭蛋列表", new LinkedHashSet<>(), AlipayUser::getList));
+        modelFields.addField(giftFamilyDrawFragment = new StringModelField("giftFamilyDrawFragment", "家庭 | 扭蛋碎片赠送用户ID(配置目录查看)", ""));
         return modelFields;
     }
 
@@ -2539,14 +2541,9 @@ public class AntFarm extends ModelTask {
             }
 
             boolean drawActivitySwitch = familyDrawInfo.getBoolean("drawActivitySwitch");
-            //串门送扭蛋
-            if (drawActivitySwitch&&familyOptions.getValue().contains("batchInviteP2P")) {
-                familyBatchInviteP2PTask(familyUserIds);
-            }
-
-            //开扭蛋
+            //扭蛋
             if (drawActivitySwitch&&familyOptions.getValue().contains("familyDrawInfo")) {
-                familyDrawTask();
+                familyDrawTask(familyUserIds,familyDrawInfo);
             }
 
         } catch (Throwable t) {
@@ -2762,7 +2759,7 @@ public class AntFarm extends ModelTask {
         }
     }
 
-    private void familyBatchInviteP2PTask(List<String> friendUserIds){
+    private void familyBatchInviteP2PTask(List<String> friendUserIds,JSONObject familyDrawInfo){
         try {
             if (StatusUtil.hasFlagToday("antFarm::familyBatchInviteP2P")) {
                 return;
@@ -2774,6 +2771,8 @@ public class AntFarm extends ModelTask {
             if (Objects.isNull(friendUserIds) || friendUserIds.isEmpty()) {
                 return;
             }
+            String activityId = familyDrawInfo.optString("activityId");
+            String sceneCode = "ANTFARM_FD_VISIT_" + activityId;
             JSONArray inviteP2PVOList = new JSONArray();
             for (String u : familyValue) {
                 if (!friendUserIds.contains(u) && inviteP2PVOList.length() < 6) {
@@ -2786,7 +2785,7 @@ public class AntFarm extends ModelTask {
                     break;
                 }
             }
-            JSONObject jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList));
+            JSONObject jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList,sceneCode));
             if (ResUtil.checkSuccess(TAG, jo)) {
                 Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
                 StatusUtil.setFlagToday("antFarm::familyBatchInviteP2P");
@@ -2798,12 +2797,41 @@ public class AntFarm extends ModelTask {
         }
     }
 
-    private void familyDrawTask() {
+    private void familyDrawTask(List<String> friendUserIds,JSONObject familyDrawInfo) {
         try {
+            JSONArray listFarmTask = familyDrawListFarmTask();
+            if (listFarmTask == null) {
+                return;
+            }
+            for (int i = 0; i < listFarmTask.length(); i++) {
+                JSONObject jo = listFarmTask.getJSONObject(i);
+                TaskStatus taskStatus = TaskStatus.valueOf(jo.getString("taskStatus"));
+                String taskId = jo.optString("taskId");
+                String title = jo.optString("title");
+                if (taskStatus == TaskStatus.RECEIVED) {
+                    continue;
+                }
+                if (taskStatus == TaskStatus.TODO && Objects.equals(taskId,"FAMILY_DRAW_VISIT_TASK")&& familyOptions.getValue().contains("batchInviteP2P")) {
+                    //分享
+                    familyBatchInviteP2PTask(friendUserIds, familyDrawInfo);
+                    continue;
+                }
+                if (taskStatus == TaskStatus.FINISHED && Objects.equals(taskId,"FAMILY_DRAW_FREE_TASK")) {
+                    //签到
+                    familyDrawSignReceiveFarmTaskAward(taskId,title);
+                    continue;
+                }
+                ThreadUtil.sleep(1000);
+            }
             JSONObject jo = new JSONObject(AntFarmRpcCall.queryFamilyDrawActivity());
             if (ResUtil.checkSuccess(TAG, jo)) {
                 ThreadUtil.sleep(1000);
                 int drawTimes = jo.optInt("familyDrawTimes");
+                //碎片个数
+                int giftNum = jo.optInt("mengliFragmentCount");
+                if (giftNum >= 20 && !Objects.isNull(giftFamilyDrawFragment.getValue())) {
+                    giftFamilyDrawFragment(giftFamilyDrawFragment.getValue(), giftNum);
+                }
                 for (int i = 0; i < drawTimes; i++) {
                     if (!familyDraw()) {
                         return;
@@ -2815,6 +2843,30 @@ public class AntFarm extends ModelTask {
             Log.runtime(TAG, "familyDrawTask err:");
             Log.printStackTrace(TAG, t);
         }
+    }
+
+    private void giftFamilyDrawFragment(String giftUserId, int giftNum) {
+        try {
+            JSONObject jo = new JSONObject(AntFarmRpcCall.giftFamilyDrawFragment(giftUserId,giftNum));
+            if (ResUtil.checkSuccess(TAG, jo)) {
+                Log.farm("亲密家庭🏠赠送扭蛋碎片#" + giftNum + "个#"+giftUserId);
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "giftFamilyDrawFragment err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+    private JSONArray familyDrawListFarmTask() {
+        try {
+            JSONObject jo = new JSONObject(AntFarmRpcCall.familyDrawListFarmTask());
+            if (ResUtil.checkSuccess(TAG, jo)) {
+                return jo.getJSONArray("farmTaskList");
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "familyDrawListFarmTask err:");
+            Log.printStackTrace(TAG, t);
+        }
+        return null;
     }
 
     private Boolean familyDraw() {
@@ -2888,6 +2940,18 @@ public class AntFarm extends ModelTask {
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "familyEatTogether err:");
+            Log.printStackTrace(TAG, t);
+        }
+    }
+
+    private void familyDrawSignReceiveFarmTaskAward(String taskId,String title) {
+        try {
+            JSONObject jo = new JSONObject(AntFarmRpcCall.familyDrawSignReceiveFarmTaskAward(taskId));
+            if (ResUtil.checkSuccess(TAG, jo)) {
+                Log.farm("亲密家庭🏠扭蛋任务#"+title+"#奖励领取成功");
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "familyDrawSignReceiveFarmTaskAward err:");
             Log.printStackTrace(TAG, t);
         }
     }

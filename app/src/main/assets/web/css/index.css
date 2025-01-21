@@ -126,7 +126,7 @@ video {
 }
 
 .van-list {
-  max-height: 70vh !important;
+  max-height: 60vh !important;
   overflow: auto;
 }
 
@@ -140,7 +140,7 @@ video {
 
 .van-dialog {
   z-index: 999999 !important;
-  width: calc(100vw - 60px) !important;
+  width: calc(100vw - 50px) !important;
 }
 
 .van-cell {
@@ -371,7 +371,7 @@ video {
 
 .dialog-list .dialog-list-content {
   width: 100%;
-  max-height: 70vh;
+  max-height: 68vh;
   overflow-y: scroll;
   scrollbar-width: none;
   /* Firefox */

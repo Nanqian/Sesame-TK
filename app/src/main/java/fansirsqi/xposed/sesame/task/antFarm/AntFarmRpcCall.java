@@ -538,9 +538,27 @@ public class AntFarmRpcCall {
         return RequestManager.requestString("com.alipay.antfarm.familyDraw", args);
     }
 
-    public static String familyBatchInviteP2P(JSONArray inviteP2PVOList) {
-        String args = "[{\"inviteP2PVOList\":"+inviteP2PVOList+",\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM_FD_VISIT_20241216\",\"source\":\"antfarm\"}]";
+    public static String familyBatchInviteP2P(JSONArray inviteP2PVOList,String sceneCode) {
+        String args = "[{\"inviteP2PVOList\":"+inviteP2PVOList+",\"requestType\":\"RPC\",\"sceneCode\":\""+sceneCode+"\",\"source\":\"antfarm\"}]";
         return RequestManager.requestString("com.alipay.antiep.batchInviteP2P", args);
+    }
+
+    public static String familyDrawSignReceiveFarmTaskAward(String taskId) {
+        String args = "[{\"awardType\":\"FAMILY_DRAW_TIME\",\"bizType\":\"ANTFARM_GAME_CENTER\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"taskId\":\""+taskId+"\",\"taskSceneCode\":\"ANTFARM_FAMILY_DRAW_TASK\"}]";
+        return RequestManager.requestString("com.alipay.antfarm.receiveFarmTaskAward", args);
+    }
+
+    /**
+     * 扭蛋任务列表
+     */
+    public static String familyDrawListFarmTask() {
+        String args = "[{\"bizType\":\"ANTFARM_GAME_CENTER\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM_FAMILY_DRAW_TASK\",\"signSceneCode\":\"\",\"source\":\"H5\",\"taskSceneCode\":\"ANTFARM_FAMILY_DRAW_TASK\"}]";
+        return RequestManager.requestString("com.alipay.antfarm.listFarmTask", args);
+    }
+
+    public static String giftFamilyDrawFragment(String giftUserId,int giftNum) {
+        String args = "[{\"bizType\":\"ANTFARM_GAME_CENTER\",\"giftNum\":"+giftNum+",\"giftUserId\":\""+giftUserId+"\",\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]";
+        return RequestManager.requestString("com.alipay.antfarm.giftFamilyDrawFragment", args);
     }
 
 }

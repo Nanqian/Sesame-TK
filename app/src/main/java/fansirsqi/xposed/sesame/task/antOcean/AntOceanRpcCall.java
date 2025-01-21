@@ -15,7 +15,7 @@ import java.util.Set;
  * @since 2023/08/01
  */
 public class AntOceanRpcCall {
-    private static final String VERSION = "20230901";
+    private static final String VERSION = "20241203";
 
     private static String getUniqueId() {
         return String.valueOf(System.currentTimeMillis()) + RandomUtil.nextLong();

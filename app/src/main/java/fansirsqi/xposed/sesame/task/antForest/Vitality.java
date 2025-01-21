@@ -16,7 +16,7 @@ import fansirsqi.xposed.sesame.util.StatusUtil;
 
 /**
  * @author Byseven
- * @date 2025/1/20
+ * @see  2025/1/20
  * @apiNote
  */
 public class Vitality {
@@ -187,4 +187,27 @@ public class Vitality {
         return false;
     }
 
+    /**
+     * 查找商店道具
+     *
+     * @param spuName xxx
+     */
+    public static JSONObject findSkuInfoBySkuName(String spuName) {
+        try {
+            if (skuInfo.isEmpty()) {
+                initVitality("SC_ASSETS");
+            }
+            for (String key : skuInfo.keySet()) {
+                JSONObject sku = skuInfo.get(key);
+                assert sku != null;
+                if(sku.getString("skuName").contains(spuName)){
+                    return sku;
+                }
+            }
+        } catch (Exception e) {
+            Log.runtime(TAG, "findSkuInfoBySkuName err:");
+            Log.printStackTrace(TAG, e);
+        }
+        return null;
+    }
 }
