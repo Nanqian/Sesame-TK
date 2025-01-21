@@ -3,7 +3,7 @@ package fansirsqi.xposed.sesame.util;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import java.io.File;
-import java.time.LocalDate;
+import java.util.Calendar;
 
 import lombok.Data;
 
@@ -157,10 +157,10 @@ public class StatisticsUtil {
      * 确保年、月、日的统计数据都存在且有效
      */
     private static void validateAndInitialize() {
-        LocalDate now = LocalDate.now();
-        if (INSTANCE.year == null) INSTANCE.year = new TimeStatistics(now.getYear());
-        if (INSTANCE.month == null) INSTANCE.month = new TimeStatistics(now.getMonthValue());
-        if (INSTANCE.day == null) INSTANCE.day = new TimeStatistics(now.getDayOfMonth());
+        Calendar now = Calendar.getInstance();
+        if (INSTANCE.year == null) INSTANCE.year = new TimeStatistics(now.get(Calendar.YEAR));
+        if (INSTANCE.month == null) INSTANCE.month = new TimeStatistics(now.get(Calendar.MONTH) + 1); // 注意：Calendar.MONTH 从0开始
+        if (INSTANCE.day == null) INSTANCE.day = new TimeStatistics(now.get(Calendar.DAY_OF_MONTH));
         updateDay(now);
     }
 
@@ -172,10 +172,10 @@ public class StatisticsUtil {
     private static void resetToDefault() {
         try {
             StatisticsUtil newInstance = new StatisticsUtil();
-            LocalDate now = LocalDate.now();
-            newInstance.year = new TimeStatistics(now.getYear());
-            newInstance.month = new TimeStatistics(now.getMonthValue());
-            newInstance.day = new TimeStatistics(now.getDayOfMonth());
+            Calendar now = Calendar.getInstance();
+            newInstance.year = new TimeStatistics(now.get(Calendar.YEAR));
+            newInstance.month = new TimeStatistics(now.get(Calendar.MONTH) + 1); // 注意：Calendar.MONTH 从0开始
+            newInstance.day = new TimeStatistics(now.get(Calendar.DAY_OF_MONTH));
 
             JsonUtil.copyMapper().updateValue(INSTANCE, newInstance);
             Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatisticsFile());
@@ -202,15 +202,16 @@ public class StatisticsUtil {
      * 保存统计数据
      */
     public static synchronized void save() {
-        save(LocalDate.now());
+        save(Calendar.getInstance());
     }
+
 
     /**
      * 保存统计数据并更新日期
      *
      * @param nowDate 当前日期
      */
-    public static synchronized void save(LocalDate nowDate) {
+    public static synchronized void save(Calendar nowDate) {
         if (updateDay(nowDate)) {
             Log.system(TAG, "重置 statistics.json");
         } else {
@@ -225,10 +226,10 @@ public class StatisticsUtil {
      * @param nowDate 当前日期
      * @return 如果日期已更改，返回 true；否则返回 false
      */
-    public static Boolean updateDay(LocalDate nowDate) {
-        int currentYear = nowDate.getYear();
-        int currentMonth = nowDate.getMonthValue();
-        int currentDay = nowDate.getDayOfMonth();
+    public static Boolean updateDay(Calendar nowDate) {
+        int currentYear = nowDate.get(Calendar.YEAR);
+        int currentMonth = nowDate.get(Calendar.MONTH) + 1; // 注意：Calendar.MONTH 从0开始
+        int currentDay = nowDate.get(Calendar.DAY_OF_MONTH);
 
         if (currentYear != INSTANCE.year.time) {
             INSTANCE.year.reset(currentYear);
@@ -243,6 +244,25 @@ public class StatisticsUtil {
             return false;
         }
         return true;
+    }
+
+    public static void updateDay() {
+        Calendar nowDate = Calendar.getInstance();
+        int currentYear = nowDate.get(Calendar.YEAR);
+        int currentMonth = nowDate.get(Calendar.MONTH) + 1; // 注意：Calendar.MONTH 从0开始
+        int currentDay = nowDate.get(Calendar.DAY_OF_MONTH);
+        if (currentYear != INSTANCE.year.time) {
+            INSTANCE.year.reset(currentYear);
+            INSTANCE.month.reset(currentMonth);
+            INSTANCE.day.reset(currentDay);
+        } else if (currentMonth != INSTANCE.month.time) {
+            INSTANCE.month.reset(currentMonth);
+            INSTANCE.day.reset(currentDay);
+        } else if (currentDay != INSTANCE.day.time) {
+            INSTANCE.day.reset(currentDay);
+        } else {
+            Log.system(TAG, "日期更新失败！");
+        }
     }
 
 

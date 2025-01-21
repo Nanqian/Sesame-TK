@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -543,26 +544,23 @@ public class StatusUtil {
      * @return true是，false否
      */
     public static boolean canGreenFinancePrizesMap() {
-        LocalDate currentDate = LocalDate.now();
-        int week = TimeUtil.getWeekNumber(currentDate);
+        int week = TimeUtil.getWeekNumber(new Date());
         String currentUid = UserMap.getCurrentUid();
         if (INSTANCE.greenFinancePrizesMap.containsKey(currentUid)) {
             Integer storedWeek = INSTANCE.greenFinancePrizesMap.get(currentUid);
-            return storedWeek != null && storedWeek == week;
+            return storedWeek == null || storedWeek != week;
         }
-        return false;
+        return true;
     }
 
     /**
      * 绿色经营-评级任务完了
      */
     public static void greenFinancePrizesMap() {
-        if (canGreenFinancePrizesMap()) {
+        if (!canGreenFinancePrizesMap()) {
             return;
         }
-        // 获取当前的日期
-        LocalDate currentDate = LocalDate.now();
-        INSTANCE.greenFinancePrizesMap.put(UserMap.getCurrentUid(), TimeUtil.getWeekNumber(currentDate));
+        INSTANCE.greenFinancePrizesMap.put(UserMap.getCurrentUid(), TimeUtil.getWeekNumber(new Date()));
         save();
     }
 

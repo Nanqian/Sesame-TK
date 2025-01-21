@@ -329,17 +329,12 @@ public class AntDodo extends ModelTask {
      */
     private boolean isUsePropType(String propType) {
         boolean usePropType = useProp.getValue();
-        switch (propType) {
-            case "COLLECT_TIMES_7_DAYS":
-                usePropType = usePropType || usePropCollectTimes7Days.getValue();
-                break;
-            case "COLLECT_HISTORY_ANIMAL_7_DAYS":
-                usePropType = usePropType || usePropCollectHistoryAnimal7Days.getValue();
-                break;
-            case "COLLECT_TO_FRIEND_TIMES_7_DAYS":
-                usePropType = usePropType || usePropCollectToFriendTimes7Days.getValue();
-                break;
-        }
+        usePropType = switch (propType) {
+            case "COLLECT_TIMES_7_DAYS" -> usePropType || usePropCollectTimes7Days.getValue();
+            case "COLLECT_HISTORY_ANIMAL_7_DAYS" -> usePropType || usePropCollectHistoryAnimal7Days.getValue();
+            case "COLLECT_TO_FRIEND_TIMES_7_DAYS" -> usePropType || usePropCollectToFriendTimes7Days.getValue();
+            default -> usePropType;
+        };
         return usePropType;
     }
 

@@ -6,7 +6,6 @@ plugins {
     id "com.android.application"
 }
 
-// Android配置信息
 android {
 
     signingConfigs {
@@ -24,7 +23,7 @@ android {
     def major = 0          // 主版本号
     def minor = 2          // 次版本号
     def patch = 5          // 补丁版本号
-    def buildTag = "beta.fix" // 构建标签 (alpha, beta, release, 等)
+    def buildTag = "beta.fix.1" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
     def buildTime
@@ -33,15 +32,12 @@ android {
     def _versionCode
     def _versionName
     try {
-        // 获取当前日期并格式化为 "yyyy-MM-dd" 构建日期
         def dateFormat = new SimpleDateFormat("yy-MM-dd")
         buildDate = dateFormat.format(new Date())
         buildDate2 = dateFormat.format(new Date()).replace("-", ".")
-        // 获取当前时间并格式化为 "HH:mm:ss" 作为构建时间，此处时间只用于app展示
         def timeFormat = new SimpleDateFormat("HH:mm:ss")
         buildTime = timeFormat.format(new Date())
         buildTime2 = timeFormat.format(new Date()).replace(":", ".")
-        // 使用 MD5 哈希算法生成构建号 (前8位)
         MessageDigest md = MessageDigest.getInstance("MD5")
         md.update(buildTime.bytes)
         buildTargetCode = md.digest().encodeHex().toString().substring(0, 4)
@@ -55,10 +51,8 @@ android {
         buildDate2 = "unknown"
         buildTargetCode = "0000"
     }
-    // 使用 Git 提交次数生成版本号
     _versionCode = 'git rev-list --count HEAD'.execute().text.trim().toInteger()
-    // 应用版本信息，用于展示在LSP
-    if (buildTag.contains("alpha")||buildTag.contains("beta")) {
+    if (buildTag.contains("alpha") || buildTag.contains("beta")) {
         _versionName = "${major}.${minor}.${patch}-${buildTag}"
     } else if (buildTag == "debug") {
         _versionName = "${buildTargetCode}-${buildTag}"
@@ -68,37 +62,36 @@ android {
     }
 
     // 配置 Android 构建设置
-    namespace "fansirsqi.xposed.sesame" // 命名空间
-    compileSdk 34    // 编译SDK版本
+    namespace "fansirsqi.xposed.sesame"
+    compileSdk 34
     defaultConfig {
-        minSdk 26 // 最低SDK版本
+        minSdk 21
         //noinspection OldTargetApi,ExpiredTargetSdkVersion
-        targetSdk 34 // 目标SDK版本
-        versionCode _versionCode  // 设置版本号
-        versionName _versionName  // 设置版本名称 (使用 SemVer 格式)
-        // 使用 buildConfigField 添加自定义字段 for show ViewInfo.class of BuildConfig.class
-        buildConfigField "String", "BUILD_DATE", "\"${buildDate}\"" // 创建常量
-        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\"" // 创建常量
-        buildConfigField "String", "BUILD_NUMBER", "\"${buildTargetCode}\"" // 创建常量
-        buildConfigField "String", "BUILD_TAG", "\"${buildTag}\"" // 创建常量
+        targetSdk 34
+        versionCode _versionCode
+        versionName _versionName
+        buildConfigField "String", "BUILD_DATE", "\"${buildDate}\""
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
+        buildConfigField "String", "BUILD_NUMBER", "\"${buildTargetCode}\""
+        buildConfigField "String", "BUILD_TAG", "\"${buildTag}\""
     }
 
     ext {
-        applicationName = "Sesame" // 应用程序名称
-        applicationType = "Normal" // 应用程序类型
+        applicationName = "Sesame"
+        applicationType = "Normal"
     }
-    flavorDimensions.add("default") // 添加产品风味维度
+    flavorDimensions.add("default")
     productFlavors {
         normal {
-            dimension "default" // 普通产品风味
+            dimension "default"
             ext.applicationType = "Normal"
-            minSdk 27    // 适用于较新的 Android 版本8
+            minSdk 28
             targetSdk 34
         }
         compatible {
-            dimension "default" // 兼容产品风味
+            dimension "default"
             ext.applicationType = "Compatible"
-            minSdk 21    // 支持较老的 Android 版本
+            minSdk 21
             targetSdk 27
         }
     }
@@ -117,13 +110,13 @@ android {
 
     buildTypes {
         debug {
-            debuggable true // 默认为true，可以显式设置
+            debuggable true
             signingConfig signingConfigs.debug
         }
         release {
-            debuggable false // 默认为false，可以显式设置
-            minifyEnabled false // 启用代码压缩
-            shrinkResources false // 启用资源压缩
+            debuggable false
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug //for debug apk
         }
@@ -132,9 +125,8 @@ android {
         targetCompatibility JavaVersion.VERSION_17
         sourceCompatibility JavaVersion.VERSION_17
     }
-    // 构建工具版本
-    applicationVariants.configureEach { variant -> // 配置每个应用变体
-        variant.outputs.configureEach { output -> // 配置每个输出
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.apk')) {
                 if (variant.buildType.name == 'release') {
@@ -157,6 +149,7 @@ dependencies {
     implementation 'com.github.tony19:logback-android:3.0.0'
     implementation 'com.android.support:appcompat-v7:28.0.0'
 
+    //noinspection GradleDependency
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
     implementation 'com.google.android.material:material:1.12.0'

@@ -21,7 +21,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,8 +42,6 @@ import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
 
 public class MainActivity extends BaseActivity {
-
-//    private final Handler handler = new Handler(Looper.getMainLooper());
 
     private boolean hasPermissions = false;
 
@@ -224,7 +221,7 @@ public class MainActivity extends BaseActivity {
             }
             try {
                 StatisticsUtil.load();
-                StatisticsUtil.updateDay(LocalDate.now());
+                StatisticsUtil.updateDay();
                 tvStatistics.setText(StatisticsUtil.getText());
             } catch (Exception e) {
                 Log.printStackTrace(e);

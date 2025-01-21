@@ -745,7 +745,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         }
 
         try {
-            StatisticsUtil.save(LocalDate.from(nowDateTime));
+            StatisticsUtil.save(Calendar.getInstance());
         } catch (Exception e) {
             Log.printStackTrace(e);
         }

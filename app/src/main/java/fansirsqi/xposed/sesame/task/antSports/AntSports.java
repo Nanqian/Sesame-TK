@@ -733,7 +733,7 @@ public class AntSports extends ModelTask {
             if (ResUtil.checkResCode(jo)) {
                 jo = jo.getJSONObject("dailyStepModel");
                 int produceQuantity = jo.getInt("produceQuantity");
-                int hour = TimeUtil.getHour(); // try fix bug of #35
+                int hour = Integer.parseInt(TimeUtil.getFormatTime().split(":")[0]);;
                 if (produceQuantity >= minExchangeCount.getValue() || hour >= latestExchangeTime.getValue()) {
                     s = AntSportsRpcCall.walkDonateSignInfo(produceQuantity);
                     s = AntSportsRpcCall.donateWalkHome(produceQuantity);

@@ -673,8 +673,6 @@ public class AntStall extends ModelTask {
     }
 
     private boolean finishTask(String taskType) {
-        // String s = AntStallRpcCall.finishTask(FriendIdMap.currentUid + "_" +
-        // taskType, taskType);
         String s = AntStallRpcCall.finishTask(taskType + "_" + System.currentTimeMillis(), taskType);
         try {
             JSONObject jo = new JSONObject(s);
@@ -1025,11 +1023,10 @@ public class AntStall extends ModelTask {
                             String key = keys.next();
                             // 获取键对应的值
                             Object propertyValue = object.get(key);
-                            if (!(propertyValue instanceof JSONObject)) {
+                            if (!(propertyValue instanceof JSONObject jo)) {
                                 continue;
                             }
                             //如signInDTO、priorityChannelDTO
-                            JSONObject jo = ((JSONObject) propertyValue);
                             if (jo.length() == 0) {
                                 continue;
                             }

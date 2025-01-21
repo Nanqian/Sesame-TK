@@ -6,10 +6,9 @@ import static fansirsqi.xposed.sesame.task.greenFinance.GreenFinanceRpcCall.task
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TreeMap;
 
@@ -22,6 +21,7 @@ import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
+import fansirsqi.xposed.sesame.util.TimeUtil;
 
 /**
  * @author Constanline
@@ -382,57 +382,47 @@ public class GreenFinance extends ModelTask {
      * 评级奖品
      */
     private void prizes() {
-        try {
-            if (StatusUtil.canGreenFinancePrizesMap()) {
-                return;
-            }
-            String campId = "CP14664674";
-            String str = GreenFinanceRpcCall.queryPrizes(campId);
-            JSONObject jsonObject = new JSONObject(str);
-            if (!jsonObject.optBoolean("success")) {
-                Log.runtime(TAG + ".prizes.queryPrizes", jsonObject.optString("resultDesc"));
-                return;
-            }
-            JSONArray prizes = (JSONArray) JsonUtil.getValueByPathObject(jsonObject, "result.prizes");
-            if (prizes != null) {
-                for (int i = 0; i < prizes.length(); i++) {
-                    jsonObject = prizes.getJSONObject(i);
-                    String bizTime = jsonObject.getString("bizTime");
-                    // 使用 SimpleDateFormat 解析字符串
-//                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
-
-                    // 使用适当的日期格式化器解析字符串，带有时区和时间
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                    LocalDate parsedDate = LocalDate.parse(bizTime, formatter);
-                    // 获取当前日期
-                    LocalDate currentDate = LocalDate.now();
-                    // 获取当前周数
-                    WeekFields weekFields = WeekFields.of(Locale.getDefault());
-                    int parsedWeek = parsedDate.get(weekFields.weekOfYear());
-                    int currentWeek = currentDate.get(weekFields.weekOfYear());
-                    if (parsedWeek == currentWeek) {
-                        // 本周已完成
-                        StatusUtil.greenFinancePrizesMap();
-                        return;
-                    }
+    try {
+        if (StatusUtil.canGreenFinancePrizesMap()) {
+            return;
+        }
+        String campId = "CP14664674";
+        String str = GreenFinanceRpcCall.queryPrizes(campId);
+        JSONObject jsonObject = new JSONObject(str);
+        if (!jsonObject.optBoolean("success")) {
+            Log.runtime(TAG + ".prizes.queryPrizes", jsonObject.optString("resultDesc"));
+            return;
+        }
+        JSONArray prizes = (JSONArray) JsonUtil.getValueByPathObject(jsonObject, "result.prizes");
+        if (prizes != null) {
+            for (int i = 0; i < prizes.length(); i++) {
+                jsonObject = prizes.getJSONObject(i);
+                String bizTime = jsonObject.getString("bizTime");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+                Date dateTime = formatter.parse(bizTime);
+                if (TimeUtil.getWeekNumber(dateTime) == TimeUtil.getWeekNumber(new Date())) {
+                    StatusUtil.greenFinancePrizesMap();
+                    return;
                 }
             }
-            str = GreenFinanceRpcCall.campTrigger(campId);
-            jsonObject = new JSONObject(str);
-            if (!jsonObject.optBoolean("success")) {
-                Log.runtime(TAG + ".prizes.campTrigger", jsonObject.optString("resultDesc"));
-                return;
-            }
-            JSONObject object = (JSONObject) JsonUtil.getValueByPathObject(jsonObject, "result.prizes.[0]");
-            if (object == null) {
-                return;
-            }
-            Log.other("绿色经营🍬评级奖品[" + object.getString("prizeName") + "]" + object.getString("price"));
-        } catch (Throwable th) {
-            Log.runtime(TAG, "prizes err:");
-            Log.printStackTrace(TAG, th);
         }
+        str = GreenFinanceRpcCall.campTrigger(campId);
+        jsonObject = new JSONObject(str);
+        if (!jsonObject.optBoolean("success")) {
+            Log.runtime(TAG + ".prizes.campTrigger", jsonObject.optString("resultDesc"));
+            return;
+        }
+        JSONObject object = (JSONObject) JsonUtil.getValueByPathObject(jsonObject, "result.prizes.[0]");
+        if (object == null) {
+            return;
+        }
+        Log.other("绿色经营🍬评级奖品[" + object.getString("prizeName") + "]" + object.getString("price"));
+    } catch (Throwable th) {
+        Log.runtime(TAG, "prizes err:");
+        Log.printStackTrace(TAG, th);
     }
+}
+
 
     /**
      * 收好友金币

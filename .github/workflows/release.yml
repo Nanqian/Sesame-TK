@@ -85,7 +85,10 @@ jobs:
           append_body: true
           generate_release_notes: true
           body: |
-            > 墙内更新地址可能不及时..[戳这里](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
+            > ### 墙内更新
+            > [抗揍云-LanZou](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
+            > [Alist分流-LanZou](https://alist.byseven.us.kg/LanZou/Sesame-TK) 密码:`9527`
+            > [Alist分流-ALiYun](https://alist.byseven.us.kg/AliYun/share/Sesame-TK) 密码:`9527`
 
       - name: Sync Release to Target Repository
         uses: softprops/action-gh-release@v2

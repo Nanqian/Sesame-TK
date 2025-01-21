@@ -15,8 +15,6 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Objects;
 
-import fansirsqi.xposed.sesame.hook.Toast;
-
 
 public class Files {
 
@@ -371,10 +369,6 @@ public class Files {
         return ensureLogFile(getLogFile("record"));
     }
 
-    public static File getSystemLogFile() {
-        return ensureLogFile(getLogFile("system"));
-    }
-
     public static File getDebugLogFile() {
         return ensureLogFile(getLogFile("debug"));
     }
@@ -499,52 +493,6 @@ public class Files {
         }
     }
 
-    public static synchronized boolean write2File(String s, File f,boolean isFormat) {
-        if (beforWrite(f)) return false;
-        try {
-            try (FileWriter fw = new FileWriter(f, false)) {
-                if (isFormat) s = JsonUtil.formatJson(s);
-                fw.write(s);
-                fw.flush();
-                return true;
-            }
-        } catch (IOException e) {
-            Log.printStackTrace(TAG, e);
-            return false;
-        }
-    }
-
-
-    /**
-     * 将字符串追加到文件末尾
-     *
-     * @param s 要追加的字符串
-     * @param f 目标文件
-     * @return 追加是否成功
-     */
-    public static boolean append2File(String s, File f) {
-        // 文件已存在，检查是否有写入权限
-        if (f.exists() && !f.canWrite()) {
-            Toast.show(f.getAbsoluteFile() + "没有写入权限！");
-            return false;
-        }
-        boolean success = false;
-        FileWriter fw = null;
-        try {
-            // 使用 FileWriter 追加内容到文件末尾
-            fw = new FileWriter(f, true);
-            fw.append(s);
-            fw.flush();
-            success = true;
-        } catch (Throwable t) {
-            // 捕获并记录异常
-            Log.printStackTrace(TAG, t);
-        } finally {
-            // 关闭文件流
-            close(fw);
-        }
-        return success;
-    }
 
     /**
      * 将源文件的内容复制到目标文件

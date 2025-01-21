@@ -4,12 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -718,55 +715,32 @@ public class AntForest extends ModelTask {
      * @return 用户的主页信息，如果发生错误则返回null。
      */
     private JSONObject querySelfHome() {
-        JSONObject userHomeObj = null; // 声明用户主页对象
-
+        JSONObject userHomeObj = null;
         try {
-            long start = System.currentTimeMillis(); // 记录开始时间
-            // 调用远程接口获取用户主页信息并转换为 JSONObject 对象
+            long start = System.currentTimeMillis();
             userHomeObj = new JSONObject(AntForestRpcCall.queryHomePage());
-            updateSelfHomePage(userHomeObj);//顺便更新一些必要信息
-            long end = System.currentTimeMillis(); // 记录结束时间
-            // 获取服务器时间
+            updateSelfHomePage(userHomeObj);
+            long end = System.currentTimeMillis();
+
             long serverTime = userHomeObj.getLong("now");
-            Instant instant = Instant.ofEpochMilli(serverTime);
-            LocalDateTime serverLocalDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-            // 格式化服务器时间为 HH:mm:ss 格式
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-            String formattedServerTime = serverLocalDateTime.format(formatter);
-            //计算时间偏差
-            int offsetTime = (int) ((start + end) / 2 - serverTime);
-            String formattedTimeDiff = formatTimeDifference(offsetTime);
-            // 记录服务器时间与本地时间差
-            Log.runtime("服务器时间：" + formattedServerTime + "，本地与服务器时间差：" + formattedTimeDiff);
+            int offsetTime = offsetTimeMath.nextInteger((int) ((start + end) / 2 - serverTime));
+            Log.runtime("服务器时间：" + serverTime + "，本地与服务器时间差：" + offsetTime);
         } catch (Throwable t) {
-            // 记录异常信息
             Log.printStackTrace(t);
         }
-        return userHomeObj; // 返回用户主页对象
+        return userHomeObj;
     }
 
     private JSONObject queryFriendHome(String userId) {
-        JSONObject userHomeObj = null; // 声明用户主页对象
+        JSONObject userHomeObj = null;
         try {
-            long start = System.currentTimeMillis(); // 记录开始时间
+            long start = System.currentTimeMillis();
             userHomeObj = new JSONObject(AntForestRpcCall.queryFriendHomePage(userId));
-            long end = System.currentTimeMillis(); // 记录结束时间
-            // 获取服务器时间
+            long end = System.currentTimeMillis();
             long serverTime = userHomeObj.getLong("now");
-            // 将服务器时间转为 LocalDateTime 对象
-            Instant instant = Instant.ofEpochMilli(serverTime);
-            LocalDateTime serverLocalDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-            // 格式化服务器时间为 HH:mm:ss 格式
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-            String formattedServerTime = serverLocalDateTime.format(formatter);
-            // 计算时间偏差
             int offsetTime = offsetTimeMath.nextInteger((int) ((start + end) / 2 - serverTime));
-            // 格式化时间差
-            String formattedTimeDiff = formatTimeDifference(offsetTime);
-            // 打印日志
-            Log.runtime("服务器时间：" + formattedServerTime + "，本地与服务器时间差：" + formattedTimeDiff);
+            Log.runtime("服务器时间：" + serverTime + "，本地与服务器时间差：" + offsetTime);
         } catch (Throwable t) {
-            // 记录异常信息
             Log.printStackTrace(t);
         }
         return userHomeObj; // 返回用户主页对象
@@ -912,15 +886,18 @@ public class AntForest extends ModelTask {
                 }
                 // 批量收取或逐一收取能量
                 if (bubbleIdList.isEmpty()) return userHomeObj;
-                if (batchRobEnergy.getValue()) {//一键收取
+                if (batchRobEnergy.getValue()) { // 一键收取
                     // 每次最多收取6个能量
                     for (int i = 0; i < bubbleIdList.size(); i += 6) {
                         List<Long> batchBubbleIdList = bubbleIdList.subList(i, Math.min(i + 6, bubbleIdList.size()));
                         collectEnergy(new CollectEnergyEntity(userId, userHomeObj, AntForestRpcCall.getCollectBatchEnergyRpcEntity(userId, batchBubbleIdList)));
                     }
-                } else {//逐一收取
-                    bubbleIdList.forEach(bubbleId -> collectEnergy(new CollectEnergyEntity(userId, userHomeObj, AntForestRpcCall.getCollectEnergyRpcEntity(null, userId, bubbleId))));
+                } else { // 逐一收取
+                    for (Long bubbleId : bubbleIdList) {
+                        collectEnergy(new CollectEnergyEntity(userId, userHomeObj, AntForestRpcCall.getCollectEnergyRpcEntity(null, userId, bubbleId)));
+                    }
                 }
+
             }
             return userHomeObj;
         } catch (Throwable t) {
@@ -1569,109 +1546,6 @@ public class AntForest extends ModelTask {
     }
 
 
-//
-//    /**
-//     * 活力值兑换能量双击卡一次性兑换完毕
-//     */
-//    private void exchangeEnergyDoubleClick() {
-//        try {
-//            JSONObject jo = findPropShop("CR20230516000362", "CR20230516000363");
-//            while (exchangePropShop(jo, StatusUtil.INSTANCE.getExchangeTimes() + 1, "活力值兑换能量双击卡")) {
-//                StatusUtil.exchangeDoubleCardToday(true);
-//            }
-//        } catch (Throwable t) {
-//            Log.runtime(TAG, "活力值兑换能量双击卡出错！:");
-//            Log.printStackTrace(TAG, t);
-//        }
-//    }
-//
-//    /**
-//     * 兑换永久双击卡
-//     */
-//    private void exchangeEnergyDoubleClickLongTime(int count) {
-//        try {
-//            String s = AntForestRpcCall.itemList("SC_ASSETS");
-//            JSONObject jo = new JSONObject(s);
-//            if (!jo.optBoolean("success")) {
-//                Log.record(jo.getString("desc"));
-//                Log.runtime(s);
-//                return;
-//            }
-//            JSONArray itemInfoVOList = jo.optJSONArray("itemInfoVOList");
-//            if (itemInfoVOList == null || itemInfoVOList.length() == 0) {
-//                Log.runtime("没有找到可用的道具列表");
-//                return;
-//            }
-//
-//            String skuId = null;
-//            String spuId = null;
-//            double price = 0d;
-//
-//            for (int i = 0; i < itemInfoVOList.length(); i++) {
-//                jo = itemInfoVOList.getJSONObject(i);
-//                if ("能量双击卡".equals(jo.getString("spuName"))) {
-//                    JSONArray skuModelList = jo.getJSONArray("skuModelList");
-//                    for (int j = 0; j < skuModelList.length(); j++) {
-//                        jo = skuModelList.getJSONObject(j);
-//                        if ("VITALITY_ENERGY_DOUBLE_CLICK_NO_EXPIRE_2023".equals(jo.getString("rightsConfigId"))) {
-//                            skuId = jo.getString("skuId");
-//                            spuId = jo.getString("spuId");
-//                            price = jo.getJSONObject("price").getDouble("amount");
-//                            break;
-//                        }
-//                    }
-//                    break;
-//                }
-//            }
-//
-//            if (skuId == null) {
-//                Log.record("没有找到永久双击卡");
-//                return;
-//            }
-//
-//            for (int exchangeCount = 1; exchangeCount <= count; exchangeCount++) {
-//                if (!StatusUtil.canExchangeDoubleCardTodayLongTime()) {
-//                    Log.record("兑换次数已到上限！");
-//                    break;
-//                }
-//
-//                JSONObject storeIndexJo = new JSONObject(AntForestRpcCall.queryVitalityStoreIndex());
-//                if (!ResUtil.checkResCode(storeIndexJo)) {
-//                    Log.record(storeIndexJo.getString("resultDesc"));
-//                    Log.runtime(storeIndexJo.toString());
-//                    break;
-//                }
-//
-//                int totalVitalityAmount = storeIndexJo.getJSONObject("userVitalityInfoVO").getInt("totalVitalityAmount");
-//                if (totalVitalityAmount <= price) {
-//                    Log.record("活力值不足，停止兑换！");
-//                    break;
-//                }
-//
-//                JSONObject exchangeJo = new JSONObject(AntForestRpcCall.exchangeBenefit(spuId, skuId));
-//                ThreadUtil.sleep(1000);
-//                if (ResUtil.checkResCode(exchangeJo)) {
-//                    StatusUtil.exchangeDoubleCardTodayLongTime(true);
-//                    int exchangedTimes = StatusUtil.INSTANCE.getExchangeTimesLongTime();
-//                    Log.forest("活力兑换💱[永久双击卡]#第" + exchangedTimes + "次");
-//                } else {
-//                    Log.record(exchangeJo.getString("resultDesc"));
-//                    Log.runtime(exchangeJo.toString());
-//                    StatusUtil.exchangeDoubleCardTodayLongTime(false);
-//                    break;
-//                }
-//            }
-//        } catch (JSONException e) {
-//            Log.record("JSON解析错误: " + e.getMessage());
-//            Log.printStackTrace(TAG, e);
-//        } catch (Throwable t) {
-//            Log.runtime(TAG, "exchangeEnergyDoubleClickLongTime err:");
-//            Log.printStackTrace(TAG, t);
-//        }
-//    }
-//
-//
-
     /**
      * 兑换能量保护罩
      * 类别 spuid skuid price
@@ -1686,26 +1560,6 @@ public class AntForest extends ModelTask {
         }
         return Vitality.VitalityExchange(spuId, skuId, "隐身卡");
     }
-//
-//
-//    /**
-//     * 兑换 神奇物种抽历史卡机会
-//     */
-//    private void exchangeCollectHistoryAnimal7Days() {
-//        if (exchangePropShop(findPropShop("SP20230518000022", "SK20230518000062"), 1, "神奇物种抽[历史]卡机会")) {
-//            StatusUtil.exchangeCollectHistoryAnimal7Days();
-//        }
-//    }
-//
-//    /**
-//     * 兑换 神奇物种抽好友卡机会
-//     */
-//    private void exchangeCollectToFriendTimes7Days() {
-//        if (exchangePropShop(findPropShop("SP20230518000021", "SK20230518000061"), 1, "神奇物种抽[好友]卡机会")) {
-//            StatusUtil.exchangeCollectToFriendTimes7Days();
-//        }
-//    }
-//
 
     /**
      * 兑换隐身卡
@@ -1893,9 +1747,9 @@ public class AntForest extends ModelTask {
             if (hasDoubleCardTime() && StatusUtil.canDoubleToday()) {
                 JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_DOUBLE_CLICK");
                 if (jo == null && doubleCardConstant.getValue()) {
-                    if(Vitality.handleVitalityExchange("SK20240805004754")){
+                    if (Vitality.handleVitalityExchange("SK20240805004754")) {
                         jo = findPropBag(getBag(), "ENERGY_DOUBLE_CLICK_31DAYS");
-                    }else if(Vitality.handleVitalityExchange("CR20230516000363")){
+                    } else if (Vitality.handleVitalityExchange("CR20230516000363")) {
                         jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_DOUBLE_CLICK");
                     }
                 }
@@ -2448,120 +2302,37 @@ public class AntForest extends ModelTask {
         }
     }
 
-    //    private JSONObject findPropShop(String spuId, String skuId) {
-//        JSONObject skuJsonObj;
-//        try {
-//            JSONObject itemListResponse = new JSONObject(AntForestRpcCall.itemList("SC_ASSETS"));
-//            if (!itemListResponse.optBoolean("success")) {
-//                Log.record(itemListResponse.getString("desc"));
-//                Log.runtime(itemListResponse.toString());
-//                return null;
-//            }
-//            JSONArray itemInfoVOList = itemListResponse.optJSONArray("itemInfoVOList");
-//            if (itemInfoVOList == null) return null;
-//            for (int i = 0; i < itemInfoVOList.length(); i++) {
-//                JSONObject itemInfo = itemInfoVOList.getJSONObject(i);
-//                if (spuId.equals(itemInfo.optString("spuId"))) {
-//                    JSONArray skuModelList = itemInfo.optJSONArray("skuModelList");
-//                    if (skuModelList != null) {
-//                        for (int j = 0; j < skuModelList.length(); j++) {
-//                            JSONObject skuModel = skuModelList.getJSONObject(j);
-//                            if (skuId.equals(skuModel.optString("skuId"))) {
-//                                skuJsonObj = skuModel;
-//                                return skuJsonObj;
-//                            }
-//                        }
-//                    }
-//                    break;
-//                }
-//            }
-//        } catch (Exception e) {
-//            Log.runtime("findPropShop", "Error finding prop in shop:");
-//            Log.printStackTrace("findPropShop", e);
-//        }
-//        return null;
-//    }
-
-//    private boolean exchangePropShop(JSONObject skuJsonObj, int exchangedCount, String tag) {
-//        if (skuJsonObj == null) {
-//            Log.record(tag, "要兑换的道具不存在！");
-//            return false;
-//        }
-//        try {
-//            ThreadUtil.sleep(800L);
-//            JSONObject storeIndex = new JSONObject(AntForestRpcCall.queryVitalityStoreIndex());
-//            if (!ResUtil.checkSuccess(storeIndex)) {
-//                Log.runtime(tag, "请求活力值商店失败");
-//                return false;
-//            }
-//            if (!skuJsonObj.has("skuId") || !skuJsonObj.has("spuId") || !skuJsonObj.has("price")) {
-//                Log.record(tag, "缺少必要的字段: skuId, spuId, price");
-//                return false;
-//            }
-//            double totalVitalityAmount = storeIndex.getJSONObject("userVitalityInfoVO").getDouble("totalVitalityAmount");
-//            double priceAmount = skuJsonObj.getJSONObject("price").getDouble("amount");
-//            if (totalVitalityAmount < priceAmount) {
-//                Log.record(tag, "活力值余额[" + priceAmount + "]不足 停止兑换[" + skuJsonObj.getString("skuName") + "]");
-//                return false;
-//            }
-//            String skuId = skuJsonObj.getString("skuId");
-//            String spuId = skuJsonObj.getString("spuId");
-//            if (!StatusUtil.hasFlagToday("forest::VitalityExchangeLimit::" + skuId)) {
-//                JSONObject exchangeResult = new JSONObject(AntForestRpcCall.exchangeBenefit(skuId, spuId));
-//                if (ResUtil.checkResCode(exchangeResult)) {
-//                    String logMessage = "活力兑换 💱 [" + skuJsonObj.getString("skuName") + "] #第" + exchangedCount + "次";
-//                    Log.forest(logMessage);
-//                    return true;
-//                } else {
-//                    Log.record(tag, exchangeResult.getString("resultDesc"));
-//                    Log.runtime(tag, exchangeResult.toString());
-//                    return false;
-//                }
-//            } else {
-//                Log.record(tag, "今日已兑换过[" + skuJsonObj.getString("skuName") + "]");
-//                return false;
-//            }
-//        } catch (JSONException e) {
-//            Log.runtime(tag, "JSON 解析错误: " + e.getMessage());
-//            Log.printStackTrace(tag, e);
-//            return false;
-//        } catch (Exception e) {
-//            Log.runtime(tag, "exchangePropShop err: " + e.getMessage());
-//            Log.printStackTrace(tag, e);
-//            return false;
-//        }
-//    }
-
 
     /**
      * 定时使用加速器
      */
     public void useBubbleBoost() {
-        List<String> boostTimeValue = bubbleBoostTime.getValue();
-        if (Objects.isNull(boostTimeValue)) return;
-        if (boostTimeValue.isEmpty()) return;
-        for (String bubbleBoostTimeStr : boostTimeValue) {
-            if ("-1".equals(bubbleBoostTimeStr)) {
-                return;
-            }
-            LocalDateTime bubbleBoostTimeCalendar = TimeUtil.getLocalDateTimeByTimeStr(bubbleBoostTimeStr);
-            if (bubbleBoostTimeCalendar == null) {
-                return;
-            }
-            long bubbleBoostTime = bubbleBoostTimeCalendar.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            long now = System.currentTimeMillis();
-            if (now > bubbleBoostTime) {
-                continue;
-            }
-            String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
-            if (!hasChildTask(bubbleBoostTaskId)) {
-                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
-                Log.record("添加定时使用加速器🌪[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
-            } else {
-                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
-            }
+    List<String> boostTimeValue = bubbleBoostTime.getValue();
+    if (Objects.isNull(boostTimeValue)) return;
+    if (boostTimeValue.isEmpty()) return;
+    for (String bubbleBoostTimeStr : boostTimeValue) {
+        if ("-1".equals(bubbleBoostTimeStr)) {
+            return;
+        }
+        Calendar bubbleBoostTimeCalendar = TimeUtil.getTodayCalendarByTimeStr(bubbleBoostTimeStr);
+        if (bubbleBoostTimeCalendar == null) {
+            return;
+        }
+        long bubbleBoostTime = bubbleBoostTimeCalendar.getTimeInMillis();
+        long now = System.currentTimeMillis();
+        if (now > bubbleBoostTime) {
+            continue;
+        }
+        String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
+        if (!hasChildTask(bubbleBoostTaskId)) {
+            addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+            Log.record("添加定时使用加速器🌪[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
+        } else {
+            addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
         }
     }
+}
+
 
     private void useBubbleBoostCard() {
         try {

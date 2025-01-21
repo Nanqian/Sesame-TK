@@ -72,12 +72,12 @@ public class Vitality {
 
     private static void handleVitalityItem(JSONObject vitalityItem) {
         try {
-            String spuId;
+            //海洋随机拼图skuModelList节点下没有spuId
+            String spuId = vitalityItem.optString("spuId");
             JSONArray skuModelList = vitalityItem.getJSONArray("skuModelList");
             for (int i = 0; i < skuModelList.length(); i++) {
                 JSONObject skuModel = skuModelList.getJSONObject(i);
                 String skuId = skuModel.getString("skuId");
-                spuId = skuModel.getString("spuId");//update spuId
                 String skuName = skuModel.getString("skuName");
                 if (!skuModel.has("spuId")) {
                     skuModel.put("spuId", spuId);

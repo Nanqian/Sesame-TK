@@ -4,9 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import fansirsqi.xposed.sesame.util.Log;
@@ -18,35 +18,46 @@ public class Privilege {
 
 
     //青春特权🌸领取
-    static boolean youthPrivilege() {
-        try {
-            if (!StatusUtil.canYouthPrivilegeToday()) return false;
-            List<List<String>> taskList = Arrays.asList(
-                    Arrays.asList("DNHZ_SL_college", "DAXUESHENG_SJK", "双击卡"),
-                    Arrays.asList("DXS_BHZ", "NENGLIANGZHAO_20230807", "保护罩"),
-                    Arrays.asList("DXS_JSQ", "JIASUQI_20230808", "加速器")
-            );
-            List<String> resultList = new ArrayList<>();
-            for (List<String> task : taskList) {
-                String queryParam = task.get(0); // 用于 queryTaskListV2 方法的第一个参数
-                String receiveParam = task.get(1); // 用于 receiveTaskAwardV2 方法的第二个参数
-                String taskName = task.get(2); // 标记名称
-                String queryResult = AntForestRpcCall.queryTaskListV2(queryParam);
-                JSONObject getTaskStatusObject = new JSONObject(queryResult);
-                JSONArray taskInfoList = getTaskStatusObject.getJSONArray("forestTasksNew")
-                        .getJSONObject(0).getJSONArray("taskInfoList");
-                resultList.addAll(handleTaskList(taskInfoList, receiveParam, taskName));
+static boolean youthPrivilege() {
+    try {
+        if (!StatusUtil.canYouthPrivilegeToday()) return false;
+        List<List<String>> taskList = Arrays.asList(
+                Arrays.asList("DNHZ_SL_college", "DAXUESHENG_SJK", "双击卡"),
+                Arrays.asList("DXS_BHZ", "NENGLIANGZHAO_20230807", "保护罩"),
+                Arrays.asList("DXS_JSQ", "JIASUQI_20230808", "加速器")
+        );
+        List<String> resultList = new ArrayList<>();
+        for (List<String> task : taskList) {
+            String queryParam = task.get(0); // 用于 queryTaskListV2 方法的第一个参数
+            String receiveParam = task.get(1); // 用于 receiveTaskAwardV2 方法的第二个参数
+            String taskName = task.get(2); // 标记名称
+            String queryResult = AntForestRpcCall.queryTaskListV2(queryParam);
+            JSONObject getTaskStatusObject = new JSONObject(queryResult);
+            JSONArray taskInfoList = getTaskStatusObject.getJSONArray("forestTasksNew")
+                    .getJSONObject(0).getJSONArray("taskInfoList");
+            resultList.addAll(handleTaskList(taskInfoList, receiveParam, taskName));
+        }
+        boolean allSuccessful = true;
+        for (String result : resultList) {
+            if (!"处理成功".equals(result)) {
+                allSuccessful = false;
+                break;
             }
-            if (resultList.stream().allMatch("处理成功"::equals)) {
-                StatusUtil.setYouthPrivilegeToday();
-                return true;
-            } else return false;
-        } catch (Exception e) {
-            Log.runtime(AntForest.TAG, "youthPrivilege err:");
-            Log.printStackTrace(AntForest.TAG, e);
+        }
+        if (allSuccessful) {
+            StatusUtil.setYouthPrivilegeToday();
+            return true;
+        } else {
             return false;
         }
+
+    } catch (Exception e) {
+        Log.runtime(AntForest.TAG, "youthPrivilege err:");
+        Log.printStackTrace(AntForest.TAG, e);
+        return false;
     }
+}
+
 
     /**
      * 处理任务列表
@@ -78,33 +89,31 @@ public class Privilege {
     }
 
     /**
-     *青春特权每日签到红包
-     */
-    static void studentSignInRedEnvelope() {
-        try {
-            LocalTime currentTime = LocalTime.now();
-            // 定义签到时间范围
-            final LocalTime START_TIME = LocalTime.of(5, 0); // 5:00 AM
-            final LocalTime END_TIME = LocalTime.of(10, 0);  // 10:00 AM
-
-            if (currentTime.isBefore(START_TIME)) {
-                Log.forest("青春特权🧧5点前不执行签到");
-                return;
-            }
-
-            if (StatusUtil.canStudentTask()) {
-                String tag = currentTime.isBefore(END_TIME) ? "double" : "single";
-                studentTaskHandle(tag);
-            } else {
-                Log.record("青春特权🧧今日已完成签到");
-            }
-
-        } catch (Exception e) {
-            Log.runtime(TAG, "studentSignInRedEnvelope错误:");
-            Log.printStackTrace(TAG, e);
-            Log.record("青春特权🧧执行异常：" + e.getMessage());
+ * 青春特权每日签到红包
+ */
+static void studentSignInRedEnvelope() {
+    try {
+        Calendar calendar = Calendar.getInstance();
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+        final int START_HOUR = 5; // 5:00 AM
+        final int END_HOUR = 10;  // 10:00 AM
+        if (currentHour < START_HOUR) {
+            Log.forest("青春特权🧧5点前不执行签到");
+            return;
         }
+        if (StatusUtil.canStudentTask()) {
+            String tag = currentHour < END_HOUR ? "double" : "single";
+            studentTaskHandle(tag);
+        } else {
+            Log.record("青春特权🧧今日已完成签到");
+        }
+    } catch (Exception e) {
+        Log.runtime(TAG, "studentSignInRedEnvelope错误:");
+        Log.printStackTrace(TAG, e);
+        Log.record("青春特权🧧执行异常：" + e.getMessage());
     }
+}
+
 
     /**
      * 学生签到执行逻辑
@@ -130,16 +139,9 @@ public class Privilege {
                 }
                 return;
             }
-
-            // 获取签到结果
             String resultDesc = resultJson.optString("resultDesc", "签到成功");
             Log.forest("青春特权🧧" + tag + "：" + resultDesc);
-
-            // 如果签到成功，设置今日已签到标记
-            if ("SUCCESS".equals(resultCode)) {
-                StatusUtil.setStudentTaskToday();
-            }
-
+            StatusUtil.setStudentTaskToday();
         } catch (JSONException e) {
             Log.runtime(TAG, "studentTask JSON解析错误:");
             Log.printStackTrace(TAG, e);
