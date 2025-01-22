@@ -2,29 +2,40 @@ package fansirsqi.xposed.sesame.entity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import fansirsqi.xposed.sesame.util.*;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.Log;
+import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.TimeUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 表示好友能量监视器的实体类，提供能量收集的统计和管理功能。
  * 该类是线程安全的，适用于多线程环境。
  *
- * @author Constanline
- * @since 2023/08/08
+ * @author Byseven
+ * @since 2025/01/22
  */
+@Setter
+@Getter
 public class FriendWatch extends MapperEntity {
 
     // 日志标签
     private static final String TAG = FriendWatch.class.getSimpleName();
 
-    // 用于存储好友能量数据的 JSON 对象
-    private static JSONObject joFriendWatch;
+    // 用于存储好友能量数据的 Map
+    private static final Map<String, FriendWatch> friendWatchMap = new HashMap<>();
 
+    // Getter 和 Setter 方法
     private String startTime; // 开始统计时间
     private int allGet; // 总收集能量
     private int weekGet; // 本周收集能量
@@ -32,7 +43,7 @@ public class FriendWatch extends MapperEntity {
     /**
      * 构造方法，初始化好友监视器对象。
      *
-     * @param id 好友 ID
+     * @param id   好友 ID
      * @param name 好友名称
      */
     public FriendWatch(String id, String name) {
@@ -60,20 +71,20 @@ public class FriendWatch extends MapperEntity {
     /**
      * 更新好友的能量收集数据。
      *
-     * @param id 好友 ID
+     * @param id              好友 ID
      * @param collectedEnergy 本次收集的能量
      */
     public static void friendWatch(String id, int collectedEnergy) {
         try {
-            JSONObject joSingle = joFriendWatch.optJSONObject(id);
-            if (joSingle == null) {
-                joSingle = new JSONObject();
-                joSingle.put("name", UserMap.getMaskName(id));
-                joSingle.put("allGet", 0);
-                joSingle.put("startTime", TimeUtil.getFormatDate());
-                joFriendWatch.put(id, joSingle);
+            FriendWatch friendWatch = friendWatchMap.get(id);
+            if (friendWatch == null) {
+                friendWatch = new FriendWatch(id, UserMap.getMaskName(id));
+                friendWatch.startTime = TimeUtil.getFormatDate();
+                friendWatch.allGet = 0;
+                friendWatch.weekGet = 0;
+                friendWatchMap.put(id, friendWatch);
             }
-            joSingle.put("weekGet", joSingle.optInt("weekGet", 0) + collectedEnergy);
+            friendWatch.weekGet += collectedEnergy;
         } catch (Throwable th) {
             Log.runtime(TAG, "friendWatch err:");
             Log.printStackTrace(TAG, th);
@@ -83,9 +94,12 @@ public class FriendWatch extends MapperEntity {
     /**
      * 保存好友能量数据到文件。
      */
-    public static synchronized void save() {
+    public static synchronized void save(String userId) {
         try {
-            Files.write2File(joFriendWatch.toString(), Files.getFriendWatchFile());
+            if (userId == null) return;
+            JSONObject joFriendWatch = new JSONObject(friendWatchMap);
+            String formattedJson = JsonUtil.formatJson(joFriendWatch);
+            Files.write2File(formattedJson, Files.getFriendWatchFile(userId));
         } catch (Exception e) {
             Log.runtime(TAG, "friendWatch save err:");
             Log.printStackTrace(TAG, e);
@@ -95,23 +109,21 @@ public class FriendWatch extends MapperEntity {
     /**
      * 更新每日统计数据，如果需要更新周数据则进行重置。
      */
-    public static void updateDay() {
-        if (!needUpdateAll(Files.getFriendWatchFile().lastModified())) {
+    public static void updateDay(String userId) {
+        if (userId == null) return;
+        if (!needUpdateAll(Files.getFriendWatchFile(userId).lastModified())) {
             return;
         }
         try {
             String dateStr = TimeUtil.getFormatDate();
-            Iterator<String> ids = joFriendWatch.keys();
-            while (ids.hasNext()) {
-                String id = ids.next();
-                JSONObject joSingle = joFriendWatch.getJSONObject(id);
-                joSingle.put("allGet", joSingle.optInt("allGet", 0) + joSingle.optInt("weekGet", 0));
-                joSingle.put("weekGet", 0);
-                if (!joSingle.has("startTime")) {
-                    joSingle.put("startTime", dateStr);
+            for (FriendWatch friendWatch : friendWatchMap.values()) {
+                friendWatch.allGet += friendWatch.weekGet;
+                friendWatch.weekGet = 0;
+                if (friendWatch.startTime == null) {
+                    friendWatch.startTime = dateStr;
                 }
             }
-            save();
+            save(userId);
         } catch (Throwable th) {
             Log.runtime(TAG, "friendWatch updateDay err:");
             Log.printStackTrace(TAG, th);
@@ -123,14 +135,26 @@ public class FriendWatch extends MapperEntity {
      *
      * @return 加载是否成功
      */
-    public static synchronized Boolean load() {
+    public static synchronized Boolean load(String userId) {
         try {
-            String strFriendWatch = Files.readFromFile(Files.getFriendWatchFile());
-            joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
+            if (userId == null) return false;
+            String strFriendWatch = Files.readFromFile(Files.getFriendWatchFile(userId));
+            JSONObject joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
+            friendWatchMap.clear();
+            Iterator<String> ids = joFriendWatch.keys();
+            while (ids.hasNext()) {
+                String id = ids.next();
+                JSONObject friend = joFriendWatch.getJSONObject(id);
+                FriendWatch friendWatch = new FriendWatch(id, friend.optString("name"));
+                friendWatch.startTime = friend.optString("startTime", "无");
+                friendWatch.weekGet = friend.optInt("weekGet", 0);
+                friendWatch.allGet = friend.optInt("allGet", 0);
+                friendWatchMap.put(id, friendWatch);
+            }
             return true;
         } catch (JSONException e) {
             Log.printStackTrace(e);
-            joFriendWatch = new JSONObject();
+            friendWatchMap.clear();
         }
         return false;
     }
@@ -139,7 +163,7 @@ public class FriendWatch extends MapperEntity {
      * 卸载好友能量数据，清空内存中的缓存。
      */
     public static synchronized void unload() {
-        joFriendWatch = new JSONObject();
+        friendWatchMap.clear();
     }
 
     /**
@@ -165,31 +189,7 @@ public class FriendWatch extends MapperEntity {
      * @return 包含所有好友能量数据的列表
      */
     public static List<FriendWatch> getList() {
-        ArrayList<FriendWatch> list = new ArrayList<>();
-        try {
-            String strFriendWatch = Files.readFromFile(Files.getFriendWatchFile());
-            JSONObject joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
-
-            Iterator<String> ids = joFriendWatch.keys();
-            while (ids.hasNext()) {
-                String id = ids.next();
-                JSONObject friend = joFriendWatch.optJSONObject(id);
-                if (friend == null) {
-                    continue;
-                }
-                FriendWatch friendWatch = new FriendWatch(id, friend.optString("name"));
-                friendWatch.startTime = friend.optString("startTime", "无");
-                friendWatch.weekGet = friend.optInt("weekGet", 0);
-                friendWatch.allGet = friend.optInt("allGet", 0) + friendWatch.weekGet;
-
-                friendWatch.name = friendWatch.name + "(开始统计时间:" + friendWatch.startTime + ")\n周收:" +
-                        friendWatch.weekGet + " 总收:" + friendWatch.allGet;
-                list.add(friendWatch);
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "FriendWatch getList err:");
-            Log.printStackTrace(TAG, t);
-        }
-        return list;
+        return new ArrayList<>(friendWatchMap.values());
     }
+
 }

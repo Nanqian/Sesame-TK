@@ -83,13 +83,16 @@ public class NewRpcBridge implements RpcBridge {
     @Override
     public String requestString(RpcEntity rpcEntity, int tryCount, int retryInterval) {
         RpcEntity resRpcEntity = requestObject(rpcEntity, tryCount, retryInterval);
-        return resRpcEntity != null ? resRpcEntity.getResponseString() : null;
+        if (resRpcEntity != null) {
+            return resRpcEntity.getResponseString();
+        }
+        return null;
     }
 
     @Override
     public RpcEntity requestObject(RpcEntity rpcEntity, int tryCount, int retryInterval) {
         if (ApplicationHook.isOffline()) {
-            Log.debug(TAG, "Application is offline, skipping RPC request");
+            Log.error(TAG, "Application is offline, skipping RPC request");
             return null;
         }
 
@@ -99,8 +102,6 @@ public class NewRpcBridge implements RpcBridge {
                 count++;
                 try {
                     RpcIntervalLimit.enterIntervalLimit(rpcEntity.getRequestMethod());
-
-                    // 解析请求数据
                     Object requestData = rpcEntity.getRpcFullRequestData();
                     if (requestData == null) {
                         Log.error(TAG, "RPC request data is null");

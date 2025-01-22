@@ -2,9 +2,7 @@ package fansirsqi.xposed.sesame.util;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -647,16 +645,16 @@ public class StatusUtil {
     }
 
     public static synchronized void save() {
-        save(LocalDateTime.now());
+        save(Calendar.getInstance());
     }
 
-    public static synchronized void save(LocalDateTime nowDateTime) {
+    public static synchronized void save(Calendar nowCalendar) {
         String currentUid = UserMap.getCurrentUid();
         if (StringUtil.isEmpty(currentUid)) {
             Log.record("用户为空，状态保存失败");
             throw new RuntimeException("用户为空，状态保存失败");
         }
-        if (updateDay(nowDateTime)) {
+        if (updateDay(nowCalendar)) {
             Log.runtime(TAG, "重置 statistics.json");
         } else {
             Log.runtime(TAG, "保存 status.json");
@@ -671,9 +669,8 @@ public class StatusUtil {
         }
     }
 
-    public static Boolean updateDay(LocalDateTime nowDateTime) {
-        long nowMillis = nowDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        if (TimeUtil.isLessThanSecondOfDays(INSTANCE.saveTime, nowMillis)) {
+    public static Boolean updateDay(Calendar nowCalendar) {
+        if (TimeUtil.isLessThanSecondOfDays(INSTANCE.saveTime, nowCalendar.getTimeInMillis())) {
             StatusUtil.unload();
             return true;
         } else {

@@ -275,8 +275,8 @@ public class Files {
         }
     }
 
-    public static File getFriendWatchFile() {
-        return getTargetFileofDir(MAIN_DIR, "friendWatch.json");
+    public static File getFriendWatchFile(String userId) {
+        return getTargetFileofUser(userId, "friendWatch.json");
     }
 
     public static File getWuaFile() {

@@ -1,13 +1,14 @@
 package fansirsqi.xposed.sesame.entity;
 
-import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
-
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
+import fansirsqi.xposed.sesame.util.Maps.ReserveaMap;
 
 /**
  * 表示支付宝保留项的实体类，包含 ID 和名称。
@@ -29,7 +30,7 @@ public class ReserveEntity extends MapperEntity {
     /**
      * 获取包含所有保留项的列表，首次调用时从 ReserveIdMapUtil 初始化。
      * 使用双重检查锁定机制实现懒加载以提高性能。
-     * @return 包含所有 AlipayReserve 对象的不可变列表
+     * @return 包含所有 ReserveEntity 对象的不可变列表
      */
     public static List<ReserveEntity> getList() {
         if (list == null) {
@@ -48,16 +49,22 @@ public class ReserveEntity extends MapperEntity {
     }
 
     /**
-     * 根据给定的 ID 删除相应的 AlipayReserve 对象。
+     * 根据给定的 ID 删除相应的 ReserveEntity 对象。
      * 首次调用 getList 方法以确保列表已初始化。
      * @param id 要删除的保留项 ID
      */
     public static void remove(String id) {
         getList();
         synchronized (ReserveEntity.class) {
-            list = new ArrayList<>(list); // 创建可变列表的副本
-            list.removeIf(reserve -> reserve.id.equals(id)); // 使用流简化移除操作
-            list = Collections.unmodifiableList(list); // 确保返回不可变列表
+            List<ReserveEntity> tempList = new ArrayList<>(list); // 创建可变列表的副本
+            Iterator<ReserveEntity> iterator = tempList.iterator();
+            while (iterator.hasNext()) {
+                ReserveEntity reserve = iterator.next();
+                if (reserve.id.equals(id)) {
+                    iterator.remove();
+                }
+            }
+            list = Collections.unmodifiableList(tempList); // 确保返回不可变列表
         }
     }
 }

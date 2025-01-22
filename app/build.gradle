@@ -85,14 +85,10 @@ android {
         normal {
             dimension "default"
             ext.applicationType = "Normal"
-            minSdk 28
-            targetSdk 34
         }
         compatible {
             dimension "default"
             ext.applicationType = "Compatible"
-            minSdk 21
-            targetSdk 27
         }
     }
 

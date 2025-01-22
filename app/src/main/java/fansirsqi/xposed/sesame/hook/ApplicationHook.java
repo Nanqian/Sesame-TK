@@ -19,7 +19,6 @@ import androidx.annotation.NonNull;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +33,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -310,7 +310,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 context = appService.getApplicationContext();
                                 service = appService;
                                 mainHandler = new Handler(Looper.getMainLooper());
-
+                                AtomicReference<String> UserId = new AtomicReference<>();
                                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                                 mainTask = BaseTask.newInstance("MAIN_TASK", () -> executorService.submit(() -> {
                                     try {
@@ -327,6 +327,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         }
                                         String currentUid = UserMap.getCurrentUid();
                                         String targetUid = getUserId();
+
                                         if (targetUid == null || !targetUid.equals(currentUid)) {
                                             Log.record("用户切换或为空，重新登录");
                                             reLogin();
@@ -340,6 +341,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                         TaskCommon.update();
                                         ModelTask.startAllTask(false);
                                         scheduleNextExecution(lastExecTime);
+                                        UserId.set(targetUid);
                                     } catch (Exception e) {
                                         Log.record(TAG, "执行异常");
                                         Log.printStackTrace(TAG, e);
@@ -347,7 +349,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 }));
                                 registerBroadcastReceiver(appService);
                                 StatisticsUtil.load();
-                                FriendWatch.load();
+                                FriendWatch.load(UserId.get());
                                 dayCalendar = Calendar.getInstance();
                                 if (initHandler(true)) {
                                     init = true;
@@ -538,7 +540,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                             },
                             2000);
                 }
-                if (!Model.getModel(BaseModel.class).getEnableField().getValue()) {
+                if (!Objects.requireNonNull(Model.getModel(BaseModel.class)).getEnableField().getValue()) {
                     Log.record("芝麻粒已禁用");
                     Toast.show("芝麻粒已禁用");
                     return false;
@@ -644,7 +646,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Notify.start(service);
                 Model.bootAllModel(classLoader);
                 StatusUtil.load();
-                updateDay();
+                updateDay(userId);
                 BaseModel.initData();
                 String successMsg = "芝麻粒-TK 加载成功🎉";
                 Log.record(successMsg);
@@ -730,20 +732,23 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         ModelTask.stopAllTask();
     }
 
-    public static void updateDay() {
-        dayDate = LocalDate.now();
-        LocalDateTime nowDateTime = LocalDateTime.now();
+    public static void updateDay(String userId) {
+        Calendar nowCalendar = Calendar.getInstance();
         try {
-            LocalDate nowDate = nowDateTime.toLocalDate();
-            if (!dayDate.equals(nowDate)) {
-                dayDate = nowDate;
-                Log.record("日期更新为：" + nowDate);
+            int nowYear = nowCalendar.get(Calendar.YEAR);
+            int nowMonth = nowCalendar.get(Calendar.MONTH);
+            int nowDay = nowCalendar.get(Calendar.DAY_OF_MONTH);
+            if (dayCalendar.get(Calendar.YEAR) != nowYear || dayCalendar.get(Calendar.MONTH) != nowMonth || dayCalendar.get(Calendar.DAY_OF_MONTH) != nowDay) {
+                dayCalendar = (Calendar) nowCalendar.clone();
+                dayCalendar.set(Calendar.HOUR_OF_DAY, 0);
+                dayCalendar.set(Calendar.MINUTE, 0);
+                dayCalendar.set(Calendar.SECOND, 0);
+                Log.record("日期更新为：" + nowYear + "-" + (nowMonth + 1) + "-" + nowDay);
                 setWakenAtTimeAlarm();
             }
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
-
         try {
             StatisticsUtil.save(Calendar.getInstance());
         } catch (Exception e) {
@@ -751,13 +756,13 @@ public class ApplicationHook implements IXposedHookLoadPackage {
         }
 
         try {
-            StatusUtil.save(nowDateTime);
+            StatusUtil.save(nowCalendar);
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
 
         try {
-            FriendWatch.updateDay();
+            FriendWatch.updateDay(userId);
         } catch (Exception e) {
             Log.printStackTrace(e);
         }

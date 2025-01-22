@@ -406,4 +406,10 @@ video {
 .dialog-desc {
   font-size: 12px;
   color: #f55718;
+  margin-left: 20px;
+  margin-top: 8px;
+}
+
+.w100 {
+  width: 100px;
 }

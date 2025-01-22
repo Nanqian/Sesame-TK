@@ -498,7 +498,7 @@ public class AntForest extends ModelTask {
                 Log.forest(TAG, "执行中断-蚂蚁森林");
             }
             StatisticsUtil.save();
-            FriendWatch.save();
+            FriendWatch.save(selfId);
             String str_totalCollected = "收:" + totalCollected + "g 帮:" + totalHelpCollected + "g 浇:" + totalWatered + "g";
             Notify.updateLastExecText(str_totalCollected);
         }
@@ -1558,7 +1558,7 @@ public class AntForest extends ModelTask {
         if (!StatusUtil.canVitalityExchangeToday(skuId, 1)) {
             return false;
         }
-        return Vitality.VitalityExchange(spuId, skuId, "隐身卡");
+        return Vitality.VitalityExchange(spuId, skuId, "保护罩");
     }
 
     /**
@@ -2246,6 +2246,9 @@ public class AntForest extends ModelTask {
     private JSONObject findPropBag(JSONObject bagObject, String propType) {
         JSONObject prop = null;
         try {
+            if(Objects.isNull(bagObject)){
+                return prop;
+            }
             // 遍历背包查找道具
             JSONArray forestPropVOList = bagObject.getJSONArray("forestPropVOList");
             for (int i = 0; i < forestPropVOList.length(); i++) {
