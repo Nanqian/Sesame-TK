@@ -1777,7 +1777,7 @@ public class AntForest extends ModelTask {
             JSONObject jo = findPropBag(bagObject, "LIMIT_TIME_STEALTH_CARD");
             if (jo == null && stealthCardConstant.getValue()) {
                 if (exchangeStealthCard()) {
-                    jo = findPropBag(bagObject, "LIMIT_TIME_STEALTH_CARD");
+                    jo = findPropBag(getBag(), "LIMIT_TIME_STEALTH_CARD");
                 }
             }
             if (jo == null) {
@@ -1805,11 +1805,11 @@ public class AntForest extends ModelTask {
             if (jo == null) {
                 if (youthPrivilege.getValue()) {
                     if (Privilege.youthPrivilege()) {
-                        jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD_TREE");
+                        jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_SHIELD_TREE");
                     } // 重新查找
                 } else if (shieldCardConstant.getValue()) {
                     if (exchangeEnergyShield()) {
-                        jo = findPropBag(bagObject, "LIMIT_TIME_ENERGY_SHIELD");
+                        jo = findPropBag(getBag(), "LIMIT_TIME_ENERGY_SHIELD");
                     }
                 } else {
                     jo = findPropBag(bagObject, "ENERGY_SHIELD"); // 尝试查找 普通保护罩，一般用不到
@@ -2307,31 +2307,31 @@ public class AntForest extends ModelTask {
      * 定时使用加速器
      */
     public void useBubbleBoost() {
-    List<String> boostTimeValue = bubbleBoostTime.getValue();
-    if (Objects.isNull(boostTimeValue)) return;
-    if (boostTimeValue.isEmpty()) return;
-    for (String bubbleBoostTimeStr : boostTimeValue) {
-        if ("-1".equals(bubbleBoostTimeStr)) {
-            return;
-        }
-        Calendar bubbleBoostTimeCalendar = TimeUtil.getTodayCalendarByTimeStr(bubbleBoostTimeStr);
-        if (bubbleBoostTimeCalendar == null) {
-            return;
-        }
-        long bubbleBoostTime = bubbleBoostTimeCalendar.getTimeInMillis();
-        long now = System.currentTimeMillis();
-        if (now > bubbleBoostTime) {
-            continue;
-        }
-        String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
-        if (!hasChildTask(bubbleBoostTaskId)) {
-            addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
-            Log.record("添加定时使用加速器🌪[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
-        } else {
-            addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+        List<String> boostTimeValue = bubbleBoostTime.getValue();
+        if (Objects.isNull(boostTimeValue)) return;
+        if (boostTimeValue.isEmpty()) return;
+        for (String bubbleBoostTimeStr : boostTimeValue) {
+            if ("-1".equals(bubbleBoostTimeStr)) {
+                return;
+            }
+            Calendar bubbleBoostTimeCalendar = TimeUtil.getTodayCalendarByTimeStr(bubbleBoostTimeStr);
+            if (bubbleBoostTimeCalendar == null) {
+                return;
+            }
+            long bubbleBoostTime = bubbleBoostTimeCalendar.getTimeInMillis();
+            long now = System.currentTimeMillis();
+            if (now > bubbleBoostTime) {
+                continue;
+            }
+            String bubbleBoostTaskId = "AS|" + bubbleBoostTime;
+            if (!hasChildTask(bubbleBoostTaskId)) {
+                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+                Log.record("添加定时使用加速器🌪[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(bubbleBoostTime) + "]执行");
+            } else {
+                addChildTask(new ChildModelTask(bubbleBoostTaskId, "AS", this::useBubbleBoostCard, bubbleBoostTime));
+            }
         }
     }
-}
 
 
     private void useBubbleBoostCard() {
