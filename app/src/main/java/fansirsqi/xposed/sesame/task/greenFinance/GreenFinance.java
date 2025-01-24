@@ -1,17 +1,13 @@
 package fansirsqi.xposed.sesame.task.greenFinance;
-
 import static fansirsqi.xposed.sesame.task.greenFinance.GreenFinanceRpcCall.taskQuery;
 import static fansirsqi.xposed.sesame.task.greenFinance.GreenFinanceRpcCall.taskTrigger;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TreeMap;
-
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -22,14 +18,12 @@ import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-
 /**
  * @author Constanline
  * @since 2023/09/08
  */
 public class GreenFinance extends ModelTask {
     private static final String TAG = GreenFinance.class.getSimpleName();
-
     private BooleanModelField greenFinanceLsxd;
     private BooleanModelField greenFinanceLsbg;
     private BooleanModelField greenFinanceLscg;
@@ -40,22 +34,18 @@ public class GreenFinance extends ModelTask {
      * 是否收取好友金币
      */
     private BooleanModelField greenFinancePointFriend;
-
     @Override
     public String getName() {
-        return "绿色经营🌱";
+        return "绿色经营";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.OTHER;
     }
-
     @Override
     public String getIcon() {
         return "GreenFinance.png";
     }
-
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -68,12 +58,10 @@ public class GreenFinance extends ModelTask {
         modelFields.addField(greenFinanceDonation = new BooleanModelField("greenFinanceDonation", "捐助 | 快过期金币", false));
         return modelFields;
     }
-
     @Override
     public Boolean check() {
         return !TaskCommon.IS_ENERGY_TIME;
     }
-
     @Override
     public void  run() {
         try {
@@ -106,7 +94,6 @@ public class GreenFinance extends ModelTask {
             if (bsnIds.length() > 0) {
                 batchSelfCollect(bsnIds);
             }
-
             signIn("PLAY102632271");
 //            signIn("PLAY102932217");
             signIn("PLAY102232206");
@@ -127,9 +114,7 @@ public class GreenFinance extends ModelTask {
         }finally {
             Log.other("执行结束-" + getName());
         }
-
     }
-
     /**
      * 公共做任务
      * 使用taskQuery查询任务，taskTrigger触发任务（根据taskProcessStatus状态，报名signup->完成send->领奖receive）
@@ -155,7 +140,6 @@ public class GreenFinance extends ModelTask {
                 if (!"USER_TRIGGER".equals(type) && !"EVENT_TRIGGER".equals(type)) {
                     continue;
                 }
-
                 String status = taskDetail.getString("taskProcessStatus");
                 String taskId = taskDetail.getString("taskId");
                 if ("TO_RECEIVE".equals(status)) {
@@ -194,7 +178,6 @@ public class GreenFinance extends ModelTask {
             Log.printStackTrace(tag, th);
         }
     }
-
     /**
      * 批量收取
      *
@@ -215,7 +198,6 @@ public class GreenFinance extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 签到
      *
@@ -246,7 +228,6 @@ public class GreenFinance extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 打卡
      */
@@ -272,7 +253,6 @@ public class GreenFinance extends ModelTask {
             doTick("wdxd");
         }
     }
-
     /**
      * 打卡绿色行为
      *
@@ -308,7 +288,6 @@ public class GreenFinance extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 捐助
      */
@@ -377,7 +356,6 @@ public class GreenFinance extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 评级奖品
      */
@@ -422,8 +400,6 @@ public class GreenFinance extends ModelTask {
         Log.printStackTrace(TAG, th);
     }
 }
-
-
     /**
      * 收好友金币
      */
@@ -500,7 +476,6 @@ public class GreenFinance extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 计算次数和金额
      *
@@ -531,6 +506,4 @@ public class GreenFinance extends ModelTask {
         }
         return new int[]{actualDeductions, remainingAmount};
     }
-
-
 }

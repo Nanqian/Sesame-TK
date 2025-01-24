@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.model;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -10,49 +9,35 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.core.content.ContextCompat;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import org.json.JSONException;
-
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Objects;
-
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.TypeUtil;
 import lombok.Data;
-
 @Data
 public class ModelField<T> implements Serializable {
-
     @JsonIgnore
     private final Type valueType; // 存储字段值的类型
-
     @JsonIgnore
     private String code; // 字段代码
-
     @JsonIgnore
     private String name; // 字段名称
-
     @JsonIgnore
     protected T defaultValue; // 默认值
-
     @JsonIgnore
     private String desc;
-
     protected volatile T value; // 当前值
-
     /**
      * 默认构造函数，初始化字段值类型
      */
     public ModelField() {
         valueType = TypeUtil.getTypeArgument(this.getClass().getGenericSuperclass(), 0);
     }
-
     /**
      * 构造函数，接受初始值
      *
@@ -61,7 +46,6 @@ public class ModelField<T> implements Serializable {
     public ModelField(T value) {
         this(null, null, value);
     }
-
     /**
      * 构造函数，接受字段代码、名称和初始值
      *
@@ -77,7 +61,6 @@ public class ModelField<T> implements Serializable {
         this.desc = null;
         setObjectValue(value); // 设置当前值
     }
-
     public ModelField(String code, String name, T value, String desc) {
         this();
         this.code = code;
@@ -86,7 +69,6 @@ public class ModelField<T> implements Serializable {
         this.desc = desc;
         setObjectValue(value);
     }
-
     /**
      * 设置当前值
      *
@@ -99,7 +81,6 @@ public class ModelField<T> implements Serializable {
         }
         value = JsonUtil.parseObject(objectValue, valueType); // 解析并设置当前值
     }
-
     /**
      * 获取字段类型
      *
@@ -109,7 +90,6 @@ public class ModelField<T> implements Serializable {
     public String getType() {
         return "DEFAULT"; // 默认返回类型
     }
-
     /**
      * 获取扩展键
      *
@@ -119,7 +99,6 @@ public class ModelField<T> implements Serializable {
     public Object getExpandKey() {
         return null; // 默认返回 null
     }
-
     /**
      * 获取扩展值
      *
@@ -129,7 +108,6 @@ public class ModelField<T> implements Serializable {
     public Object getExpandValue() throws JSONException {
         return null; // 默认返回 null
     }
-
     /**
      * 将当前值转换为配置值
      *
@@ -139,7 +117,6 @@ public class ModelField<T> implements Serializable {
     public Object toConfigValue(T value) {
         return value; // 默认返回当前值
     }
-
     /**
      * 从配置值转换为对象值
      *
@@ -149,7 +126,6 @@ public class ModelField<T> implements Serializable {
     public Object fromConfigValue(String value) {
         return value; // 默认返回配置值
     }
-
     /**
      * 获取当前值的配置字符串表示
      *
@@ -159,7 +135,6 @@ public class ModelField<T> implements Serializable {
     public String getConfigValue() {
         return JsonUtil.formatJson(toConfigValue(value)); // 转换为 JSON 字符串
     }
-
     /**
      * 设置配置值
      *
@@ -179,8 +154,6 @@ public class ModelField<T> implements Serializable {
             value = JsonUtil.parseObject(objectValue, valueType);
         }
     }
-
-
     public LayerDrawable setBorder(Context context,boolean left,boolean right,boolean top,boolean bottom) {
         // 创建 Drawable 用于绘制上边框
         GradientDrawable topBorder = new GradientDrawable();
@@ -221,14 +194,12 @@ public class ModelField<T> implements Serializable {
         if (right) {layerDrawable.setLayerInset(4, 0, 0, 0, 0);}
         return layerDrawable;
     }
-
     /**
      * 重置当前值为默认值
      */
     public void reset() {
         value = defaultValue; // 设置当前值为默认值
     }
-
     /**
      * 获取字段的视图
      *

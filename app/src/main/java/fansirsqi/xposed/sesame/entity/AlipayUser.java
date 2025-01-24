@@ -1,17 +1,13 @@
 package fansirsqi.xposed.sesame.entity;
-
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 /**
  * 表示支付宝用户的实体类，包含 ID 和名称。
  */
 public class AlipayUser extends MapperEntity {
-
     /**
      * 构造方法，根据给定的 ID 和名称初始化用户对象。
      * @param i 用户的 ID
@@ -21,7 +17,6 @@ public class AlipayUser extends MapperEntity {
         id = i;
         name = n;
     }
-
     /**
      * 获取所有用户的列表，不使用任何过滤器。
      * @return 包含所有符合条件的 AlipayUser 对象的列表
@@ -29,7 +24,6 @@ public class AlipayUser extends MapperEntity {
     public static List<AlipayUser> getList() {
         return getList(user -> true); // 默认不过滤
     }
-
     /**
      * 获取符合过滤条件的用户列表。
      * @param filterFunc 过滤函数，用于筛选用户
@@ -51,7 +45,6 @@ public class AlipayUser extends MapperEntity {
         }
         return list;
     }
-
     /**
      * 过滤接口，用于筛选符合条件的用户。
      */
@@ -63,5 +56,4 @@ public class AlipayUser extends MapperEntity {
          */
         Boolean apply(UserEntity user);
     }
-
 }

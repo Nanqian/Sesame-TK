@@ -1,22 +1,15 @@
 package fansirsqi.xposed.sesame.task.antForest;
-
 import static fansirsqi.xposed.sesame.task.antForest.AntForest.giveEnergyRainList;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.Set;
-
 import fansirsqi.xposed.sesame.hook.Toast;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 public class EnergyRain {
-
     private static final String TAG = EnergyRain.class.getSimpleName();
-
     public static void startEnergyRain() {
         try {
             JSONObject jo = new JSONObject(AntForestRpcCall.startEnergyRain());
@@ -41,9 +34,7 @@ public class EnergyRain {
             Log.printStackTrace(TAG, th);
         }
     }
-
     static void energyRain() {
-
         try {
             JSONObject joEnergyRainHome = new JSONObject(AntForestRpcCall.queryEnergyRainHome());
             Thread.sleep(300);
@@ -93,7 +84,5 @@ public class EnergyRain {
             Log.runtime(TAG, "energyRain err:");
             Log.printStackTrace(TAG, th);
         }
-
     }
-
 }

@@ -1,12 +1,10 @@
 package fansirsqi.xposed.sesame.task.AnswerAI;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.StringUtil;
-
 /**
  * @author Constanline
  * @since 2023/08/22

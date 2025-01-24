@@ -1,20 +1,16 @@
 package fansirsqi.xposed.sesame.entity;
-
 import fansirsqi.xposed.sesame.util.Maps.BeachMap;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 /**
  * 表示支付宝海滩的实体类，包含 ID 和名称。
  */
 public class AlipayBeach extends MapperEntity {
     // 使用 volatile 关键字确保多线程环境下的可见性
     private static volatile List<AlipayBeach> list;
-
     /**
      * 构造方法，根据给定的 ID 和名称初始化对象。
      * @param i 海滩的 ID
@@ -24,7 +20,6 @@ public class AlipayBeach extends MapperEntity {
         id = i;
         name = n;
     }
-
     /**
      * 获取包含所有海滩的列表，首次调用时从 BeachMap 初始化。
      * 使用双重检查锁定机制实现懒加载以提高性能。
@@ -44,7 +39,6 @@ public class AlipayBeach extends MapperEntity {
         }
         return list;
     }
-
     /**
      * 根据给定的 ID 删除相应的 AlipayBeach 对象。
      * 首次调用 getList 方法以确保列表已初始化。

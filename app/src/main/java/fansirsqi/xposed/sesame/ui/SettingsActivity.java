@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.ui;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -14,14 +13,11 @@ import android.widget.ScrollView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
-
 import java.util.Map;
-
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.data.UIConfig;
@@ -44,24 +40,19 @@ import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
-
 public class SettingsActivity extends BaseActivity {
-
     private ActivityResultLauncher<Intent> exportLauncher;
     private ActivityResultLauncher<Intent> importLauncher;
-
     private Context context; // 上下文对象
     private Boolean isDraw = false; // 标记是否已调整 Tab 的宽度
     private TabHost tabHost; // 用于显示多个选项卡的控件
     private ScrollView svTabs; // 滚动视图，用于容纳 Tab 选项卡内容
     private String userId; // 用户 ID
     private String userName; // 用户名
-
     @Override
     public String getBaseSubtitle() {
         return getString(R.string.settings); // 返回界面的副标题
     }
-
     //    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +65,6 @@ public class SettingsActivity extends BaseActivity {
             this.userId = intent.getStringExtra("userId"); // 从 Intent 中获取用户 ID
             this.userName = intent.getStringExtra("userName"); // 从 Intent 中获取用户名
         }
-
         // 初始化各种配置数据
         Model.initAllModel();
         UserMap.setCurrentUserId(this.userId);
@@ -84,11 +74,9 @@ public class SettingsActivity extends BaseActivity {
         IdMapManager.getInstance(ReserveaMap.class).load();
         IdMapManager.getInstance(BeachMap.class).load();
         Config.load(this.userId);
-
         // 设置语言和布局
         LanguageUtil.setLocale(this);
         setContentView(R.layout.activity_settings);
-
         //处理返回键
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -97,7 +85,6 @@ public class SettingsActivity extends BaseActivity {
                 finish();
             }
         });
-
         // 初始化导出逻辑
         exportLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -107,7 +94,6 @@ public class SettingsActivity extends BaseActivity {
                     }
                 }
         );
-
         // 初始化导入逻辑
         importLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -117,7 +103,6 @@ public class SettingsActivity extends BaseActivity {
                     }
                 }
         );
-
         // 如果用户名不为空，将其显示在副标题中
         if (this.userName != null) {
             setBaseSubtitle(getString(R.string.settings) + ": " + this.userName);
@@ -128,7 +113,6 @@ public class SettingsActivity extends BaseActivity {
         tabHost = findViewById(R.id.tab_settings);
         tabHost.setup();
         svTabs = findViewById(R.id.sv_tabs);
-
         // 动态生成选项卡并填充内容
         Map<String, ModelConfig> modelConfigMap = ModelTask.getModelConfigMap();
         for (Map.Entry<String, ModelConfig> configEntry : modelConfigMap.entrySet()) {
@@ -159,8 +143,6 @@ public class SettingsActivity extends BaseActivity {
         }
         tabHost.setCurrentTab(0); // 设置默认选项卡
     }
-
-
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
@@ -175,7 +157,6 @@ public class SettingsActivity extends BaseActivity {
             isDraw = true;
         }
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // 创建菜单选项
@@ -186,7 +167,6 @@ public class SettingsActivity extends BaseActivity {
         menu.add(0, 5, 5, "切换至新UI"); // 允许切换到新 UI
         return super.onCreateOptionsMenu(menu);
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // 处理菜单项点击事件
@@ -245,7 +225,6 @@ public class SettingsActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
     private void save() {
         try {
             if (Config.isModify(this.userId) && Config.save(this.userId, false)) {

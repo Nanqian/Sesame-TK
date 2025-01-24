@@ -1,11 +1,9 @@
 package fansirsqi.xposed.sesame.ui;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 /**
  * 自定义 WebView 类，提供默认的初始化设置和滚动到底部的功能。
  */
@@ -19,7 +17,6 @@ public class MyWebView extends WebView {
         super(c);
         defInit();
     }
-
     /**
      * 构造函数，用于当有 AttributeSet 参数时。
      *
@@ -30,7 +27,6 @@ public class MyWebView extends WebView {
         super(context, attrs);
         defInit();
     }
-
     /**
      * 构造函数，用于当有 AttributeSet 和 defStyleAttr 参数时。
      *
@@ -42,7 +38,6 @@ public class MyWebView extends WebView {
         super(context, attrs, defStyleAttr);
         defInit();
     }
-
     /**
      * 构造函数，用于当有 AttributeSet、defStyleAttr 和 defStyleRes 参数时。
      *
@@ -55,7 +50,6 @@ public class MyWebView extends WebView {
         super(context, attrs, defStyleAttr, defStyleRes);
         defInit();
     }
-
     /**
      * 默认初始化方法，设置 WebView 的一些默认属性。
      */
@@ -67,7 +61,6 @@ public class MyWebView extends WebView {
         settings.setUseWideViewPort(false); // 不使用宽视图端口
         settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL); // 设置布局算法为 NORMAL
         settings.setAllowFileAccess(true); // 允许访问文件
-
         // 设置 WebViewClient 以处理页面加载完成事件
         setWebViewClient(new WebViewClient() {
             @Override
@@ -90,7 +83,6 @@ public class MyWebView extends WebView {
             }
         });
     }
-
     /**
      * 滚动到 WebView 的底部。
      */

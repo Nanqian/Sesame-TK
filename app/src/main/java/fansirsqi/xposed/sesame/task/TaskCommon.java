@@ -1,8 +1,6 @@
 package fansirsqi.xposed.sesame.task;
-
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-
 /**
  * 通用任务工具类
  * <p>
@@ -17,7 +15,5 @@ public class TaskCommon {
         IS_MODULE_SLEEP_TIME = TimeUtil.checkInTimeRange(currentTimeMillis, BaseModel.getEnergyTime().getValue());
         IS_ENERGY_TIME = TimeUtil.checkInTimeRange(currentTimeMillis, BaseModel.getEnergyTime().getValue());
         IS_AFTER_8AM = TimeUtil.isAfterOrCompareTimeStr(currentTimeMillis, "0800");
-
-
     }
 }

@@ -1,8 +1,6 @@
 package fansirsqi.xposed.sesame.util;
-
 import android.annotation.SuppressLint;
 import android.os.Environment;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,35 +12,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Objects;
-
-
 public class Files {
-
     @SuppressLint("StaticFieldLeak")
-
     private static final String TAG = Files.class.getSimpleName();
-
     /**
      * 配置文件夹名称
      */
     public static final String CONFIG_DIR_NAME = "sesame-TK";
-
     /**
      * 应用配置文件夹主路径
      */
     public static final File MAIN_DIR = getMainDir();
-
     /**
      * 配置文件夹路径
      */
     public static final File CONFIG_DIR = getConfigDir();
-
     /**
      * 日志文件夹路径
      */
     public static final File LOG_DIR = getLogDir();
-
-
     /**
      * 确保指定的目录存在且不是一个文件。
      * 如果目录是一个文件，则将其删除并创建新的目录。
@@ -69,8 +57,6 @@ public class Files {
             Log.printStackTrace(TAG + " ensureDir error", e);
         }
     }
-
-
     /**
      * 获取配置文件夹主路径
      *
@@ -83,7 +69,6 @@ public class Files {
         ensureDir(mainDir);
         return mainDir;
     }
-
     /**
      * 获取日志文件夹路径
      *
@@ -94,8 +79,6 @@ public class Files {
         ensureDir(logDir);
         return logDir.exists() ? logDir : null;
     }
-
-
     /**
      * 获取配置文件夹路径
      *
@@ -106,7 +89,6 @@ public class Files {
         ensureDir(configDir);
         return configDir;
     }
-
     /**
      * 获取指定用户的配置文件夹路径。
      *
@@ -117,7 +99,6 @@ public class Files {
         ensureDir(configDir);
         return configDir;
     }
-
     /**
      * 获取默认的配置文件
      *
@@ -126,7 +107,6 @@ public class Files {
     public static File getDefaultConfigV2File() {
         return new File(MAIN_DIR, "config_v2.json");
     }
-
     /**
      * 设置默认的配置文件
      *
@@ -135,7 +115,6 @@ public class Files {
     public static synchronized boolean setDefaultConfigV2File(String json) {
         return write2File(json, new File(MAIN_DIR, "config_v2.json"));
     }
-
     /**
      * 获取指定用户的配置文件
      *
@@ -161,15 +140,12 @@ public class Files {
         }
         return confV2File;
     }
-
     public static synchronized boolean setConfigV2File(String userId, String json) {
         return write2File(json, new File(CONFIG_DIR + File.separator + userId, "config_v2.json"));
     }
-
     public static synchronized boolean setUIConfigFile(String json) {
         return write2File(json, new File(MAIN_DIR, "ui_config.json"));
     }
-
     public static File getTargetFileofUser(String userId, String fullTargerFileName) {
         File targetFile = new File(CONFIG_DIR + File.separator + userId, fullTargerFileName);
         if (!targetFile.exists() && !targetFile.isDirectory()) {
@@ -193,7 +169,6 @@ public class Files {
         }
         return targetFile;
     }
-
     public static File getTargetFileofDir(File dir, String fullTargerFileName) {
         File targetFile = new File(dir, fullTargerFileName);
         if (!targetFile.exists() && !targetFile.isDirectory()) {
@@ -217,19 +192,15 @@ public class Files {
         }
         return targetFile;
     }
-
     public static File getSelfIdFile(String userId) {
         return getTargetFileofUser(userId, "self.json");
     }
-
     public static File getFriendIdMapFile(String userId) {
         return getTargetFileofUser(userId, "friend.json");
     }
-
     public static File runtimeInfoFile(String userId) {
         return getTargetFileofUser(userId, "runtime.json");
     }
-
     /**
      * 获取用户状态文件
      *
@@ -239,19 +210,15 @@ public class Files {
     public static File getStatusFile(String userId) {
         return getTargetFileofUser(userId, "status.json");
     }
-
     /**
      * 获取统计文件
      */
     public static File getStatisticsFile() {
         return getTargetFileofDir(MAIN_DIR, "statistics.json");
     }
-
-
     public static File getUIConfigFile() {
         return getTargetFileofDir(MAIN_DIR, "ui_config.json");
     }
-
     /**
      * 获取已经导出的统计文件在载目录中
      *
@@ -274,15 +241,12 @@ public class Files {
             return null;
         }
     }
-
     public static File getFriendWatchFile(String userId) {
         return getTargetFileofUser(userId, "friendWatch.json");
     }
-
     public static File getWuaFile() {
         return getTargetFileofDir(MAIN_DIR, "wua.list");
     }
-
     /**
      * 导出文件到下载目录
      *
@@ -306,7 +270,6 @@ public class Files {
         Files.copyTo(file, exportFile);
         return exportFile;
     }
-
     /**
      * 获取城市代码文件
      *
@@ -321,7 +284,6 @@ public class Files {
         }
         return cityCodeFile;
     }
-
     /**
      * 确保日志文件存在，如果文件是一个目录则删除并创建新文件。 如果文件不存在，则创建新文件。
      *
@@ -350,7 +312,6 @@ public class Files {
         }
         return logFile;
     }
-
     /**
      * 根据日志名称生成带有日期的日志文件名。
      *
@@ -360,41 +321,30 @@ public class Files {
     public static String getLogFile(String logName) {
         return logName + ".log";
     }
-
     public static File getRuntimeLogFile() {
         return ensureLogFile(getLogFile("runtime"));
     }
-
     public static File getRecordLogFile() {
         return ensureLogFile(getLogFile("record"));
     }
-
     public static File getDebugLogFile() {
         return ensureLogFile(getLogFile("debug"));
     }
-
     public static File getCaptureLogFile() {
         return ensureLogFile(getLogFile("capture"));
     }
-
     public static File getForestLogFile() {
         return ensureLogFile(getLogFile("forest"));
     }
-
     public static File getFarmLogFile() {
         return ensureLogFile(getLogFile("farm"));
     }
-
     public static File getOtherLogFile() {
         return ensureLogFile(getLogFile("other"));
     }
-
     public static File getErrorLogFile() {
         return ensureLogFile(getLogFile("error"));
     }
-
-
-
     /**
      * 关闭流对象
      *
@@ -409,8 +359,6 @@ public class Files {
             }
         }
     }
-
-
     /**
      * 从文件中读取内容
      *
@@ -448,7 +396,6 @@ public class Files {
         }
         return result.toString();
     }
-
     public static boolean beforWrite(File f) {
         // 检查文件权限和目录结构
         if (f.exists()) {
@@ -471,7 +418,6 @@ public class Files {
         }
         return false;
     }
-
     /**
      * 将字符串写入文件
      *
@@ -492,8 +438,6 @@ public class Files {
             return false;
         }
     }
-
-
     /**
      * 将源文件的内容复制到目标文件
      *
@@ -516,7 +460,6 @@ public class Files {
         }
         return false; // 复制失败
     }
-
     /**
      * 将输入流（source）中的数据拷贝到输出流（dest）中。 会循环读取输入流的数据并写入输出流，直到读取完毕。 最终关闭输入输出流。
      *
@@ -527,7 +470,6 @@ public class Files {
     public static boolean streamTo(InputStream source, OutputStream dest) {
         byte[] buffer = new byte[1024]; // 创建一个缓冲区，每次读取 1024 字节
         int length;
-
         try {
             // 循环读取输入流中的数据并写入输出流
             while ((length = source.read(buffer)) > 0) {
@@ -545,7 +487,6 @@ public class Files {
         }
         return false; // 拷贝失败或发生异常
     }
-
     /**
      * 关闭流并处理可能发生的异常
      *
@@ -561,7 +502,6 @@ public class Files {
             }
         }
     }
-
     /**
      * 创建一个文件，如果文件已存在且是目录，
      * 则先删除该目录再创建文件。
@@ -597,9 +537,6 @@ public class Files {
         // 文件已存在或成功创建，返回文件对象
         return file;
     }
-
-
-
     /**
      * 清空文件内容, 并返回是否清空成功
      *
@@ -634,7 +571,6 @@ public class Files {
         // 如果文件不存在，则返回 false
         return false;
     }
-
     /**
      * 删除文件或目录（包括子文件和子目录）。如果是目录，则递归删除其中的所有文件和目录。
      *
@@ -644,25 +580,18 @@ public class Files {
     public static Boolean delFile(File file) {
         // 如果文件或目录不存在，则返回删除失败
         if (!file.exists()) return false;
-
         // 如果是文件，直接删除文件
         if (file.isFile()) return file.delete();
-
         // 如果是目录，获取目录下的所有文件和子目录
         File[] files = file.listFiles();
-
         // 如果目录为空或无法列出文件，尝试删除目录
         if (files == null) return file.delete();
-
         // 遍历所有文件和子目录，递归调用 deleteFile 删除
         for (File innerFile : files) {
             // 如果递归删除失败，返回 false
             if (!delFile(innerFile)) return false;
         }
-
         // 删除空目录
         return file.delete();
     }
-
-
 }

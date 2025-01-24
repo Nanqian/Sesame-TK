@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.ui;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
@@ -12,11 +11,8 @@ import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.SelectModelFieldFunc;
 import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.util.Log;
-
 import java.util.*;
-
 public class ListAdapter extends BaseAdapter {
-
     @SuppressLint("StaticFieldLeak")
     private static ListAdapter adapter;
     private static ListDialog.ListType listType;
@@ -26,7 +22,6 @@ public class ListAdapter extends BaseAdapter {
     private int findIndex = -1;
     private String findWord = null;
     public static List<ViewHolder> viewHolderList = new ArrayList<>();
-
     /**
      * 获取适配器的单例实例。
      *
@@ -39,7 +34,6 @@ public class ListAdapter extends BaseAdapter {
         }
         return adapter;
     }
-
     /**
      * 获取并重置适配器实例，清空查找相关的状态。
      *
@@ -51,7 +45,6 @@ public class ListAdapter extends BaseAdapter {
         adapter.resetFindState();
         return adapter;
     }
-
     /**
      * 获取并重置适配器实例，设置列表类型并清空查找相关状态。
      *
@@ -65,7 +58,6 @@ public class ListAdapter extends BaseAdapter {
         adapter.resetFindState();
         return adapter;
     }
-
     /**
      * 构造函数，初始化上下文。
      *
@@ -74,7 +66,6 @@ public class ListAdapter extends BaseAdapter {
     private ListAdapter(Context c) {
         this.context = c;  // 使用传入的上下文
     }
-
     /**
      * 设置基本列表数据。
      *
@@ -86,7 +77,6 @@ public class ListAdapter extends BaseAdapter {
         }
         this.list = l;
     }
-
     /**
      * 设置选中的列表项，并按选中状态排序。
      *
@@ -108,7 +98,6 @@ public class ListAdapter extends BaseAdapter {
             Log.printStackTrace(e);
         }
     }
-
     /**
      * 查找上一个匹配项。
      *
@@ -118,7 +107,6 @@ public class ListAdapter extends BaseAdapter {
     public int findLast(String findThis) {
         return findItem(findThis, false);
     }
-
     /**
      * 查找下一个匹配项。
      *
@@ -128,7 +116,6 @@ public class ListAdapter extends BaseAdapter {
     public int findNext(String findThis) {
         return findItem(findThis, true);
     }
-
     /**
      * 查找列表中的匹配项。
      *
@@ -145,11 +132,9 @@ public class ListAdapter extends BaseAdapter {
             resetFindState();
             findWord = findThis;
         }
-
         int current = Math.max(findIndex, 0);
         int size = list.size();
         int start = current;
-
         do {
             current = (forward) ? (current + 1) % size : (current - 1 + size) % size;
             if (list.get(current).name.toLowerCase().contains(findThis)) {
@@ -158,10 +143,8 @@ public class ListAdapter extends BaseAdapter {
                 return findIndex;
             }
         } while (current != start);
-
         return -1;
     }
-
     /**
      * 重置查找状态。
      */
@@ -169,14 +152,12 @@ public class ListAdapter extends BaseAdapter {
         findIndex = -1;
         findWord = null;
     }
-
     /**
      * 退出查找模式。
      */
     public void exitFind() {
         resetFindState();
     }
-
     /**
      * 全选列表中的所有项。
      */
@@ -187,7 +168,6 @@ public class ListAdapter extends BaseAdapter {
         }
         notifyDataSetChanged();
     }
-
     /**
      * 反选列表中的所有项。
      */
@@ -201,22 +181,18 @@ public class ListAdapter extends BaseAdapter {
         }
         notifyDataSetChanged();
     }
-
     @Override
     public int getCount() {
         return list != null ? list.size() : 0;
     }
-
     @Override
     public Object getItem(int position) {
         return list.get(position);
     }
-
     @Override
     public long getItemId(int position) {
         return position;
     }
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder vh;
@@ -225,7 +201,6 @@ public class ListAdapter extends BaseAdapter {
             convertView = View.inflate(context, R.layout.list_item, null);
             vh.tv = convertView.findViewById(R.id.tv_idn);
             vh.cb = convertView.findViewById(R.id.cb_list);
-
             if (listType == ListDialog.ListType.SHOW) {
                 vh.cb.setVisibility(View.GONE);
             }
@@ -234,15 +209,12 @@ public class ListAdapter extends BaseAdapter {
         } else {
             vh = (ViewHolder) convertView.getTag();
         }
-
         MapperEntity item = list.get(position);
         vh.tv.setText(item.name);
         vh.tv.setTextColor(findIndex == position ? Color.RED : Color.BLACK);
         vh.cb.setChecked(selectModelFieldFunc != null && selectModelFieldFunc.contains(item.id));
-
         return convertView;
     }
-
     /**
      * 内部 ViewHolder 类，用于缓存列表项视图。
      */

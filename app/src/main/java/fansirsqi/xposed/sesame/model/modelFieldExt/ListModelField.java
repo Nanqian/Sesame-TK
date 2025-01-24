@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.model.modelFieldExt;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -8,26 +7,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-
 import androidx.core.content.ContextCompat;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.ui.StringDialog;
-
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * 表示一个存储字符串列表的字段模型，用于管理和展示列表数据。
  * 提供基本的获取类型、配置值以及视图展示的方法。
  */
 public class ListModelField extends ModelField<List<String>> {
-
     // JSON 类型引用，用于序列化和反序列化 List<String>
     private static final TypeReference<List<String>> typeReference = new TypeReference<List<String>>() {};
-
     /**
      * 构造方法，初始化字段模型。
      *
@@ -38,7 +31,6 @@ public class ListModelField extends ModelField<List<String>> {
     public ListModelField(String code, String name, List<String> value) {
         super(code, name, value);
     }
-
     /**
      * 获取字段的类型。
      *
@@ -48,7 +40,6 @@ public class ListModelField extends ModelField<List<String>> {
     public String getType() {
         return "LIST";
     }
-
     /**
      * 获取用于展示该字段的视图组件。
      *
@@ -70,19 +61,14 @@ public class ListModelField extends ModelField<List<String>> {
         btn.setMaxHeight(180);
         btn.setPaddingRelative(40, 0, 40, 0);
         btn.setAllCaps(false);
-
         // 设置按钮点击事件，打开编辑对话框
         btn.setOnClickListener(v -> StringDialog.showEditDialog(v.getContext(), ((Button) v).getText(), this));
-
         return btn;
     }
-
-
     /**
      * 一个子类，用于将字符串列表转换为逗号分隔的字符串，并实现相应的设置和获取功能。
      */
     public static class ListJoinCommaToStringModelField extends ListModelField {
-
         /**
          * 构造方法，初始化字段模型。
          *
@@ -93,7 +79,6 @@ public class ListModelField extends ModelField<List<String>> {
         public ListJoinCommaToStringModelField(String code, String name, List<String> value) {
             super(code, name, value);
         }
-
         /**
          * 设置配置值，将逗号分隔的字符串转换为字符串列表。
          *
@@ -114,7 +99,6 @@ public class ListModelField extends ModelField<List<String>> {
             }
             value = list;
         }
-
         /**
          * 获取配置值，将字符串列表拼接为逗号分隔的字符串。
          *

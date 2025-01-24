@@ -1,15 +1,12 @@
 package fansirsqi.xposed.sesame.task.antOcean;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import fansirsqi.xposed.sesame.entity.AlipayBeach;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.model.ModelFields;
@@ -27,29 +24,24 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 /**
  * @author Constanline
  * @since 2023/08/01
  */
 public class AntOcean extends ModelTask {
     private static final String TAG = AntOcean.class.getSimpleName();
-
     @Override
     public String getName() {
-        return "海洋🌊";
+        return "海洋";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.FOREST;
     }
-
     @Override
     public String getIcon() {
         return "AntOcean.png";
     }
-
     /**每日海洋任务*/
     private BooleanModelField dailyOceanTask;
     /**领取碎片奖励*/
@@ -68,7 +60,6 @@ public class AntOcean extends ModelTask {
     private BooleanModelField protectOcean;
     /**保护 | 海洋列表*/
     private SelectAndCountModelField protectOceanList;
-
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -83,12 +74,10 @@ public class AntOcean extends ModelTask {
         modelFields.addField(protectOceanList = new SelectAndCountModelField("protectOceanList", "保护 | 海洋列表", new LinkedHashMap<>(), AlipayBeach::getList));
         return modelFields;
     }
-
     @Override
     public Boolean check() {
         return !TaskCommon.IS_ENERGY_TIME;
     }
-
     @Override
     public void run() {
         try {
@@ -116,7 +105,6 @@ public class AntOcean extends ModelTask {
             Log.other("执行结束-" + getName());
         }
     }
-
     private void queryHomePage() {
         try {
             JSONObject joHomePage = new JSONObject(AntOceanRpcCall.queryHomePage());
@@ -124,12 +112,10 @@ public class AntOcean extends ModelTask {
                 if (joHomePage.has("bubbleVOList")) {
                     collectEnergy(joHomePage.getJSONArray("bubbleVOList"));
                 }
-
                 JSONObject userInfoVO = joHomePage.getJSONObject("userInfoVO");
                 int rubbishNumber = userInfoVO.optInt("rubbishNumber", 0);
                 String userId = userInfoVO.getString("userId");
                 cleanOcean(userId, rubbishNumber);
-
                 JSONObject ipVO = userInfoVO.optJSONObject("ipVO");
                 if (ipVO != null) {
                     int surprisePieceNum = ipVO.optInt("surprisePieceNum", 0);
@@ -137,19 +123,13 @@ public class AntOcean extends ModelTask {
                         ipOpenSurprise();
                     }
                 }
-
                 queryReplicaHome();
-
                 queryMiscInfo();
-
                 queryUserRanking();
-
                 querySeaAreaDetailList();
-
                 if (dailyOceanTask.getValue()) {
                     doOceanDailyTask();
                 }
-
                 if (receiveOceanTaskAward.getValue()) {
                     receiveTaskAward();
                 }
@@ -161,7 +141,6 @@ public class AntOcean extends ModelTask {
                 if (usePropByType.getValue()) {
                     usePropByType();
                 }
-
             } else {
                 Log.runtime(TAG, joHomePage.getString("resultDesc"));
             }
@@ -170,7 +149,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void collectEnergy(JSONArray bubbleVOList) {
         try {
             for (int i = 0; i < bubbleVOList.length(); i++) {
@@ -205,7 +183,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void cleanOcean(String userId, int rubbishNumber) {
         try {
             for (int i = 0; i < rubbishNumber; i++) {
@@ -224,7 +201,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void ipOpenSurprise() {
         try {
             String s = AntOceanRpcCall.ipOpenSurprise();
@@ -240,7 +216,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void combineFish(String fishId) {
         try {
             String s = AntOceanRpcCall.combineFish(fishId);
@@ -257,7 +232,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void checkReward(JSONArray rewards) {
         try {
             for (int i = 0; i < rewards.length(); i++) {
@@ -279,14 +253,12 @@ public class AntOcean extends ModelTask {
                         combineFish(fishId);
                     }
                 }
-
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "checkReward err:");
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void collectReplicaAsset(int canCollectAssetNum) {
         try {
             for (int i = 0; i < canCollectAssetNum; i++) {
@@ -303,7 +275,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void unLockReplicaPhase(String replicaCode, String replicaPhaseCode) {
         try {
             String s = AntOceanRpcCall.unLockReplicaPhase(replicaCode, replicaPhaseCode);
@@ -319,7 +290,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void queryReplicaHome() {
         try {
             String s = AntOceanRpcCall.queryReplicaHome();
@@ -330,7 +300,6 @@ public class AntOcean extends ModelTask {
                     int canCollectAssetNum = userReplicaAssetVO.getInt("canCollectAssetNum");
                     collectReplicaAsset(canCollectAssetNum);
                 }
-
                 if (jo.has("userCurrentPhaseVO")) {
                     JSONObject userCurrentPhaseVO = jo.getJSONObject("userCurrentPhaseVO");
                     String phaseCode = userCurrentPhaseVO.getString("phaseCode");
@@ -347,7 +316,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void queryOceanPropList() {
         try {
             String s = AntOceanRpcCall.queryOceanPropList();
@@ -362,7 +330,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void switchOceanChapter() {
         String s = AntOceanRpcCall.queryOceanChapterList();
         try {
@@ -404,7 +371,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void querySeaAreaDetailList() {
         try {
             String s = AntOceanRpcCall.querySeaAreaDetailList();
@@ -436,7 +402,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void queryMiscInfo() {
         try {
             String s = AntOceanRpcCall.queryMiscInfo();
@@ -456,7 +421,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void cleanFriendOcean(JSONObject fillFlag) {
         if (!fillFlag.optBoolean("canClean")) {
             return;
@@ -491,7 +455,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void queryUserRanking() {
         try {
             String s = AntOceanRpcCall.queryUserRanking();
@@ -512,7 +475,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     @SuppressWarnings("unused")
     private static boolean isTargetTask(String taskType) {
         // 在这里添加其他任务类型，以便后续扩展
@@ -523,9 +485,7 @@ public class AntOcean extends ModelTask {
                 || "DAOLIU_ELEMEGUOYUAN".equals(taskType) // 去逛饿了么夺宝
                 || "ZHUANHUA_NONGCHANGYX".equals(taskType) // 去玩趣味小游戏
                 || "ZHUANHUA_HUIYUN_OZB".equals(taskType); // 一键传球欧洲杯
-
     }
-
     private static void doOceanDailyTask() {
         try {
             JSONObject jo = new JSONObject(AntOceanRpcCall.queryTaskList());
@@ -544,7 +504,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void finishTask(JSONObject task) {
         try {
             if (task.has("taskProgress")) {
@@ -576,7 +535,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void receiveTaskAward() {
         try {
             JSONObject jo = new JSONObject(AntOceanRpcCall.queryTaskList());
@@ -608,7 +566,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     // 海洋答题任务
     private static void answerQuestion() {
         try {
@@ -638,7 +595,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     /**潘多拉海洋任务领取*/
     private static void doOceanPDLTask() {
         try {
@@ -681,7 +637,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void protectOcean() {
         try {
             String s = AntOceanRpcCall.queryCultivationList();
@@ -723,7 +678,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void oceanExchangeTree(String cultivationCode, String projectCode, String itemName, int count) {
         try {
             String s;
@@ -763,7 +717,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static int queryCultivationDetail(String cultivationCode, String projectCode, int count) {
         int appliedTimes = -1;
         try {
@@ -796,7 +749,6 @@ public class AntOcean extends ModelTask {
         }
         return appliedTimes;
     }
-
     // 制作万能碎片
     private static void exchangeProp() {
         try {
@@ -817,11 +769,9 @@ public class AntOcean extends ModelTask {
                     // 如果道具重复数量大于等于10，则执行道具兑换操作
                     String exchangeResultJson = AntOceanRpcCall.exchangeProp();
                     JSONObject exchangeResultObj = new JSONObject(exchangeResultJson);
-
                     // 获取兑换后的碎片数量和兑换数量
                     String exchangedPieceNum = exchangeResultObj.getString("duplicatePieceNum");
                     String exchangeNum = exchangeResultObj.getString("exchangeNum");
-
                     // 检查道具兑换操作是否成功
                     if (ResUtil.checkResCode(exchangeResultObj)) {
                         // 输出日志信息
@@ -840,7 +790,6 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     // 使用万能拼图
     private static void usePropByType() {
         try {
@@ -916,16 +865,10 @@ public class AntOcean extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
-
     @SuppressWarnings("unused")
     public interface CleanOceanType {
-
         int CLEAN = 0;
         int DONT_CLEAN = 1;
-
         String[] nickNames = {"选中清理", "选中不清理"};
-
     }
-
 }

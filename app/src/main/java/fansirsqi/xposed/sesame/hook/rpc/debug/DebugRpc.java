@@ -1,37 +1,29 @@
 package fansirsqi.xposed.sesame.hook.rpc.debug;
-
 import fansirsqi.xposed.sesame.hook.RequestManager;
 import fansirsqi.xposed.sesame.task.reserve.ReserveRpcCall;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.Iterator;
-
 public class DebugRpc {
     private static final String TAG = DebugRpc.class.getCanonicalName();
-
     public String getName() {
         return "Rpc测试";
     }
-
     public void start(String broadcastFun, String broadcastData, String testType) {
         new Thread() {
             String broadcastFun;
             String broadcastData;
             String testType;
-
             public Thread setData(String fun, String data, String type) {
                 broadcastFun = fun;
                 broadcastData = data;
                 testType = type;
                 return this;
             }
-
             @Override
             public void run() {
                 switch (testType) {
@@ -61,20 +53,15 @@ public class DebugRpc {
             }
         }.setData(broadcastFun, broadcastData, testType).start();
     }
-
     private String test(String fun, String data) {
         return RequestManager.requestString(fun, data);
     }
-
-
     public String queryEnvironmentCertDetailList(String alias, int pageNum, String targetUserID) {
         return DebugRpcCall.queryEnvironmentCertDetailList(alias, pageNum, targetUserID);
     }
-
     public String sendTree(String certificateId, String friendUserId) {
         return DebugRpcCall.sendTree(certificateId, friendUserId);
     }
-
     private void getNewTreeItems() {
         try {
             String s = ReserveRpcCall.queryTreeItemsForExchange();
@@ -97,7 +84,6 @@ public class DebugRpc {
             Log.printStackTrace(TAG, t);
         }
     }
-
     /**
      * 查询特定项目下可交换树木的信息。
      *
@@ -143,8 +129,6 @@ public class DebugRpc {
             Log.printStackTrace(TAG, t);
         }
     }
-
-
     /**
      * 获取可交换的树木项目列表，并对每个可用的项目查询当前预算。
      */
@@ -170,7 +154,6 @@ public class DebugRpc {
                     String itemName = jo.getString("itemName");
                     // 对当前项目查询当前预算
                     getTreeCurrentBudget(projectId, itemName);
-
                     // 在查询每个项目后暂停100毫秒
                     ThreadUtil.sleep(100);
                 }
@@ -188,8 +171,6 @@ public class DebugRpc {
             Log.printStackTrace(TAG, t);
         }
     }
-
-
     /**
      * 树苗查询
      *
@@ -201,7 +182,6 @@ public class DebugRpc {
             // 调用RPC方法查询树木交换信息
             String response = ReserveRpcCall.queryTreeForExchange(projectId);
             JSONObject jo = new JSONObject(response);
-
             // 检查RPC调用结果码是否为"SUCCESS"，表示成功
             if (ResUtil.checkResCode(jo)) {
                 // 获取可交换树木的信息
@@ -226,8 +206,6 @@ public class DebugRpc {
             Log.printStackTrace(TAG, t);
         }
     }
-
-
     /**
      * 模拟网格行走过程，处理行走中的事件，如完成迷你游戏和广告任务。
      */
@@ -276,10 +254,8 @@ public class DebugRpc {
                         }
                     }
                 }
-
                 // 获取剩余行走次数
                 int leftCount = data.getInt("leftCount");
-
                 // 如果还有剩余次数，继续行走
                 if (leftCount > 0) {
                     ThreadUtil.sleep(3000L);
@@ -299,7 +275,6 @@ public class DebugRpc {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void queryAreaTrees() {
         try {
             JSONObject jo = new JSONObject(ReserveRpcCall.queryAreaTrees());
@@ -322,7 +297,6 @@ public class DebugRpc {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void getUnlockTreeItems() {
         try {
             JSONObject jo = new JSONObject(ReserveRpcCall.queryTreeItemsForExchange("", "project"));
@@ -347,5 +321,4 @@ public class DebugRpc {
             Log.printStackTrace(TAG, t);
         }
     }
-
 }

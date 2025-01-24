@@ -1,29 +1,20 @@
 package fansirsqi.xposed.sesame.util;
-
 import com.fasterxml.jackson.databind.JsonMappingException;
-
 import java.io.File;
 import java.util.Calendar;
-
 import lombok.Data;
-
-
 @Data
 public class StatisticsUtil {
-
     @Data
     public static class TimeStatistics {
         int time;
         int collected, helped, watered;
-
         public TimeStatistics() {
             reset(0);
         }
-
         TimeStatistics(int i) {
             reset(i);
         }
-
         public void reset(int i) {
             time = i;
             collected = 0;
@@ -31,14 +22,11 @@ public class StatisticsUtil {
             watered = 0;
         }
     }
-
     private static final String TAG = StatisticsUtil.class.getSimpleName();
     public static final StatisticsUtil INSTANCE = new StatisticsUtil();
-
     private TimeStatistics year = new TimeStatistics();
     private TimeStatistics month = new TimeStatistics();
     private TimeStatistics day = new TimeStatistics();
-
     /**
      * 增加指定数据类型的统计量
      *
@@ -65,7 +53,6 @@ public class StatisticsUtil {
                 break;
         }
     }
-
     /**
      * 获取指定时间和数据类型的统计值
      *
@@ -91,7 +78,6 @@ public class StatisticsUtil {
         }
         return data;
     }
-
     /**
      * 获取统计文本信息
      *
@@ -109,7 +95,6 @@ public class StatisticsUtil {
                 " 帮: " + getData(TimeType.DAY, DataType.HELPED) +
                 " 浇: " + getData(TimeType.DAY, DataType.WATERED);
     }
-
     /**
      * 加载统计数据
      *
@@ -151,7 +136,6 @@ public class StatisticsUtil {
         }
         return INSTANCE;
     }
-
     /**
      * 验证并初始化统计数据
      * 确保年、月、日的统计数据都存在且有效
@@ -163,8 +147,6 @@ public class StatisticsUtil {
         if (INSTANCE.day == null) INSTANCE.day = new TimeStatistics(now.get(Calendar.DAY_OF_MONTH));
         updateDay(now);
     }
-
-
     /**
      * 重置统计数据为默认值
      * 使用当前日期初始化新的统计实例
@@ -176,17 +158,14 @@ public class StatisticsUtil {
             newInstance.year = new TimeStatistics(now.get(Calendar.YEAR));
             newInstance.month = new TimeStatistics(now.get(Calendar.MONTH) + 1); // 注意：Calendar.MONTH 从0开始
             newInstance.day = new TimeStatistics(now.get(Calendar.DAY_OF_MONTH));
-
             JsonUtil.copyMapper().updateValue(INSTANCE, newInstance);
             Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatisticsFile());
-
             Log.runtime(TAG, "已重置为默认值");
             Log.system(TAG, "已重置为默认值");
         } catch (JsonMappingException e) {
             Log.printStackTrace(TAG, e);
         }
     }
-
     /**
      * 卸载当前统计数据
      */
@@ -197,15 +176,12 @@ public class StatisticsUtil {
             Log.printStackTrace(TAG, e);
         }
     }
-
     /**
      * 保存统计数据
      */
     public static synchronized void save() {
         save(Calendar.getInstance());
     }
-
-
     /**
      * 保存统计数据并更新日期
      *
@@ -219,7 +195,6 @@ public class StatisticsUtil {
         }
         Files.write2File(JsonUtil.formatJson(INSTANCE), Files.getStatisticsFile());
     }
-
     /**
      * 更新日期并重置统计数据
      *
@@ -230,7 +205,6 @@ public class StatisticsUtil {
         int currentYear = nowDate.get(Calendar.YEAR);
         int currentMonth = nowDate.get(Calendar.MONTH) + 1; // 注意：Calendar.MONTH 从0开始
         int currentDay = nowDate.get(Calendar.DAY_OF_MONTH);
-
         if (currentYear != INSTANCE.year.time) {
             INSTANCE.year.reset(currentYear);
             INSTANCE.month.reset(currentMonth);
@@ -245,7 +219,6 @@ public class StatisticsUtil {
         }
         return true;
     }
-
     public static void updateDay() {
         Calendar nowDate = Calendar.getInstance();
         int currentYear = nowDate.get(Calendar.YEAR);
@@ -264,15 +237,10 @@ public class StatisticsUtil {
             Log.system(TAG, "日期更新失败！");
         }
     }
-
-
     public enum TimeType {
         YEAR, MONTH, DAY
     }
-
     public enum DataType {
         TIME, COLLECTED, HELPED, WATERED
     }
 }
-
-

@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.ui;
-
 import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -15,23 +14,18 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import androidx.core.content.ContextCompat;
-
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.LanguageUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ToastUtil;
-
 public class HtmlViewerActivity extends BaseActivity {
     private static final String TAG = HtmlViewerActivity.class.getSimpleName();
-
     MyWebView mWebView;
     ProgressBar progressBar;
     private Uri uri;
     private Boolean canClear;
-
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +41,9 @@ public class HtmlViewerActivity extends BaseActivity {
         // 初始化 WebView 和进度条
         mWebView = findViewById(R.id.mwv_webview);
         progressBar = findViewById(R.id.pgb_webview);
-
         // 设置 WebView 的客户端
         setupWebView();
     }
-
     /**
      * 设置 WebView 的 WebChromeClient 和进度变化监听
      */
@@ -72,25 +64,21 @@ public class HtmlViewerActivity extends BaseActivity {
                     }
                 });
     }
-
     @Override
     protected void onResume() {
         super.onResume();
         // 获取传递过来的 Intent
         Intent intent = getIntent();
         WebSettings settings = mWebView.getSettings();
-
         settings.setSupportZoom(true); // 支持缩放
         settings.setBuiltInZoomControls(true); // 启用内置缩放机制
         settings.setDisplayZoomControls(false); // 不显示缩放控件
-
         // 启用触摸缩放
         mWebView.getSettings().setUseWideViewPort(true);
         mWebView.getSettings().setLoadWithOverviewMode(true);
         mWebView.getSettings().setSupportZoom(true);
         mWebView.getSettings().setBuiltInZoomControls(true);
         mWebView.getSettings().setDisplayZoomControls(false);
-
     // 根据 intent 设置 WebView
     if (intent != null) {
       configureWebViewSettings(intent, settings);
@@ -105,7 +93,6 @@ public class HtmlViewerActivity extends BaseActivity {
     settings.setTextZoom(85);
     settings.setUseWideViewPort(true);
   }
-
   /**
    * 配置 WebView 的设置项
    *
@@ -121,7 +108,6 @@ public class HtmlViewerActivity extends BaseActivity {
       settings.setUseWideViewPort(true);
     }
   }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // 创建菜单选项
@@ -135,7 +121,6 @@ public class HtmlViewerActivity extends BaseActivity {
         menu.add(0, 6, 6, getString(R.string.scroll_to_bottom));
         return super.onCreateOptionsMenu(menu);
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -166,7 +151,6 @@ public class HtmlViewerActivity extends BaseActivity {
         }
         return true;
     }
-
     /**
      * 导出当前文件
      */
@@ -192,7 +176,6 @@ public class HtmlViewerActivity extends BaseActivity {
             Log.printStackTrace(TAG, e);
         }
     }
-
     /**
      * 清空当前文件
      */
@@ -212,7 +195,6 @@ public class HtmlViewerActivity extends BaseActivity {
             Log.printStackTrace(TAG, e);
         }
     }
-
     /**
      * 使用其他浏览器打开当前 URL
      */
@@ -229,8 +211,6 @@ public class HtmlViewerActivity extends BaseActivity {
             }
         }
     }
-
-
     /**
      * 复制当前 WebView 的 URL 到剪贴板
      */

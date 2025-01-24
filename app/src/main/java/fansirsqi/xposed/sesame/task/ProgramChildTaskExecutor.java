@@ -1,23 +1,18 @@
 package fansirsqi.xposed.sesame.task;
-
 import android.os.Build;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 import java.util.Map;
 import java.util.concurrent.*;
-
 /**
  * ProgramChildTaskExecutor 类实现了 ChildTaskExecutor 接口，用于管理和执行子任务。
  * 它支持按任务组分配线程池，并为每个子任务设定执行时间。
  */
 public class ProgramChildTaskExecutor implements ChildTaskExecutor {
-
     /**
      * 存储每个任务组的线程池执行器
      */
     private final Map<String, ThreadPoolExecutor> groupChildTaskExecutorMap = new ConcurrentHashMap<>();
-
     /**
      * 向任务组中添加子任务
      *
@@ -30,7 +25,6 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
         ThreadPoolExecutor threadPoolExecutor = getChildGroupThreadPool(childTask.getGroup());
         Future<?> future;
         long execTime = childTask.getExecTime();
-
         // 如果子任务有执行时间，进行延时执行
         if (execTime > 0) {
             future = threadPoolExecutor.submit(() -> {
@@ -60,12 +54,10 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
                 }
             });
         }
-
         // 设置子任务取消时的操作
         childTask.setCancelTask(() -> future.cancel(true));
         return true;
     }
-
     /**
      * 移除指定的子任务
      *
@@ -75,7 +67,6 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
     public void removeChildTask(ModelTask.ChildModelTask childTask) {
         childTask.cancel(); // 取消子任务
     }
-
     /**
      * 清除指定任务组中的所有子任务
      *
@@ -93,7 +84,6 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
         });
         return true;
     }
-
     /**
      * 清除所有子任务
      */
@@ -105,7 +95,6 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
         }
         groupChildTaskExecutorMap.clear(); // 清空所有任务组
     }
-
     /**
      * 获取指定任务组的线程池执行器，如果没有则创建一个新的线程池
      *
@@ -114,12 +103,10 @@ public class ProgramChildTaskExecutor implements ChildTaskExecutor {
      */
     private ThreadPoolExecutor getChildGroupThreadPool(String group) {
         ThreadPoolExecutor threadPoolExecutor = groupChildTaskExecutorMap.get(group);
-
         // 如果线程池不存在，则创建一个新的线程池
         if (threadPoolExecutor != null) {
             return threadPoolExecutor;
         }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             threadPoolExecutor = groupChildTaskExecutorMap.compute(group, (keyInner, valueInner) -> {
                 if (valueInner == null) {

@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.util;
-
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.lang.reflect.Field;
@@ -8,19 +7,16 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * 类型工具类。
  * 提供了一系列方法来处理Java反射中的类型相关的操作。
  */
 public class TypeUtil {
-
     /**
      * 私有构造函数，防止实例化。
      */
     private TypeUtil() {
     }
-
     /**
      * 从给定的类型中提取Class对象。
      * 如果类型是Class、ParameterizedType或有界的TypeVariable/WildcardType，则返回其对应的Class对象。
@@ -51,8 +47,6 @@ public class TypeUtil {
         }
         return null;
     }
-
-
     /**
      * 获取Field的泛型类型。
      *
@@ -62,7 +56,6 @@ public class TypeUtil {
     public static Type getType(Field field) {
         return field != null ? field.getGenericType() : null;
     }
-
     /**
      * 获取Field的Class类型。
      *
@@ -72,7 +65,6 @@ public class TypeUtil {
     public static Class<?> getClass(Field field) {
         return field != null ? field.getType() : null;
     }
-
     /**
      * 获取Method的第一个参数的泛型类型。
      *
@@ -82,7 +74,6 @@ public class TypeUtil {
     public static Type getFirstParamType(Method method) {
         return getParamType(method, 0);
     }
-
     /**
      * 获取Method的第一个参数的Class类型。
      *
@@ -92,7 +83,6 @@ public class TypeUtil {
     public static Class<?> getFirstParamClass(Method method) {
         return getParamClass(method, 0);
     }
-
     /**
      * 获取Method指定索引位置参数的泛型类型。
      *
@@ -104,7 +94,6 @@ public class TypeUtil {
         Type[] types = getParamTypes(method);
         return types != null && types.length > index ? types[index] : null;
     }
-
     /**
      * 获取Method指定索引位置参数的Class类型。
      *
@@ -116,7 +105,6 @@ public class TypeUtil {
         Class<?>[] classes = getParamClasses(method);
         return classes != null && classes.length > index ? classes[index] : null;
     }
-
     /**
      * 获取Method的所有参数的泛型类型。
      *
@@ -126,7 +114,6 @@ public class TypeUtil {
     public static Type[] getParamTypes(Method method) {
         return method != null ? method.getGenericParameterTypes() : null;
     }
-
     /**
      * 获取Method的所有参数的Class类型。
      *
@@ -136,7 +123,6 @@ public class TypeUtil {
     public static Class<?>[] getParamClasses(Method method) {
         return method != null ? method.getParameterTypes() : null;
     }
-
     /**
      * 获取Method的返回值的泛型类型。
      *
@@ -146,7 +132,6 @@ public class TypeUtil {
     public static Type getReturnType(Method method) {
         return method != null ? method.getGenericReturnType() : null;
     }
-
     /**
      * 获取Method的返回值的Class类型。
      *
@@ -156,7 +141,6 @@ public class TypeUtil {
     public static Class<?> getReturnClass(Method method) {
         return method != null ? method.getReturnType() : null;
     }
-
     /**
      * 获取泛型类型的参数类型。
      *
@@ -166,7 +150,6 @@ public class TypeUtil {
     public static Type getTypeArgument(Type type) {
         return getTypeArgument(type, 0);
     }
-
     /**
      * 获取泛型类型的指定索引位置的参数类型。
      *
@@ -178,7 +161,6 @@ public class TypeUtil {
         Type[] typeArguments = getTypeArguments(type);
         return typeArguments != null && typeArguments.length > index ? typeArguments[index] : null;
     }
-
     /**
      * 获取泛型类型的所有参数类型。
      *
@@ -192,7 +174,6 @@ public class TypeUtil {
         ParameterizedType parameterizedType = toParameterizedType(type);
         return parameterizedType != null ? parameterizedType.getActualTypeArguments() : null;
     }
-
     /**
      * 将类型转换为ParameterizedType。
      *
@@ -202,7 +183,6 @@ public class TypeUtil {
     public static ParameterizedType toParameterizedType(Type type) {
         return toParameterizedType(type, 0);
     }
-
     /**
      * 将类型转换为ParameterizedType，并指定接口索引。
      *
@@ -221,8 +201,6 @@ public class TypeUtil {
         }
         return null;
     }
-
-
     /**
      * 获取类的泛型类型。
      *
@@ -238,7 +216,6 @@ public class TypeUtil {
                 result.add(parameterizedType);
             }
         }
-
         Type[] genericInterfaces = clazz.getGenericInterfaces();
         for (Type genericInterface : genericInterfaces) {
             ParameterizedType parameterizedType = toParameterizedType(genericInterface);
@@ -246,10 +223,8 @@ public class TypeUtil {
                 result.add(parameterizedType);
             }
         }
-
         return result.toArray(new ParameterizedType[0]);
     }
-
     /**
      * 检查类型是否未知。
      *
@@ -259,7 +234,6 @@ public class TypeUtil {
     public static boolean isUnknown(Type type) {
         return type == null || type instanceof TypeVariable;
     }
-
     /**
      * 检查给定的类型数组中是否包含TypeVariable。
      *

@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.hook.rpc.bridge;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
@@ -8,25 +7,19 @@ import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.hook.rpc.intervallimit.RpcIntervalLimit;
 import fansirsqi.xposed.sesame.util.*;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 public class OldRpcBridge implements RpcBridge {
-
     private static final String TAG = OldRpcBridge.class.getSimpleName();
-
     private ClassLoader loader;
     private Class<?> h5PageClazz;
     private Method rpcCallMethod;
     private Method getResponseMethod;
     private Object curH5PageImpl;
-
     @Override
     public RpcVersion getVersion() {
         return RpcVersion.NEW; // 返回 RPC 的版本
     }
-
     /**
      * 加载 RPC 所需的类和方法。
      */
@@ -46,7 +39,6 @@ public class OldRpcBridge implements RpcBridge {
             throw t;
         }
     }
-
     /**
      * 使用反射加载 RPC 方法。
      */
@@ -66,7 +58,6 @@ public class OldRpcBridge implements RpcBridge {
             }
         }
     }
-
     @Override
     public void unload() {
         getResponseMethod = null; // 清空响应方法
@@ -74,7 +65,6 @@ public class OldRpcBridge implements RpcBridge {
         h5PageClazz = null; // 清空 H5 页面类
         loader = null; // 清空类加载器
     }
-
     /**
      * 向 RPC 实体请求字符串响应。
      *
@@ -87,17 +77,14 @@ public class OldRpcBridge implements RpcBridge {
         RpcEntity responseEntity = requestObject(rpcEntity, tryCount, retryInterval);
         return responseEntity != null ? responseEntity.getResponseString() : null; // 返回响应字符串或 null
     }
-
     @Override
     public RpcEntity requestObject(RpcEntity rpcEntity, int tryCount, int retryInterval) {
         if (ApplicationHook.isOffline()) {
             return null; // 如果离线，直接返回 null
         }
-
         int id = rpcEntity.hashCode(); // 获取请求 ID
         String method = rpcEntity.getRequestMethod(); // 获取请求方法
         String args = rpcEntity.getRequestData(); // 获取请求参数
-
         for (int count = 0; count < tryCount; count++) {
             try {
                 RpcIntervalLimit.enterIntervalLimit(method); // 进入 RPC 调用间隔限制
@@ -109,7 +96,6 @@ public class OldRpcBridge implements RpcBridge {
         }
         return null; // 所有尝试失败后返回 null
     }
-
     /**
      * 使用反射调用 RPC 方法。
      *
@@ -125,7 +111,6 @@ public class OldRpcBridge implements RpcBridge {
             return rpcCallMethod.invoke(null, method, args, "", true, null, null, false, curH5PageImpl, 0, "", false, -1, "");
         }
     }
-
     /**
      * 处理 RPC 响应。
      *
@@ -142,7 +127,6 @@ public class OldRpcBridge implements RpcBridge {
         String resultStr = (String) getResponseMethod.invoke(response); // 获取响应字符串
         JSONObject resultObject = new JSONObject(resultStr);
         rpcEntity.setResponseObject(resultObject, resultStr); // 设置响应对象
-
         // 检查响应中的 "memo" 字段是否包含 "系统繁忙"
         if (resultObject.optString("memo", "").contains("系统繁忙")) {
             ApplicationHook.setOffline(true); // 设置为离线状态
@@ -150,15 +134,12 @@ public class OldRpcBridge implements RpcBridge {
             Log.record("系统繁忙，可能需要滑动验证");
             return null; // 返回 null
         }
-
         if (!resultObject.optBoolean("success")) {
             rpcEntity.setError(); // 设置为错误状态
             Log.error("旧 RPC 响应 | id: " + id + " | method: " + method + " args: " + args + " | data: " + rpcEntity.getResponseString());
         }
-
         return rpcEntity; // 返回更新后的 RPC 实体
     }
-
     /**
      * 处理 RPC 请求过程中发生的错误。
      *
@@ -172,12 +153,10 @@ public class OldRpcBridge implements RpcBridge {
         rpcEntity.setError(); // 设置为错误状态
         Log.error("旧 RPC 请求 | id: " + id + " | method: " + method + " err:");
         Log.printStackTrace(t); // 打印堆栈跟踪
-
         if (t instanceof InvocationTargetException) {
             handleInvocationException(rpcEntity, (InvocationTargetException) t, method); // 处理调用异常
         }
     }
-
     /**
      * 处理调用过程中的特定异常。
      *
@@ -194,7 +173,6 @@ public class OldRpcBridge implements RpcBridge {
             }
         }
     }
-
     /**
      * 处理特定的错误消息，并根据内容执行相应的操作。
      *
@@ -211,7 +189,6 @@ public class OldRpcBridge implements RpcBridge {
             handleMmtpException(rpcEntity); // 处理 MMTP 异常
         }
     }
-
     /**
      * 处理登录超时的情况。
      */
@@ -225,7 +202,6 @@ public class OldRpcBridge implements RpcBridge {
             }
         }
     }
-
     /**
      * 处理能量收集异常的情况。
      */
@@ -237,7 +213,6 @@ public class OldRpcBridge implements RpcBridge {
             Log.record("触发异常, 等待至" + TimeUtil.getCommonDate(waitTime));
         }
     }
-
     /**
      * 处理 MMTP 异常的情况。
      *
@@ -246,13 +221,11 @@ public class OldRpcBridge implements RpcBridge {
     private void handleMmtpException(RpcEntity rpcEntity) {
         try {
             String jsonString;
-
             JSONObject jo = new JSONObject();
             jo.put("resultCode", "FAIL");
             jo.put("memo", "MMTPException");
             jo.put("resultDesc", "MMTPException");
             jsonString = jo.toString();
-
             rpcEntity.setResponseObject(new JSONObject(jsonString), jsonString); // 设置 MMTP 异常响应
         } catch (JSONException e) {
             Log.printStackTrace(e); // 打印异常信息

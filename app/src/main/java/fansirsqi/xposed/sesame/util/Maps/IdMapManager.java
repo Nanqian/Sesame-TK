@@ -1,34 +1,26 @@
 package fansirsqi.xposed.sesame.util.Maps;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
-
 /**
  * 抽象ID映射工具类。
  * 提供通用的线程安全的ID映射功能，并支持单例管理。
  */
 public abstract class IdMapManager {
-
     /**
      * 存储ID映射的并发HashMap。
      */
     private final Map<String, String> idMap = new ConcurrentHashMap<>();
-
     /**
      * 只读的ID映射。
      */
     private final Map<String, String> readOnlyIdMap = Collections.unmodifiableMap(idMap);
-
-
     private static final Map<Class<? extends IdMapManager>, IdMapManager> instances = new ConcurrentHashMap<>();
     public static <T extends IdMapManager> T getInstance(Class<T> clazz) {
         return clazz.cast(instances.computeIfAbsent(clazz, cls -> {
@@ -39,14 +31,11 @@ public abstract class IdMapManager {
             }
         }));
     }
-
-
     /**
      * 强制子类提供文件名。
      * @return 文件名。
      */
     protected abstract String thisFileName();
-
     /**
      * 获取只读的ID映射。
      * @return 只读的ID映射。
@@ -54,7 +43,6 @@ public abstract class IdMapManager {
     public Map<String, String> getMap() {
         return readOnlyIdMap;
     }
-
     /**
      * 根据键获取值。
      * @param key 键。
@@ -63,7 +51,6 @@ public abstract class IdMapManager {
     public String get(String key) {
         return idMap.get(key);
     }
-
     /**
      * 添加或更新ID映射。
      * @param key 键。
@@ -72,7 +59,6 @@ public abstract class IdMapManager {
     public synchronized void add(String key, String value) {
         idMap.put(key, value);
     }
-
     /**
      * 从ID映射中删除键值对。
      * @param key 键。
@@ -80,7 +66,6 @@ public abstract class IdMapManager {
     public synchronized void remove(String key) {
         idMap.remove(key);
     }
-
     /**
      * 从文件加载ID映射。
      * @param userId 用户ID。
@@ -99,7 +84,6 @@ public abstract class IdMapManager {
             Log.printStackTrace(e);
         }
     }
-
     public synchronized void load() {
         idMap.clear();
         try {
@@ -114,7 +98,6 @@ public abstract class IdMapManager {
             Log.printStackTrace(e);
         }
     }
-
     /**
      * 将ID映射保存到文件。
      * @param userId 用户ID。
@@ -132,7 +115,6 @@ public abstract class IdMapManager {
             return false;
         }
     }
-
     public synchronized boolean save() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -145,7 +127,6 @@ public abstract class IdMapManager {
             return false;
         }
     }
-
     /**
      * 清除ID映射。
      */

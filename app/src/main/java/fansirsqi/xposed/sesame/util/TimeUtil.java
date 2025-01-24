@@ -1,7 +1,5 @@
 package fansirsqi.xposed.sesame.util;
-
 import android.annotation.SuppressLint;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,16 +7,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 /**
  * 时间工具类。 提供了一系列方法来处理时间相关的操作，包括时间范围检查、时间比较、日期格式化等。
  */
 public class TimeUtil {
-
     public static Boolean checkNowInTimeRange(String timeRange) {
         return checkInTimeRange(System.currentTimeMillis(), timeRange);
     }
-
     public static Boolean checkInTimeRange(Long timeMillis, List<String> timeRangeList) {
         for (String timeRange : timeRangeList) {
             if (checkInTimeRange(timeMillis, timeRange)) {
@@ -27,7 +22,6 @@ public class TimeUtil {
         }
         return false;
     }
-
     public static Boolean checkInTimeRange(Long timeMillis, String timeRange) {
         try {
             String[] timeRangeArray = timeRange.split("-");
@@ -41,23 +35,18 @@ public class TimeUtil {
         }
         return false;
     }
-
     public static Boolean isNowBeforeTimeStr(String beforeTimeStr) {
         return isBeforeTimeStr(System.currentTimeMillis(), beforeTimeStr);
     }
-
     public static Boolean isNowAfterTimeStr(String afterTimeStr) {
         return isAfterTimeStr(System.currentTimeMillis(), afterTimeStr);
     }
-
     public static Boolean isNowBeforeOrCompareTimeStr(String beforeTimeStr) {
         return isBeforeOrCompareTimeStr(System.currentTimeMillis(), beforeTimeStr);
     }
-
     public static Boolean isNowAfterOrCompareTimeStr(String afterTimeStr) {
         return isAfterOrCompareTimeStr(System.currentTimeMillis(), afterTimeStr);
     }
-
     public static Boolean isBeforeTimeStr(Long timeMillis, String beforeTimeStr) {
         Integer compared = isCompareTimeStr(timeMillis, beforeTimeStr);
         if (compared != null) {
@@ -65,7 +54,6 @@ public class TimeUtil {
         }
         return false;
     }
-
     public static Boolean isAfterTimeStr(Long timeMillis, String afterTimeStr) {
         Integer compared = isCompareTimeStr(timeMillis, afterTimeStr);
         if (compared != null) {
@@ -73,7 +61,6 @@ public class TimeUtil {
         }
         return false;
     }
-
     public static Boolean isBeforeOrCompareTimeStr(Long timeMillis, String beforeTimeStr) {
         Integer compared = isCompareTimeStr(timeMillis, beforeTimeStr);
         if (compared != null) {
@@ -81,7 +68,6 @@ public class TimeUtil {
         }
         return false;
     }
-
     public static Boolean isAfterOrCompareTimeStr(Long timeMillis, String afterTimeStr) {
         Integer compared = isCompareTimeStr(timeMillis, afterTimeStr);
         if (compared != null) {
@@ -89,7 +75,6 @@ public class TimeUtil {
         }
         return false;
     }
-
     public static Integer isCompareTimeStr(Long timeMillis, String compareTimeStr) {
         try {
             Calendar timeCalendar = Calendar.getInstance();
@@ -103,11 +88,9 @@ public class TimeUtil {
         }
         return null;
     }
-
     public static Calendar getTodayCalendarByTimeStr(String timeStr) {
         return getCalendarByTimeStr((Long) null, timeStr);
     }
-
     public static Calendar getCalendarByTimeStr(Long timeMillis, String timeStr) {
         try {
             Calendar timeCalendar = getCalendarByTimeMillis(timeMillis);
@@ -117,7 +100,6 @@ public class TimeUtil {
         }
         return null;
     }
-
     public static Calendar getCalendarByTimeStr(Calendar timeCalendar, String timeStr) {
         try {
             int length = timeStr.length();
@@ -147,7 +129,6 @@ public class TimeUtil {
         }
         return null;
     }
-
     public static Calendar getCalendarByTimeMillis(Long timeMillis) {
         Calendar timeCalendar = Calendar.getInstance();
         if (timeMillis != null) {
@@ -155,15 +136,12 @@ public class TimeUtil {
         }
         return timeCalendar;
     }
-
     public static String getTimeStr(long ts) {
         return DateFormat.getTimeInstance().format(new java.util.Date(ts));
     }
-
     public static String getDateStr() {
         return getDateStr(0);
     }
-
     public static String getDateStr(int plusDay) {
         Calendar c = Calendar.getInstance();
         if (plusDay != 0) {
@@ -171,7 +149,6 @@ public class TimeUtil {
         }
         return DateFormat.getDateInstance().format(c.getTime());
     }
-
     public static Calendar getToday() {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, 0);
@@ -180,11 +157,9 @@ public class TimeUtil {
         c.set(Calendar.MILLISECOND, 0);
         return c;
     }
-
     public static Calendar getNow() {
         return Calendar.getInstance();
     }
-
     public static void sleep(long millis) {
         try {
             Thread.sleep(millis);
@@ -192,7 +167,6 @@ public class TimeUtil {
             throw new RuntimeException(e);
         }
     }
-
     /**
      * 获取指定时间的周数
      *
@@ -206,7 +180,6 @@ public class TimeUtil {
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
         return calendar.get(Calendar.WEEK_OF_YEAR);
     }
-
     /**
      * 比较第一个日历的天数小于第二个日历的天数
      *
@@ -219,7 +192,6 @@ public class TimeUtil {
                 || (firstCalendar.get(Calendar.YEAR) == secondCalendar.get(Calendar.YEAR)
                 && firstCalendar.get(Calendar.DAY_OF_YEAR) < secondCalendar.get(Calendar.DAY_OF_YEAR));
     }
-
     /**
      * 比较第一个时间戳的天数是否小于第二个时间戳的天数
      *
@@ -232,7 +204,6 @@ public class TimeUtil {
         Calendar secondCalendar = getCalendarByTimeMillis(secondTimestamp);
         return isLessThanSecondOfDays(firstCalendar, secondCalendar);
     }
-
     /**
      * 通过时间戳比较传入的时间戳的天数是否小于当前时间戳的天数
      *
@@ -242,7 +213,6 @@ public class TimeUtil {
     public static Boolean isLessThanNowOfDays(Long timestamp) {
         return isLessThanSecondOfDays(getCalendarByTimeMillis(timestamp), getNow());
     }
-
     /**
      * 判断两个日历对象是否为同一天
      *
@@ -254,7 +224,6 @@ public class TimeUtil {
         return firstCalendar.get(Calendar.YEAR) == secondCalendar.get(Calendar.YEAR)
                 && firstCalendar.get(Calendar.DAY_OF_YEAR) == secondCalendar.get(Calendar.DAY_OF_YEAR);
     }
-
     /**
      * 判断两个时间戳是否为同一天
      *
@@ -267,7 +236,6 @@ public class TimeUtil {
         Calendar secondCalendar = getCalendarByTimeMillis(secondTimestamp);
         return isSameDay(firstCalendar, secondCalendar);
     }
-
     /**
      * 判断日历对象是否为今天
      *
@@ -277,7 +245,6 @@ public class TimeUtil {
     public static Boolean isToday(Calendar calendar) {
         return isSameDay(getToday(), calendar);
     }
-
     /**
      * 判断时间戳是否为今天
      *
@@ -287,45 +254,32 @@ public class TimeUtil {
     public static Boolean isToday(Long timestamp) {
         return isToday(getCalendarByTimeMillis(timestamp));
     }
-
     @SuppressLint("SimpleDateFormat")
     public static DateFormat getCommonDateFormat() {
         return new SimpleDateFormat("dd日HH:mm:ss");
     }
-
     @SuppressLint("SimpleDateFormat")
     public static String getCommonDate(Long timestamp) {
         return getCommonDateFormat().format(timestamp);
     }
-
-
     public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
-
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         }
-
     };
-
     public static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
-
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         }
-
     };
-
     public static final ThreadLocal<SimpleDateFormat> OTHER_DATE_TIME_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
-
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.getDefault());
         }
-
     };
-
     public static long timeToStamp(String timers) {
         Date d = new Date();
         long timeStemp;
@@ -343,7 +297,6 @@ public class TimeUtil {
         timeStemp = d.getTime();
         return timeStemp;
     }
-
     public static String getFormatDateTime() {
         SimpleDateFormat simpleDateFormat = DATE_TIME_FORMAT_THREAD_LOCAL.get();
         if (simpleDateFormat == null) {
@@ -351,15 +304,12 @@ public class TimeUtil {
         }
         return simpleDateFormat.format(new Date());
     }
-
     public static String getFormatDate() {
         return getFormatDateTime().split(" ")[0];
     }
-
     public static String getFormatTime() {
         return getFormatDateTime().split(" ")[1];
     }
-
     public static String getFormatTime(int offset, String format) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, offset);

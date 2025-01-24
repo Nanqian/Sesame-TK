@@ -1,42 +1,34 @@
 package fansirsqi.xposed.sesame.task;
-
 import android.os.Build;
 import android.os.Handler;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 /**
  * SystemChildTaskExecutor 类实现了 ChildTaskExecutor 接口，用于执行和管理子任务，
  * 支持在指定时间延迟后执行子任务，并且支持任务取消和任务组的管理。
  */
 public class SystemChildTaskExecutor implements ChildTaskExecutor {
-
     /**
      * 用于延时执行任务的主线程处理器
      */
     private final Handler handler;
-
     /**
      * 存储每个任务组对应的线程池执行器
      */
     private final Map<String, ThreadPoolExecutor> groupChildTaskExecutorMap = new ConcurrentHashMap<>();
-
     /**
      * 构造函数，初始化 Handler
      */
     public SystemChildTaskExecutor() {
         handler = ApplicationHook.getMainHandler();
     }
-
     /**
      * 向任务组添加子任务。若子任务有延迟执行时间，则会在指定时间后执行任务。
      *
@@ -48,14 +40,12 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
         // 获取子任务所属的任务组的线程池
         ThreadPoolExecutor threadPoolExecutor = getChildGroupHandler(childTask.getGroup());
         long execTime = childTask.getExecTime();
-
         // 如果有延迟执行时间
         if (execTime > 0) {
             Runnable runnable = () -> {
                 if (childTask.getIsCancel()) {
                     return; // 如果任务被取消则不执行
                 }
-
                 // 提交子任务到线程池
                 Future<?> future = threadPoolExecutor.submit(() -> {
                     try {
@@ -74,11 +64,9 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
                         childTask.getModelTask().removeChildTask(childTask.getId()); // 完成后移除子任务
                     }
                 });
-
                 // 设置取消任务的操作
                 childTask.setCancelTask(() -> future.cancel(true));
             };
-
             long delayMillis = execTime - System.currentTimeMillis();
             // 如果延迟时间大于3秒，设定延迟执行
             if (delayMillis > 3000) {
@@ -103,7 +91,6 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
         }
         return true;
     }
-
     /**
      * 移除指定的子任务
      *
@@ -113,7 +100,6 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
     public void removeChildTask(ModelTask.ChildModelTask childTask) {
         childTask.cancel(); // 取消子任务
     }
-
     /**
      * 清除指定任务组中的所有子任务
      *
@@ -144,7 +130,6 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
         }
         return true;
     }
-
     /**
      * 清除所有任务组中的所有子任务
      */
@@ -156,7 +141,6 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
         }
         groupChildTaskExecutorMap.clear(); // 清空所有任务组
     }
-
     /**
      * 获取指定任务组的线程池执行器，如果不存在则创建一个新的线程池
      *
@@ -165,12 +149,10 @@ public class SystemChildTaskExecutor implements ChildTaskExecutor {
      */
     private ThreadPoolExecutor getChildGroupHandler(String group) {
         ThreadPoolExecutor threadPoolExecutor = groupChildTaskExecutorMap.get(group);
-
         // 如果线程池已存在，直接返回
         if (threadPoolExecutor != null) {
             return threadPoolExecutor;
         }
-
         // Android 7.0 及以上版本使用 compute 方法创建线程池
         threadPoolExecutor = groupChildTaskExecutorMap.compute(group, (keyInner, valueInner) -> {
             if (valueInner == null) {

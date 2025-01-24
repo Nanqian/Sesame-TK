@@ -1,11 +1,8 @@
 package fansirsqi.xposed.sesame.task.antMember;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.Arrays;
-
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -18,25 +15,20 @@ import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-
 public class AntMember extends ModelTask {
   private static final String TAG = AntMember.class.getSimpleName();
-
   @Override
   public String getName() {
-    return "会员🏆";
+    return "会员";
   }
-
   @Override
   public ModelGroup getGroup() {
     return ModelGroup.MEMBER;
   }
-
   @Override
   public String getIcon() {
     return "AntMember.png";
   }
-
   private BooleanModelField memberSign;
   private BooleanModelField memberTask;
   private BooleanModelField collectSesame;
@@ -50,7 +42,6 @@ public class AntMember extends ModelTask {
   private BooleanModelField merchantMoreTask;
   private BooleanModelField beanSignIn;
   private BooleanModelField beanExchangeBubbleBoost;
-
   @Override
   public ModelFields getFields() {
     ModelFields modelFields = new ModelFields();
@@ -69,12 +60,10 @@ public class AntMember extends ModelTask {
     modelFields.addField(beanExchangeBubbleBoost = new BooleanModelField("beanExchangeBubbleBoost", "安心豆兑换时光加速器", false));
     return modelFields;
   }
-
   @Override
   public Boolean check() {
     return !TaskCommon.IS_ENERGY_TIME;
   }
-
   @Override
   public void run() {
     try {
@@ -137,7 +126,6 @@ public class AntMember extends ModelTask {
       Log.other("执行结束-" + getName());
     }
   }
-
   /**
    * 会员签到
    */
@@ -160,9 +148,9 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 会员任务-逛一逛
+   * 单次执行 1
    */
   private void doAllMemberAvailableTask() {
     try {
@@ -170,7 +158,7 @@ public class AntMember extends ModelTask {
       ThreadUtil.sleep(500);
       JSONObject jsonObject = new JSONObject(str);
       if (!ResUtil.checkResCode(jsonObject)) {
-        Log.runtime(TAG, "doAllMemberAvailableTask err:" + jsonObject.getString("resultDesc"));
+        Log.error(TAG + ".doAllMemberAvailableTask", "会员任务响应失败: " + jsonObject.getString("resultDesc"));
         return;
       }
       if (!jsonObject.has("availableTaskList")) {
@@ -178,7 +166,6 @@ public class AntMember extends ModelTask {
       }
       JSONArray taskList = jsonObject.getJSONArray("availableTaskList");
       for (int j = 0; j < taskList.length(); j++) {
-        ThreadUtil.sleep(16000);
         JSONObject task = taskList.getJSONObject(j);
         processTask(task);
       }
@@ -187,7 +174,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 会员积分收取
    * @param page 第几页
@@ -209,7 +195,7 @@ public class AntMember extends ModelTask {
           s = AntMemberRpcCall.receivePointByUser(id);
           jo = new JSONObject(s);
           if (ResUtil.checkResCode(jo)) {
-            Log.other("会员积分🎖️[" + bizTitle + "]#" + pointAmount + "积分");
+            Log.other("会员积分🎖️[领取" + bizTitle + "]#" + pointAmount + "积分");
           } else {
             Log.record(jo.getString("resultDesc"));
             Log.runtime(s);
@@ -227,7 +213,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 检查是否满足运行芝麻信用任务的条件
    * @return bool
@@ -237,7 +222,8 @@ public class AntMember extends ModelTask {
       String s = AntMemberRpcCall.queryHome();
       JSONObject jo = new JSONObject(s);
       if (!jo.optBoolean("success")) {
-        Log.other(TAG + ".checkSesameCanRun.queryHome", jo.optString("errorMsg"));
+        Log.other(TAG, "芝麻信用💳[首页响应失败]#" + jo.optString("errorMsg"));
+        Log.error(TAG + ".checkSesameCanRun.queryHome", "芝麻信用💳[首页响应失败]#" + s);
         return false;
       }
       JSONObject entrance = jo.getJSONObject("entrance");
@@ -251,7 +237,6 @@ public class AntMember extends ModelTask {
       return false;
     }
   }
-
   /**
    * 芝麻信用任务
    */
@@ -264,11 +249,13 @@ public class AntMember extends ModelTask {
         jo = jo.getJSONObject("resData");
       }
       if (!jo.optBoolean("success")) {
-        Log.other(TAG + ".doAllAvailableSesameTask.queryAvailableSesameTask", jo.getString("resultCode"));
+        Log.other(TAG, "芝麻信用💳[查询任务响应失败]#" + jo.getString("resultCode"));
+        Log.error(TAG + ".doAllAvailableSesameTask.queryAvailableSesameTask", "芝麻信用💳[查询任务响应失败]#" + s);
         return;
       }
       JSONObject taskObj = jo.getJSONObject("data");
       if (taskObj.has("dailyTaskListVO")) {
+        joinAndFinishSesameTask(taskObj.getJSONObject("dailyTaskListVO").getJSONArray("waitCompleteTaskVOS"));
         joinAndFinishSesameTask(taskObj.getJSONObject("dailyTaskListVO").getJSONArray("waitJoinTaskVOS"));
       }
       if (taskObj.has("toCompleteVOS")) {
@@ -278,7 +265,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG + ".doAllAvailableSesameTask", t);
     }
   }
-
   /**
    * 芝麻信用-领取并完成任务
    * @param taskList 任务列表
@@ -290,7 +276,7 @@ public class AntMember extends ModelTask {
       String taskTemplateId = task.getString("templateId");
       String taskTitle = task.getString("title");
       int needCompleteNum = task.getInt("needCompleteNum");
-      int completedNum = task.getInt("completedNum");
+      int completedNum = task.optInt("completedNum", 0);
       String s;
       String recordId;
       JSONObject responseObj;
@@ -301,45 +287,52 @@ public class AntMember extends ModelTask {
       if (!task.has("todayFinish")) {
         // 领取任务
         s = AntMemberRpcCall.joinSesameTask(taskTemplateId);
-        ThreadUtil.sleep(500);
+        ThreadUtil.sleep(200);
         responseObj = new JSONObject(s);
         if (!responseObj.optBoolean("success")) {
-          Log.error("芝麻信用💳[领取任务" + taskTitle + "失败]#" + s);
+          Log.other(TAG, "芝麻信用💳[领取任务" + taskTitle + "失败]#" + s);
+          Log.error(TAG + ".joinAndFinishSesameTask.joinSesameTask", "芝麻信用💳[领取任务" + taskTitle + "失败]#" + s);
           continue;
         }
         recordId = responseObj.getJSONObject("data").getString("recordId");
       } else {
         if (!task.has("recordId")) {
-          Log.error("芝麻信用💳[任务" + taskTitle + "未获取到recordId]#" + task);
+          Log.other(TAG, "芝麻信用💳[任务" + taskTitle + "未获取到recordId]#" + task);
+          Log.error(TAG + ".joinAndFinishSesameTask", "芝麻信用💳[任务" + taskTitle + "未获取到recordId]#" + task);
           continue;
         }
         recordId = task.getString("recordId");
       }
       s = AntMemberRpcCall.feedBackSesameTask(taskTemplateId);
-      ThreadUtil.sleep(16000);
+      ThreadUtil.sleep(200);
       responseObj = new JSONObject(s);
       if (!responseObj.optBoolean("success")) {
-        Log.error("芝麻信用💳[任务" + taskTitle + "回调失败]#" + s);
+        Log.other(TAG, "芝麻信用💳[任务" + taskTitle + "回调失败]#" + responseObj.getString("errorMessage"));
+        Log.error(TAG + ".joinAndFinishSesameTask.feedBackSesameTask", "芝麻信用💳[任务" + taskTitle + "回调失败]#" + s);
         continue;
       }
-      // 无法自动完成的任务只领取，不操作完成，否则会报错
+      // 无法完成的任务
       switch (taskTemplateId) {
         case "save_ins_universal_new": // 坚持攒保证金
         case "xiaofeijin_visit_new": // 坚持攒消费金金币
         case "xianyonghoufu_new": // 体验先用后付
           continue;
       }
-      s = AntMemberRpcCall.finishSesameTask(recordId);
-      ThreadUtil.sleep(4000);
-      responseObj = new JSONObject(s);
-      if (!responseObj.optBoolean("success")) {
-        Log.error("芝麻信用💳[任务" + taskTitle + "完成失败]#" + s);
-        continue;
+      // 是否为浏览15s任务
+      boolean assistiveTouch = task.getJSONObject("strategyRule").optBoolean("assistiveTouch");
+      if (task.optBoolean("jumpToPushModel") || assistiveTouch) {
+        s = AntMemberRpcCall.finishSesameTask(recordId);
+        ThreadUtil.sleep(16000);
+        responseObj = new JSONObject(s);
+        if (!responseObj.optBoolean("success")) {
+          Log.other(TAG, "芝麻信用💳[任务" + taskTitle + "完成失败]#" + s);
+          Log.error(TAG + ".joinAndFinishSesameTask.finishSesameTask", "芝麻信用💳[任务" + taskTitle + "完成失败]#" + s);
+          continue;
+        }
       }
-      Log.other("芝麻信用💳[" + taskTitle + "]#(" + (completedNum + 1) + "/" + needCompleteNum + "天)");
+      Log.other("芝麻信用💳[完成任务" + taskTitle + "]#(" + (completedNum + 1) + "/" + needCompleteNum + "天)");
     }
   }
-
   /**
    * 芝麻粒收取
    * @param withOneClick 启用一键收取
@@ -349,7 +342,8 @@ public class AntMember extends ModelTask {
       JSONObject jo = new JSONObject(AntMemberRpcCall.queryCreditFeedback());
       ThreadUtil.sleep(500);
       if (!jo.optBoolean("success")) {
-        Log.other(TAG + ".collectSesame.queryCreditFeedback", jo.getString("resultView"));
+        Log.other(TAG, "芝麻信用💳[查询未领取芝麻粒响应失败]#" + jo.getString("resultView"));
+        Log.error(TAG + ".collectSesame.queryCreditFeedback", "芝麻信用💳[查询未领取芝麻粒响应失败]#" + jo);
         return;
       }
       JSONArray availableCollectList = jo.getJSONArray("creditFeedbackVOS");
@@ -358,7 +352,8 @@ public class AntMember extends ModelTask {
         jo = new JSONObject(AntMemberRpcCall.collectAllCreditFeedback());
         ThreadUtil.sleep(2000);
         if (!jo.optBoolean("success")) {
-          Log.other(TAG + ".collectSesame.collectAllCreditFeedback", jo.optString("resultView"));
+          Log.other(TAG, "芝麻信用💳[一键收取芝麻粒响应失败]#" + jo);
+          Log.error(TAG + ".collectSesame.collectAllCreditFeedback", "芝麻信用💳[一键收取芝麻粒响应失败]#" + jo);
           return;
         }
       }
@@ -374,7 +369,8 @@ public class AntMember extends ModelTask {
           jo = new JSONObject(AntMemberRpcCall.collectCreditFeedback(creditFeedbackId));
           ThreadUtil.sleep(2000);
           if (!jo.optBoolean("success")) {
-            Log.other(TAG + ".collectSesame.collectCreditFeedback", jo.optString("resultView"));
+            Log.other(TAG, "芝麻信用💳[查询未领取芝麻粒响应失败]#" + jo.getString("resultView"));
+            Log.error(TAG + ".collectSesame.collectCreditFeedback", "芝麻信用💳[收取芝麻粒响应失败]#" + jo);
             continue;
           }
         }
@@ -384,7 +380,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG + ".collectSesame", t);
     }
   }
-
   /**
    * 商家开门打卡签到
    */
@@ -411,7 +406,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 商家开门打卡报名
    */
@@ -449,7 +443,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 商家积分签到
    */
@@ -475,7 +468,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 商家积分任务
    */
@@ -573,7 +565,6 @@ public class AntMember extends ModelTask {
       }
     }
   }
-
   /**
    * 完成商家积分任务
    * @param taskCode 任务代码
@@ -602,7 +593,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 保障金领取
    */
@@ -645,16 +635,14 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG + ".collectInsuredGold", t);
     }
   }
-
   /**
    * 执行会员任务 类型1
    * @param task 单个任务对象
-   * @return 如果任务处理成功，则返回true；否则返回false
    */
   private void processTask(JSONObject task) throws JSONException {
     JSONObject taskConfigInfo = task.getJSONObject("taskConfigInfo");
     String name = taskConfigInfo.getString("name");
-    Long id = taskConfigInfo.getLong("id");
+    long id = taskConfigInfo.getLong("id");
     String awardParamPoint = taskConfigInfo.getJSONObject("awardParam").getString("awardParamPoint");
     String targetBusiness = taskConfigInfo.getJSONArray("targetBusiness").getString(0);
     String[] targetBusinessArray = targetBusiness.split("#");
@@ -665,15 +653,46 @@ public class AntMember extends ModelTask {
     String bizType = targetBusinessArray[0];
     String bizSubType = targetBusinessArray[1];
     String bizParam = targetBusinessArray[2];
+    ThreadUtil.sleep(16000);
     String str = AntMemberRpcCall.executeTask(bizParam, bizSubType, bizType, id);
-    ThreadUtil.sleep(500);
     JSONObject jo = new JSONObject(str);
     if (!ResUtil.checkResCode(jo)) {
       Log.runtime(TAG, "执行任务失败:" + jo.optString("resultDesc"));
+      return;
     }
-    Log.other("会员任务🎖️[" + name + "]#获得积分" + awardParamPoint);
+    if (checkMemberTaskFinished(id)) {
+      Log.other("会员任务🎖️[" + name + "]#获得积分" + awardParamPoint);
+    }
   }
 
+  /**
+   * 查询指定会员任务是否完成
+   * @param taskId 任务id
+   */
+  private boolean checkMemberTaskFinished(long taskId) {
+    try {
+      String str = AntMemberRpcCall.queryAllStatusTaskList();
+      ThreadUtil.sleep(500);
+      JSONObject jsonObject = new JSONObject(str);
+      if (!ResUtil.checkResCode(jsonObject)) {
+        Log.error(TAG + ".checkMemberTaskFinished", "会员任务响应失败: " + jsonObject.getString("resultDesc"));
+      }
+      if (!jsonObject.has("availableTaskList")) {
+        return true;
+      }
+      JSONArray taskList = jsonObject.getJSONArray("availableTaskList");
+      for (int i = 0; i < taskList.length(); i++) {
+        JSONObject taskConfigInfo = taskList.getJSONObject(i).getJSONObject("taskConfigInfo");
+        long id = taskConfigInfo.getLong("id");
+        if (taskId == id) {
+          return false;
+        }
+      }
+      return true;
+    } catch (JSONException e) {
+      return false;
+    }
+  }
   public void kbMember() {
     try {
       if (!StatusUtil.canKbSignInToday()) {
@@ -695,7 +714,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void goldTicket() {
     try {
       // 签到
@@ -706,7 +724,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /** 收取黄金票 */
   private void goldBillCollect(String signInfo) {
     try {
@@ -731,7 +748,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, th);
     }
   }
-
   private void enableGameCenter() {
     try {
       try {
@@ -784,7 +800,6 @@ public class AntMember extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void beanSignIn() {
     try {
       JSONObject jo = new JSONObject(AntMemberRpcCall.querySignInProcess("AP16242232", "INS_BLUE_BEAN_SIGN"));
@@ -801,13 +816,11 @@ public class AntMember extends ModelTask {
           Log.runtime(jo.toString());
         }
       }
-
     } catch (Throwable t) {
       Log.runtime(TAG, "beanSignIn err:");
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void beanExchangeBubbleBoost() {
     try {
       JSONObject jo = new JSONObject(AntMemberRpcCall.queryUserAccountInfo("INS_BLUE_BEAN"));

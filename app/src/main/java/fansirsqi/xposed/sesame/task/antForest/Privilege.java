@@ -1,22 +1,15 @@
 package fansirsqi.xposed.sesame.task.antForest;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.StatusUtil;
-
 public class Privilege {
-
     public static final String TAG = Privilege.class.getSimpleName();
-
-
     //青春特权🌸领取
 static boolean youthPrivilege() {
     try {
@@ -50,15 +43,12 @@ static boolean youthPrivilege() {
         } else {
             return false;
         }
-
     } catch (Exception e) {
         Log.runtime(AntForest.TAG, "youthPrivilege err:");
         Log.printStackTrace(AntForest.TAG, e);
         return false;
     }
 }
-
-
     /**
      * 处理任务列表
      */
@@ -67,7 +57,6 @@ static boolean youthPrivilege() {
         for (int i = 0; i < taskInfoList.length(); i++) {
             JSONObject taskInfo = taskInfoList.getJSONObject(i);
             JSONObject taskBaseInfo = taskInfo.getJSONObject("taskBaseInfo");
-
             if (receiveParam.equals(taskBaseInfo.getString("taskType"))) {
                 String taskStatus = taskBaseInfo.getString("taskStatus");
                 if ("RECEIVED".equals(taskStatus)) {
@@ -87,7 +76,6 @@ static boolean youthPrivilege() {
         }
         return resultList;
     }
-
     /**
  * 青春特权每日签到红包
  */
@@ -113,8 +101,6 @@ static void studentSignInRedEnvelope() {
         Log.record("青春特权🧧执行异常：" + e.getMessage());
     }
 }
-
-
     /**
      * 学生签到执行逻辑
      */
@@ -125,9 +111,7 @@ static void studentSignInRedEnvelope() {
                 Log.record("青春特权🧧签到失败：返回数据为空");
                 return;
             }
-
             JSONObject resultJson = new JSONObject(result);
-
             // 检查返回码
             String resultCode = resultJson.optString("resultCode", "");
             if (!"SUCCESS".equals(resultCode)) {
@@ -152,7 +136,6 @@ static void studentSignInRedEnvelope() {
             Log.record("青春特权🧧签到异常：" + e.getMessage());
         }
     }
-
     /**
      * 处理不在签到时间范围内的逻辑
      */
@@ -162,15 +145,12 @@ static void studentSignInRedEnvelope() {
                 Log.record("青春特权🧧今日已达上限");
                 return;
             }
-
             String response = AntForestRpcCall.studentQqueryCheckInModel();
             if (response == null || response.isEmpty()) {
                 Log.record("青春特权🧧查询失败：返回数据为空");
                 return;
             }
-
             JSONObject responseJson = new JSONObject(response);
-
             // 检查返回码
             if (responseJson.has("resultCode")) {
                 String resultCode = responseJson.getString("resultCode");
@@ -180,28 +160,24 @@ static void studentSignInRedEnvelope() {
                     return;
                 }
             }
-
             // 安全获取 studentCheckInInfo
             JSONObject studentCheckInInfo = responseJson.optJSONObject("studentCheckInInfo");
             if (studentCheckInInfo == null) {
                 Log.record("青春特权🧧查询失败：无签到信息");
                 return;
             }
-
             // 安全获取 action
             String action = studentCheckInInfo.optString("action", "");
             if (action.isEmpty()) {
                 Log.record("青春特权🧧查询失败：无操作信息");
                 return;
             }
-
             if ("DO_TASK".equals(action)) {
                 Log.record("青春特权🧧今日已签到");
                 StatusUtil.setStudentTaskToday();
             } else {
                 studentTask(tag);
             }
-
         } catch (JSONException e) {
             Log.runtime(TAG, "studentTaskHandle JSON解析错误:");
             Log.printStackTrace(TAG, e);
@@ -212,5 +188,4 @@ static void studentSignInRedEnvelope() {
             Log.record("青春特权🧧签到异常：" + e.getMessage());
         }
     }
-
 }

@@ -1,11 +1,8 @@
 package fansirsqi.xposed.sesame.task.antForest;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import fansirsqi.xposed.sesame.entity.VitalityStore.ExchangeStatus;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
@@ -13,18 +10,14 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StatusUtil;
-
 /**
  * @author Byseven
  * @see  2025/1/20
  * @apiNote
  */
 public class Vitality {
-
     private static final String TAG = Vitality.class.getSimpleName();
-
     static Map<String, JSONObject> skuInfo = new HashMap<>();
-
     public static JSONArray ItemListByType(String labelType) {
         JSONArray itemInfoVOList = null;
         try {
@@ -38,7 +31,6 @@ public class Vitality {
         }
         return itemInfoVOList;
     }
-
     public static void ItemDetailBySpuId(String spuId) {
         try {
             JSONObject jo = new JSONObject(AntForestRpcCall.itemDetail(spuId));
@@ -51,7 +43,6 @@ public class Vitality {
             Log.printStackTrace(TAG, th);
         }
     }
-
     public static void initVitality(String labelType) {
         try {
             JSONArray itemInfoVOList = ItemListByType(labelType);
@@ -68,8 +59,6 @@ public class Vitality {
             Log.printStackTrace(TAG, th);
         }
     }
-
-
     private static void handleVitalityItem(JSONObject vitalityItem) {
         try {
             //海洋随机拼图skuModelList节点下没有spuId
@@ -91,7 +80,6 @@ public class Vitality {
             Log.printStackTrace(TAG, th);
         }
     }
-
     private static void handleItemDetail(JSONObject ItemDetail) {
         try {
             String spuId = ItemDetail.getString("spuId");
@@ -112,9 +100,6 @@ public class Vitality {
             Log.printStackTrace(TAG, th);
         }
     }
-
-
-
     /*
      * 兑换活力值商品
      * sku
@@ -132,7 +117,6 @@ public class Vitality {
         }
         try {
             String skuName = sku.getString("skuName");
-
             JSONArray itemStatusList = sku.getJSONArray("itemStatusList");
             for (int i = 0; i < itemStatusList.length(); i++) {
                 String itemStatus = itemStatusList.getString(i);
@@ -160,7 +144,6 @@ public class Vitality {
         }
         return false;
     }
-
     public static Boolean VitalityExchange(String spuId, String skuId, String skuName) {
         try {
             if (VitalityExchange(spuId, skuId)) {
@@ -175,7 +158,6 @@ public class Vitality {
         }
         return false;
     }
-
     private static Boolean VitalityExchange(String spuId, String skuId) {
         try {
             JSONObject jo = new JSONObject(AntForestRpcCall.exchangeBenefit(spuId, skuId));
@@ -186,7 +168,6 @@ public class Vitality {
         }
         return false;
     }
-
     /**
      * 查找商店道具
      *

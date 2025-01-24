@@ -1,17 +1,13 @@
 package fansirsqi.xposed.sesame.task.greenFinance;
-
 import fansirsqi.xposed.sesame.hook.RequestManager;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-
 import org.json.JSONArray;
-
 /**
  * 绿色经营Rpc请求类
  *
  * @author xiong
  */
 public class GreenFinanceRpcCall {
-
   /**
    * 查询任务
    *
@@ -21,7 +17,6 @@ public class GreenFinanceRpcCall {
   public static String taskQuery(String appletId) {
     return RequestManager.requestString("com.alipay.loanpromoweb.promo.task.taskQuery", "[{\"appletId\":\"" + appletId + "\",\"completedBottom\":true}]");
   }
-
   /**
    * 触发任务
    *
@@ -34,11 +29,9 @@ public class GreenFinanceRpcCall {
     return RequestManager.requestString(
         "com.alipay.loanpromoweb.promo.task.taskTrigger", "[{\"appletId\":\"" + appletId + "\",\"stageCode\":\"" + stageCode + "\",\"taskCenId\":\"" + taskCenId + "\"}]");
   }
-
   public static String signInTrigger(String sceneId) {
     return RequestManager.requestString("com.alipay.loanpromoweb.promo.signin.trigger", "[{\"extInfo\":{},\"sceneId\":\"" + sceneId + "\"}]");
   }
-
   /**
    * 绿色经营首页
    *
@@ -48,7 +41,6 @@ public class GreenFinanceRpcCall {
     return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinancePageQueryService.indexV2", "[{\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\"}]");
   }
-
   /**
    * 批量收取
    *
@@ -60,7 +52,6 @@ public class GreenFinanceRpcCall {
         "com.alipay.mcaplatformunit.common.mobile.service.GreenFinancePointCollectService.batchSelfCollect",
         "[{\"bsnIds\":" + bsnIds + ",\"clientVersion\":\"VERSION2\",\"custType\":\"MERCHANT\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
-
   /**
    * 签到查询
    *
@@ -71,7 +62,6 @@ public class GreenFinanceRpcCall {
     return RequestManager.requestString(
         "com.alipay.loanpromoweb.promo.signin.query", "[{\"cycleCount\":7,\"cycleType\":\"d\",\"extInfo\":{},\"needContinuous\":1,\"sceneId\":\"" + sceneId + "\"}]");
   }
-
   /**
    * 查询打卡记录
    *
@@ -83,7 +73,6 @@ public class GreenFinanceRpcCall {
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceTickService.queryUserTickItem",
         "[{\"custType\":\"MERCHANT\",\"firstBehaviorType\":\"" + firstBehaviorType + "\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
-
   /**
    * 提交打卡
    *
@@ -102,7 +91,6 @@ public class GreenFinanceRpcCall {
             + behaviorCode
             + "\"}]");
   }
-
   /**
    * 查询要过期了的金币
    *
@@ -120,7 +108,6 @@ public class GreenFinanceRpcCall {
             + (System.currentTimeMillis() + day * 24 * 60 * 60 * 1000)
             + "\"}]");
   }
-
   /**
    * 查询可捐助的项目、
    *
@@ -131,7 +118,6 @@ public class GreenFinanceRpcCall {
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceDonationService.queryAllDonationProjectNew",
         "[{\"custType\":\"MERCHANT\",\"subjectType\":\"ALL_DONATION\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
-
   /**
    * 捐助
    *
@@ -153,7 +139,6 @@ public class GreenFinanceRpcCall {
             + projectId
             + "\"}]");
   }
-
   /**
    * 查询评级任务列表
    *
@@ -164,7 +149,6 @@ public class GreenFinanceRpcCall {
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.consultProveTaskList",
         "[{\"custType\":\"MERCHANT\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
-
   /**
    * 查询绿色特权奖品
    *
@@ -174,7 +158,6 @@ public class GreenFinanceRpcCall {
   public static String queryPrizes(String campId) {
     return RequestManager.requestString("com.alipay.loanpromoweb.promo.camp.queryPrizes", "[{\"campIds\":[\"" + campId + "\"]}]");
   }
-
   /**
    * 绿色特权奖品领取
    *
@@ -184,7 +167,6 @@ public class GreenFinanceRpcCall {
   public static String campTrigger(String campId) {
     return RequestManager.requestString("com.alipay.loanpromoweb.promo.camp.trigger", "[{\"campId\":\"" + campId + "\"}]");
   }
-
   /**
    * 绿色评级
    *
@@ -197,7 +179,6 @@ public class GreenFinanceRpcCall {
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.proveTask",
         "[{\"bizType\":\"" + bizType + "\",\"custType\":\"MERCHANT\",\"imageUrl\":\"" + imageUrl + "\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
-
   /**
    * 绿色评级
    *
@@ -209,7 +190,6 @@ public class GreenFinanceRpcCall {
         "com.alipay.mcaplatformunit.common.mobile.newservice.GreenFinanceProveTaskService.queryProveTaskStatus",
         "[{\"taskId\":\"" + taskId + "\",\"custType\":\"MERCHANT\",\"uid\":\"" + UserMap.getCurrentUid() + "\"}]");
   }
-
   /**
    * 查询好友列表
    *
@@ -226,7 +206,6 @@ public class GreenFinanceRpcCall {
             + UserMap.getCurrentUid()
             + "\"}]");
   }
-
   /**
    * 查询一个可以收金币的好友
    *
@@ -241,7 +220,6 @@ public class GreenFinanceRpcCall {
             + UserMap.getCurrentUid()
             + "\"}]");
   }
-
   public static String batchSteal(JSONArray bsnIds, String collectedUid) {
     return RequestManager.requestString(
         "com.alipay.mcaplatformunit.common.mobile.service.GreenFinancePointCollectService.batchSteal",

@@ -1,26 +1,19 @@
 package fansirsqi.xposed.sesame.util;
-
 import com.fasterxml.jackson.databind.JsonMappingException;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.antForest.AntForest;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import lombok.Data;
-
 @Data
 public class StatusUtil {
-
     private static final String TAG = StatusUtil.class.getSimpleName();
-
     public static final StatusUtil INSTANCE = new StatusUtil();
-
     // ===========================forest
     private Map<String, Integer> waterFriendLogList = new HashMap<>();
     private Set<String> cooperateWaterList = new HashSet<>();//合作浇水
@@ -37,7 +30,6 @@ public class StatusUtil {
     private boolean youthPrivilege = true;
     private boolean studentTask = true;
     private Map<String, Integer> VitalityStoreList = new HashMap<>();
-
     // ===========================farm
     private Boolean answerQuestion = false;
     private Map<String, Integer> feedFriendLogList = new HashMap<>();
@@ -50,14 +42,11 @@ public class StatusUtil {
      */
     private Boolean canOrnament = true;
     private Boolean animalSleep = false;
-
-
     // =============================stall
     private Map<String, Integer> stallHelpedCountLogList = new HashMap<>();
     private Set<String> spreadManureList = new HashSet<>();
     private Set<String> stallP2PHelpedList = new HashSet<>();
     private Boolean canStallDonate = true;
-
     // ==========================sport
     private Set<String> syncStepList = new HashSet<>();
     private Set<String> exchangeList = new HashSet<>();
@@ -65,10 +54,8 @@ public class StatusUtil {
      * 捐运动币
      */
     private boolean donateCharityCoin = false;
-
     // =======================other
     private Set<String> memberSignInList = new HashSet<>();
-
     private final Set<String> flagList = new HashSet<>();
     /**
      * 口碑签到
@@ -98,9 +85,6 @@ public class StatusUtil {
      * 农场助力
      */
     private Set<String> antOrchardAssistFriend = new HashSet<>();
-
-
-
     public static int getVitalityCount(String skuId) {
         Integer exchangedCount = INSTANCE.VitalityStoreList.get(skuId);
         if (exchangedCount == null) {
@@ -108,89 +92,69 @@ public class StatusUtil {
         }
         return exchangedCount;
     }
-
     public static Boolean canVitalityExchangeToday(String skuId, int count) {
         return !hasFlagToday("forest::VitalityExchangeLimit::" + skuId)
                 && getVitalityCount(skuId) < count;
     }
-
     public static void vitalityExchangeToday(String skuId) {
         int count = getVitalityCount(skuId) + 1;
         INSTANCE.VitalityStoreList.put(skuId, count);
         save();
     }
-
     public static boolean canStudentTask() {
         return INSTANCE.studentTask;
     }
-
     public static void setStudentTaskToday() {
         if (INSTANCE.studentTask) {
             INSTANCE.studentTask = false;
             save();
         }
     }
-
-
     public static boolean canYouthPrivilegeToday() {
         return INSTANCE.youthPrivilege;
     }
-
     public static void setYouthPrivilegeToday() {
         if (INSTANCE.youthPrivilege) {
             INSTANCE.youthPrivilege = false;
             save();
         }
     }
-
     public static boolean canExchangeEnergyShield() {
         return !INSTANCE.exchangeEnergyShield;
     }
-
     public static void exchangeEnergyShield() {
-
         if (!INSTANCE.exchangeEnergyShield) {
             INSTANCE.exchangeEnergyShield = true;
             save();
         }
     }
-
     public static boolean canExchangeCollectHistoryAnimal7Days() {
         return !INSTANCE.exchangeCollectHistoryAnimal7Days;
     }
-
     public static void exchangeCollectHistoryAnimal7Days() {
-
         if (!INSTANCE.exchangeCollectHistoryAnimal7Days) {
             INSTANCE.exchangeCollectHistoryAnimal7Days = true;
             save();
         }
     }
-
     public static boolean canExchangeCollectToFriendTimes7Days() {
         return !INSTANCE.exchangeCollectToFriendTimes7Days;
     }
-
     public static void exchangeCollectToFriendTimes7Days() {
-
         if (!INSTANCE.exchangeCollectToFriendTimes7Days) {
             INSTANCE.exchangeCollectToFriendTimes7Days = true;
             save();
         }
     }
-
     public static boolean canAnimalSleep() {
         return !INSTANCE.animalSleep;
     }
-
     public static void animalSleep() {
-
         if (!INSTANCE.animalSleep) {
             INSTANCE.animalSleep = true;
             save();
         }
     }
-
     public static boolean canWaterFriendToday(String id, int newCount) {
         id = UserMap.getCurrentUid() + "-" + id;
         Integer count = INSTANCE.waterFriendLogList.get(id);
@@ -199,13 +163,11 @@ public class StatusUtil {
         }
         return count < newCount;
     }
-
     public static void waterFriendToday(String id, int count) {
         id = UserMap.getCurrentUid() + "-" + id;
         INSTANCE.waterFriendLogList.put(id, count);
         save();
     }
-
     public static int getReserveTimes(String id) {
         Integer count = INSTANCE.reserveLogList.get(id);
         if (count == null) {
@@ -213,11 +175,9 @@ public class StatusUtil {
         }
         return count;
     }
-
     public static boolean canReserveToday(String id, int count) {
         return getReserveTimes(id) < count;
     }
-
     public static void reserveToday(String id, int newCount) {
         Integer count = INSTANCE.reserveLogList.get(id);
         if (count == null) {
@@ -226,44 +186,34 @@ public class StatusUtil {
         INSTANCE.reserveLogList.put(id, count + newCount);
         save();
     }
-
     public static boolean canCooperateWaterToday(String uid, String coopId) {
         return !INSTANCE.cooperateWaterList.contains(uid + "_" + coopId);
     }
-
     public static void cooperateWaterToday(String uid, String coopId) {
-
         String v = uid + "_" + coopId;
         if (!INSTANCE.cooperateWaterList.contains(v)) {
             INSTANCE.cooperateWaterList.add(v);
             save();
         }
     }
-
     public static boolean canAncientTreeToday(String cityCode) {
         return !INSTANCE.ancientTreeCityCodeList.contains(cityCode);
     }
-
     public static void ancientTreeToday(String cityCode) {
-
         if (!INSTANCE.ancientTreeCityCodeList.contains(cityCode)) {
             INSTANCE.ancientTreeCityCodeList.add(cityCode);
             save();
         }
     }
-
     public static boolean canAnswerQuestionToday() {
         return !INSTANCE.answerQuestion;
     }
-
     public static void answerQuestionToday() {
-
         if (!INSTANCE.answerQuestion) {
             INSTANCE.answerQuestion = true;
             save();
         }
     }
-
     public static boolean canFeedFriendToday(String id, int newCount) {
         Integer count = INSTANCE.feedFriendLogList.get(id);
         if (count == null) {
@@ -271,7 +221,6 @@ public class StatusUtil {
         }
         return count < newCount;
     }
-
     public static void feedFriendToday(String id) {
         Integer count = INSTANCE.feedFriendLogList.get(id);
         if (count == null) {
@@ -280,7 +229,6 @@ public class StatusUtil {
         INSTANCE.feedFriendLogList.put(id, count + 1);
         save();
     }
-
     public static boolean canVisitFriendToday(String id, int newCount) {
         id = UserMap.getCurrentUid() + "-" + id;
         Integer count = INSTANCE.visitFriendLogList.get(id);
@@ -289,13 +237,11 @@ public class StatusUtil {
         }
         return count < newCount;
     }
-
     public static void visitFriendToday(String id, int newCount) {
         id = UserMap.getCurrentUid() + "-" + id;
         INSTANCE.visitFriendLogList.put(id, newCount);
         save();
     }
-
     public static boolean canStallHelpToday(String id) {
         Integer count = INSTANCE.stallHelpedCountLogList.get(id);
         if (count == null) {
@@ -303,7 +249,6 @@ public class StatusUtil {
         }
         return count < 3;
     }
-
     public static void stallHelpToday(String id, boolean limited) {
         Integer count = INSTANCE.stallHelpedCountLogList.get(id);
         if (count == null) {
@@ -317,66 +262,51 @@ public class StatusUtil {
         INSTANCE.stallHelpedCountLogList.put(id, count);
         save();
     }
-
     public static boolean canMemberSignInToday(String uid) {
         return !INSTANCE.memberSignInList.contains(uid);
     }
-
     public static void memberSignInToday(String uid) {
-
         if (!INSTANCE.memberSignInList.contains(uid)) {
             INSTANCE.memberSignInList.add(uid);
             save();
         }
     }
-
     public static boolean canUseAccelerateTool() {
         return INSTANCE.useAccelerateToolCount < 8;
     }
-
     public static void useAccelerateTool() {
         INSTANCE.useAccelerateToolCount += 1;
         save();
     }
-
     public static boolean canDonationEgg(String uid) {
         return !INSTANCE.donationEggList.contains(uid);
     }
-
     public static void donationEgg(String uid) {
-
         if (!INSTANCE.donationEggList.contains(uid)) {
             INSTANCE.donationEggList.add(uid);
             save();
         }
     }
-
     public static boolean canSpreadManureToday(String uid) {
         return !INSTANCE.spreadManureList.contains(uid);
     }
-
     public static void spreadManureToday(String uid) {
-
         if (!INSTANCE.spreadManureList.contains(uid)) {
             INSTANCE.spreadManureList.add(uid);
             save();
         }
     }
-
     public static boolean canStallP2PHelpToday(String uid) {
         uid = UserMap.getCurrentUid() + "-" + uid;
         return !INSTANCE.stallP2PHelpedList.contains(uid);
     }
-
     public static void stallP2PHelpeToday(String uid) {
         uid = UserMap.getCurrentUid() + "-" + uid;
-
         if (!INSTANCE.stallP2PHelpedList.contains(uid)) {
             INSTANCE.stallP2PHelpedList.add(uid);
             save();
         }
     }
-
     /**
      * 是否可以新村助力
      *
@@ -385,48 +315,36 @@ public class StatusUtil {
     public static boolean canAntStallAssistFriendToday() {
         return !INSTANCE.antStallAssistFriend.contains(UserMap.getCurrentUid());
     }
-
     /**
      * 设置新村助力已到上限
      */
     public static void antStallAssistFriendToday() {
-
         String uid = UserMap.getCurrentUid();
         if (!INSTANCE.antStallAssistFriend.contains(uid)) {
             INSTANCE.antStallAssistFriend.add(uid);
             save();
         }
     }
-
     // 农场助力
     public static boolean canAntOrchardAssistFriendToday() {
         return !INSTANCE.antOrchardAssistFriend.contains(UserMap.getCurrentUid());
     }
-
     public static void antOrchardAssistFriendToday() {
-
         String uid = UserMap.getCurrentUid();
         if (!INSTANCE.antOrchardAssistFriend.contains(uid)) {
             INSTANCE.antOrchardAssistFriend.add(uid);
             save();
         }
     }
-
     public static boolean canProtectBubbleToday(String uid) {
         return !INSTANCE.protectBubbleList.contains(uid);
     }
-
     public static void protectBubbleToday(String uid) {
-
         if (!INSTANCE.protectBubbleList.contains(uid)) {
             INSTANCE.protectBubbleList.add(uid);
             save();
         }
     }
-
-
-
-
     /**
      * 是否可以贴罚单
      *
@@ -435,7 +353,6 @@ public class StatusUtil {
     public static boolean canPasteTicketTime() {
         return !INSTANCE.canPasteTicketTime.contains(UserMap.getCurrentUid());
     }
-
     /**
      * 罚单贴完了
      */
@@ -446,7 +363,6 @@ public class StatusUtil {
         INSTANCE.canPasteTicketTime.add(UserMap.getCurrentUid());
         save();
     }
-
     public static boolean canDoubleToday() {
         AntForest task = ModelTask.getModel(AntForest.class);
         if (task == null) {
@@ -454,68 +370,53 @@ public class StatusUtil {
         }
         return INSTANCE.doubleTimes < task.getDoubleCountLimit().getValue();
     }
-
     public static void DoubleToday() {
         INSTANCE.doubleTimes += 1;
         save();
     }
-
     public static boolean canKbSignInToday() {
         return INSTANCE.kbSignIn < StatisticsUtil.INSTANCE.getDay().time;
     }
-
     public static void KbSignInToday() {
         if (INSTANCE.kbSignIn != StatisticsUtil.INSTANCE.getDay().time) {
             INSTANCE.kbSignIn = StatisticsUtil.INSTANCE.getDay().time;
             save();
         }
     }
-
     public static Set<String> getDadaDailySet() {
         return INSTANCE.dailyAnswerList;
     }
-
     public static void setDadaDailySet(Set<String> dailyAnswerList) {
         INSTANCE.dailyAnswerList = dailyAnswerList;
         save();
     }
-
     public static boolean canDonateCharityCoin() {
         return !INSTANCE.donateCharityCoin;
     }
-
     public static void donateCharityCoin() {
-
         if (!INSTANCE.donateCharityCoin) {
             INSTANCE.donateCharityCoin = true;
             save();
         }
     }
-
     public static boolean canSyncStepToday(String uid) {
         return !INSTANCE.syncStepList.contains(uid);
     }
-
     public static void SyncStepToday(String uid) {
-
         if (!INSTANCE.syncStepList.contains(uid)) {
             INSTANCE.syncStepList.add(uid);
             save();
         }
     }
-
     public static boolean canExchangeToday(String uid) {
         return !INSTANCE.exchangeList.contains(uid);
     }
-
     public static void exchangeToday(String uid) {
-
         if (!INSTANCE.exchangeList.contains(uid)) {
             INSTANCE.exchangeList.add(uid);
             save();
         }
     }
-
     /**
      * 绿色经营-是否可以收好友金币
      *
@@ -524,7 +425,6 @@ public class StatusUtil {
     public static boolean canGreenFinancePointFriend() {
         return INSTANCE.greenFinancePointFriend.contains(UserMap.getCurrentUid());
     }
-
     /**
      * 绿色经营-收好友金币完了
      */
@@ -535,7 +435,6 @@ public class StatusUtil {
         INSTANCE.greenFinancePointFriend.add(UserMap.getCurrentUid());
         save();
     }
-
     /**
      * 绿色经营-是否可以做评级任务
      *
@@ -550,7 +449,6 @@ public class StatusUtil {
         }
         return true;
     }
-
     /**
      * 绿色经营-评级任务完了
      */
@@ -561,7 +459,6 @@ public class StatusUtil {
         INSTANCE.greenFinancePrizesMap.put(UserMap.getCurrentUid(), TimeUtil.getWeekNumber(new Date()));
         save();
     }
-
     /**
      * 加载状态文件
      *
@@ -573,7 +470,6 @@ public class StatusUtil {
             Log.runtime(TAG, "用户为空，状态加载失败");
             throw new RuntimeException("用户为空，状态加载失败");
         }
-
         try {
             java.io.File statusFile = Files.getStatusFile(currentUid);
             if (statusFile.exists()) {
@@ -599,13 +495,11 @@ public class StatusUtil {
             Log.runtime(TAG, "状态文件格式有误，已重置");
             resetAndSaveConfig();
         }
-
         if (INSTANCE.saveTime == null) {
             INSTANCE.saveTime = System.currentTimeMillis();
         }
         return INSTANCE;
     }
-
     /**
      * 初始化默认配置
      *
@@ -621,7 +515,6 @@ public class StatusUtil {
             throw new RuntimeException("初始化配置失败", e);
         }
     }
-
     /**
      * 重置配置并保存
      */
@@ -634,8 +527,6 @@ public class StatusUtil {
             throw new RuntimeException("重置配置失败", e);
         }
     }
-
-
     public static synchronized void unload() {
         try {
             JsonUtil.copyMapper().updateValue(INSTANCE, new StatusUtil());
@@ -643,11 +534,9 @@ public class StatusUtil {
             Log.printStackTrace(TAG, e);
         }
     }
-
     public static synchronized void save() {
         save(Calendar.getInstance());
     }
-
     public static synchronized void save(Calendar nowCalendar) {
         String currentUid = UserMap.getCurrentUid();
         if (StringUtil.isEmpty(currentUid)) {
@@ -668,7 +557,6 @@ public class StatusUtil {
             throw e;
         }
     }
-
     public static Boolean updateDay(Calendar nowCalendar) {
         if (TimeUtil.isLessThanSecondOfDays(INSTANCE.saveTime, nowCalendar.getTimeInMillis())) {
             StatusUtil.unload();
@@ -677,132 +565,104 @@ public class StatusUtil {
             return false;
         }
     }
-
     public static boolean canOrnamentToday() {
         return INSTANCE.canOrnament;
     }
-
     public static void setOrnamentToday() {
         if (INSTANCE.canOrnament) {
             INSTANCE.canOrnament = false;
             save();
         }
     }
-
     // 新村捐赠
     public static boolean canStallDonateToday() {
         return INSTANCE.canStallDonate;
     }
-
     public static void setStallDonateToday() {
         if (INSTANCE.canStallDonate) {
             INSTANCE.canStallDonate = false;
             save();
         }
     }
-
     public static Boolean hasFlagToday(String flag) {
         return INSTANCE.flagList.contains(flag);
     }
-
     public static void setFlagToday(String flag) {
         if (!hasFlagToday(flag)) {
             INSTANCE.flagList.add(flag);
             save();
         }
     }
-
     @Data
     private static class WaterFriendLog {
         String userId;
         int waterCount = 0;
-
         public WaterFriendLog() {
         }
-
         public WaterFriendLog(String id) {
             userId = id;
         }
     }
-
     @Data
     private static class ReserveLog {
         String projectId;
         int applyCount = 0;
-
         public ReserveLog() {
         }
-
         public ReserveLog(String id) {
             projectId = id;
         }
     }
-
     @Data
     private static class BeachLog {
         String cultivationCode;
         int applyCount = 0;
-
         public BeachLog() {
         }
-
         public BeachLog(String id) {
             cultivationCode = id;
         }
     }
-
     @Data
     private static class FeedFriendLog {
         String userId;
         int feedCount = 0;
-
         public FeedFriendLog() {
         }
-
         public FeedFriendLog(String id) {
             userId = id;
         }
     }
-
     @Data
     private static class VisitFriendLog {
         String userId;
         int visitCount = 0;
-
         public VisitFriendLog() {
         }
-
         public VisitFriendLog(String id) {
             userId = id;
         }
     }
-
     @Data
     private static class StallShareIdLog {
         String userId;
         String shareId;
-
         public StallShareIdLog() {
         }
-
         public StallShareIdLog(String uid, String sid) {
             userId = uid;
             shareId = sid;
         }
     }
-
     @Data
     private static class StallHelpedCountLog {
         String userId;
         int helpedCount = 0;
         int beHelpedCount = 0;
-
         public StallHelpedCountLog() {
         }
-
         public StallHelpedCountLog(String id) {
             userId = id;
         }
     }
-
 }

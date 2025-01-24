@@ -1,19 +1,14 @@
 package fansirsqi.xposed.sesame.entity;
-
 import lombok.Getter;
-
 /**
  * 表示支付宝版本的实体类，可进行版本比较。
  */
 @Getter
 public class AlipayVersion implements Comparable<AlipayVersion> {
-
     // 原始版本字符串
     private final String versionString;
-
     // 版本号数组，用于比较
     private final Integer[] versionArray;
-
     /**
      * 构造方法，将版本字符串解析为整数数组。
      * @param versionString 版本号字符串（以点号分隔，例如 "10.1.1"）
@@ -31,7 +26,6 @@ public class AlipayVersion implements Comparable<AlipayVersion> {
             }
         }
     }
-
     /**
      * 实现版本比较逻辑。
      * @param alipayVersion 需要比较的另一个 AlipayVersion 实例
@@ -43,7 +37,6 @@ public class AlipayVersion implements Comparable<AlipayVersion> {
         int thatLength = alipayVersion.versionArray.length;
         int compareResult = Integer.compare(thisLength, thatLength); // 比较长度
         int minLength = Math.min(thisLength, thatLength); // 取最小长度
-
         // 按版本号逐段比较
         for (int i = 0; i < minLength; i++) {
             int thisVer = versionArray[i];
@@ -52,7 +45,6 @@ public class AlipayVersion implements Comparable<AlipayVersion> {
                 return Integer.compare(thisVer, thatVer);
             }
         }
-
         // 如果所有对应段都相等，返回长度比较结果
         return compareResult;
     }

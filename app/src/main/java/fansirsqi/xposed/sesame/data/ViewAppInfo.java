@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.data;
-
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -8,43 +7,34 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
 import lombok.Setter;
-
 /**
  * ViewAppInfo 类用于提供应用信息相关的功能，包括初始化应用信息、检查运行状态、设置运行类型等。
  */
 public final class ViewAppInfo {
-
     @SuppressLint("StaticFieldLeak")
     @Getter
     private static Context context = null;
-
     // 应用名称
     @Getter
     private static String appTitle = "";
-
     // 应用版本号
     @Getter
     private static String appVersion = "";
-
     // 构建目标信息
     @Getter
     private static String appBuildTarget = "";
-
     // 构建编号
     @Getter
     private static String appBuildNumber = "";
-
     // 运行状态类型，默认为禁用
     @Setter
     @Getter
     private static RunType runType = RunType.DISABLE;
-
     /**
      * 初始化 ViewAppInfo，设置应用的相关信息，如版本号、构建日期等
      *
@@ -69,7 +59,6 @@ public final class ViewAppInfo {
             }
         }
     }
-
     /**
      * 检查当前应用的运行类型，判断是否启用或禁用 通过与 content provider 交互来检查应用是否处于激活状态
      */
@@ -114,7 +103,6 @@ public final class ViewAppInfo {
         }
         runType = RunType.DISABLE;
     }
-
     /**
      * 根据运行类型的编码设置当前应用的运行状态
      *
@@ -128,7 +116,6 @@ public final class ViewAppInfo {
         }
         ViewAppInfo.runType = newRunType;
     }
-
     /**
      * 判断当前应用是否处于调试模式
      *
@@ -149,7 +136,6 @@ public final class ViewAppInfo {
             return false;
         }
     }
-
     /**
      * 判断目标应用是否处于调试模式
      *
@@ -171,5 +157,4 @@ public final class ViewAppInfo {
             return false;
         }
     }
-
 }

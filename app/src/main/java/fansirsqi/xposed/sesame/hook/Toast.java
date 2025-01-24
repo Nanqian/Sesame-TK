@@ -1,15 +1,11 @@
 package fansirsqi.xposed.sesame.hook;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.util.Log;
-
 public class Toast {
     private static final String TAG = Toast.class.getSimpleName();
-
     /**
      * 显示 Toast 消息
      *
@@ -18,7 +14,6 @@ public class Toast {
     public static void show(CharSequence message) {
         show(message, false);
     }
-
     /**
      * 显示 Toast 消息
      *
@@ -36,7 +31,6 @@ public class Toast {
             displayToast(context.getApplicationContext(), message);
         }
     }
-
     /**
      * 显示 Toast 消息（确保在主线程中调用）
      *
@@ -58,7 +52,6 @@ public class Toast {
             Log.printStackTrace(TAG, t);
         }
     }
-
     /**
      * 创建并显示 Toast
      *

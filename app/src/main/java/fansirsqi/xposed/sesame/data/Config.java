@@ -1,12 +1,9 @@
 package fansirsqi.xposed.sesame.data;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.model.ModelConfig;
 import fansirsqi.xposed.sesame.model.ModelField;
@@ -18,25 +15,19 @@ import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import lombok.Data;
-
 /**
  * 配置类，负责加载、保存、管理应用的配置数据。
  */
 @Data
 public class Config {
-
     private static final String TAG = Config.class.getSimpleName();
-
     // 单例实例
     public static final Config INSTANCE = new Config();
-
     // 是否初始化标志
     @JsonIgnore
     private boolean init;
-
     // 存储模型字段的映射
     private final Map<String, ModelFields> modelFieldsMap = new ConcurrentHashMap<>();
-
     /**
      * 设置新的模型字段配置
      *
@@ -45,19 +36,16 @@ public class Config {
     public void setModelFieldsMap(Map<String, ModelFields> newModels) {
         modelFieldsMap.clear();
         Map<String, ModelConfig> modelConfigMap = ModelTask.getModelConfigMap();
-
         // 如果传入的 newModels 为 null，初始化为空
         if (newModels == null) {
             newModels = new HashMap<>();
         }
-
         // 遍历所有模型配置，合并字段配置
         for (ModelConfig modelConfig : modelConfigMap.values()) {
             String modelCode = modelConfig.getCode();
             ModelFields newModelFields = new ModelFields();
             ModelFields configModelFields = modelConfig.getFields();
             ModelFields modelFields = newModels.get(modelCode);
-
             if (modelFields != null) {
                 // 如果已有模型字段，则按值覆盖配置
                 for (ModelField<?> configModelField : configModelFields.values()) {
@@ -83,7 +71,6 @@ public class Config {
             modelFieldsMap.put(modelCode, newModelFields);
         }
     }
-
     /**
      * 检查是否存在指定的模型字段
      *
@@ -93,7 +80,6 @@ public class Config {
     public Boolean hasModelFields(String modelCode) {
         return modelFieldsMap.containsKey(modelCode);
     }
-
     /**
      * 检查指定模型字段是否存在
      *
@@ -108,7 +94,6 @@ public class Config {
         }
         return modelFields.containsKey(fieldCode);
     }
-
     /**
      * 判断配置文件是否已修改
      *
@@ -118,24 +103,20 @@ public class Config {
     public static Boolean isModify(String userId) {
         String json = null;
         java.io.File configV2File;
-
         if (StringUtil.isEmpty(userId)) {
             configV2File = Files.getDefaultConfigV2File();
         } else {
             configV2File = Files.getConfigV2File(userId);
         }
-
         if (configV2File.exists()) {
             json = Files.readFromFile(configV2File);
         }
-
         if (json != null) {
             String formatted = JsonUtil.formatJson(INSTANCE);
             return formatted == null || !formatted.equals(json);
         }
         return true;
     }
-
     /**
      * 保存配置文件
      *
@@ -171,7 +152,6 @@ public class Config {
             }
             String userName = StringUtil.isEmpty(userId) ? userId : UserMap.get(userId).getShowName();
             Log.record("保存用户[" + userName + "]配置");
-
         } catch (Exception e) {
             Log.printStackTrace(TAG, e);
             Log.record("保存用户配置失败");
@@ -179,8 +159,6 @@ public class Config {
         }
         return true;
     }
-
-
     /**
      * 加载配置文件
      *
@@ -255,7 +233,6 @@ public class Config {
         Log.runtime(TAG, "加载配置结束！");
         return INSTANCE;
     }
-
     /**
      * 卸载当前配置
      */
@@ -268,5 +245,4 @@ public class Config {
             }
         }
     }
-
 }

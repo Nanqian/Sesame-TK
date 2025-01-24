@@ -1,25 +1,20 @@
 package fansirsqi.xposed.sesame.util;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Objects;
-
 import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.util.Maps.CooperateMap;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
-
 /**
  * Utility class for handling import and export operations.
  */
 public class PortUtil {
-
     public static void handleExport(Context context, Uri uri, String userId) {
         if (uri == null) {
             ToastUtil.makeText("未选择目标位置", Toast.LENGTH_SHORT).show();
@@ -29,7 +24,6 @@ public class PortUtil {
             File configV2File = StringUtil.isEmpty(userId) ?
                     Files.getDefaultConfigV2File() :
                     Files.getConfigV2File(userId);
-
             FileInputStream inputStream = new FileInputStream(configV2File);
             if (Files.streamTo(inputStream, context.getContentResolver().openOutputStream(uri))) {
                 ToastUtil.makeText("导出成功！", Toast.LENGTH_SHORT).show();
@@ -41,13 +35,11 @@ public class PortUtil {
             ToastUtil.makeText("导出失败：发生异常", Toast.LENGTH_SHORT).show();
         }
     }
-
     public static void handleImport(Context context, Uri uri, String userId) {
         if (uri == null) {
             ToastUtil.makeText("导入失败：未选择文件", Toast.LENGTH_SHORT).show();
             return;
         }
-
         try {
             File configV2File = StringUtil.isEmpty(userId) ?
                     Files.getDefaultConfigV2File() :
@@ -75,7 +67,6 @@ public class PortUtil {
             ToastUtil.makeText("导入失败：发生异常", Toast.LENGTH_SHORT).show();
         }
     }
-
     public static void save(Context context, String userId) {
         try {
             if (Config.isModify(userId) && Config.save(userId, false)) {

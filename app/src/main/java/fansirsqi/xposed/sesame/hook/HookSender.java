@@ -1,13 +1,9 @@
 package fansirsqi.xposed.sesame.hook;
-
 import androidx.annotation.NonNull;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.Map;
-
 import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.util.Log;
 import okhttp3.Call;
@@ -17,17 +13,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
 /**
  * @author Byseven
  * @date 2025/1/17
  * @apiNote
  */
 public class HookSender {
-
     private static final OkHttpClient client = new OkHttpClient();
     private static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
-
     public static void sendHookData(Map<String, Object> hookResponse) {
         try {
             JSONObject jo = new JSONObject();
@@ -37,30 +30,24 @@ public class HookSender {
                 if (v instanceof String stringValue) {
                     try {
                         JSONObject valueAsJson = new JSONObject(stringValue);
-                        Log.debug("Converting " + k + " to JSONObject");
                         jo.put(k, valueAsJson);
                     } catch (JSONException e) {
-                        Log.debug("Not Converting " + k + " to JSONObject");
                         jo.put(k, v);
                     }
                 } else {
                     jo.put(k, v);
                 }
             }
-
             RequestBody body = RequestBody.create(jo.toString(), JSON_MEDIA_TYPE);
-
             Request request = new Request.Builder()
                     .url(BaseModel.getSendHookDataUrl().getValue())
                     .post(body)
                     .build();
-
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     Log.runtime("Failed to send hook data: " + e.getMessage());
                 }
-
                 @Override
                 public void onResponse(@NonNull Call call, @NonNull Response response) {
                     if (!response.isSuccessful()) {
@@ -74,7 +61,4 @@ public class HookSender {
             Log.error("Failed to send hook data: " + e.getMessage());
         }
     }
-
-
-
 }

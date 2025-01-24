@@ -1,10 +1,7 @@
 package fansirsqi.xposed.sesame.task.antStall;
-
 import android.util.Base64;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
-
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
@@ -34,26 +30,21 @@ import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-
 /**
  * @author Constanline
  * @since 2023/08/22
  */
 public class AntStall extends ModelTask {
     private static final String TAG = AntStall.class.getSimpleName();
-
     private static class Seat {
         public String userId;
         public int hot;
-
         public Seat(String userId, int hot) {
             this.userId = userId;
             this.hot = hot;
         }
     }
-
     private static final List<String> taskTypeList;
-
     static {
         taskTypeList = new ArrayList<>();
         // 开启收新村收益提醒
@@ -68,22 +59,18 @@ public class AntStall extends ModelTask {
         taskTypeList.add("ANTSTALL_TASK_diantao202311");
         taskTypeList.add("ANTSTALL_TASK_nongchangleyuan");
     }
-
     @Override
     public String getName() {
-        return "新村🏵";
+        return "新村";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.STALL;
     }
-
     @Override
     public String getIcon() {
         return "AntStall.png";
     }
-
     private BooleanModelField stallAutoOpen;
     private ChoiceModelField stallOpenType;
     private SelectModelField stallOpenList;
@@ -115,7 +102,6 @@ public class AntStall extends ModelTask {
      * 助力好友列表
      */
     private SelectModelField assistFriendList;
-
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -146,12 +132,10 @@ public class AntStall extends ModelTask {
         modelFields.addField(assistFriendList = new SelectModelField("assistFriendList", "助力好友列表", new LinkedHashSet<>(), AlipayUser::getList));
         return modelFields;
     }
-
     @Override
     public Boolean check() {
         return !TaskCommon.IS_ENERGY_TIME;
     }
-
     @Override
     public void run() {
         try {
@@ -163,27 +147,20 @@ public class AntStall extends ModelTask {
                     Log.farm("蚂蚁新村⛪请先开启蚂蚁新村");
                     return;
                 }
-
                 JSONObject astReceivableCoinVO = jo.getJSONObject("astReceivableCoinVO");
                 if (astReceivableCoinVO.optBoolean("hasCoin")) {
                     settleReceivable();
                 }
-
                 if (stallThrowManure.getValue()) {
                     throwManure();
                 }
-
                 JSONObject seatsMap = jo.getJSONObject("seatsMap");
                 settle(seatsMap);
-
                 collectManure();
-
                 sendBack(seatsMap);
-
                 if (stallAutoClose.getValue()) {
                     closeShop();
                 }
-
                 if (stallAutoOpen.getValue()) {
                     openShop();
                 }
@@ -212,7 +189,6 @@ public class AntStall extends ModelTask {
             Log.other("执行结束-" + getName());
         }
     }
-
     private void sendBack(String billNo, String seatId, String shopId, String shopUserId) {
         String s = AntStallRpcCall.shopSendBackPre(billNo, seatId, shopId, shopUserId);
         try {
@@ -240,7 +216,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void inviteOpen(String seatId) {
         String s = AntStallRpcCall.rankInviteOpen();
         try {
@@ -274,7 +249,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void sendBack(JSONObject seatsMap) {
         try {
             for (int i = 1; i <= 2; i++) {
@@ -330,7 +304,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void settle(JSONObject seatsMap) {
         try {
             JSONObject seat = seatsMap.getJSONObject("MASTER");
@@ -350,13 +323,11 @@ public class AntStall extends ModelTask {
                     }
                 }
             }
-
         } catch (Throwable t) {
             Log.runtime(TAG, "settle err:");
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void closeShop() {
         String s = AntStallRpcCall.shopList();
         try {
@@ -405,7 +376,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void openShop() {
         String s = AntStallRpcCall.shopList();
         try {
@@ -428,7 +398,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void rankCoinDonate(Queue<String> shopIds) {
         String s = AntStallRpcCall.rankCoinDonate();
         try {
@@ -460,7 +429,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void openShop(String seatId, String userId, String shopId) {
         String s = AntStallRpcCall.shopOpen(seatId, userId, shopId);
         try {
@@ -473,7 +441,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void friendHomeOpen(List<Seat> seats, Queue<String> shopIds) {
         Collections.sort(seats, (e1, e2) -> e2.hot - e1.hot);
         for (Seat seat : seats) {
@@ -505,7 +472,6 @@ public class AntStall extends ModelTask {
             }
         }
     }
-
     private void shopClose(String shopId, String billNo, String userId) {
         String s = AntStallRpcCall.preShopClose(shopId, billNo);
         try {
@@ -527,7 +493,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void taskList() {
         try {
             String s = AntStallRpcCall.taskList();
@@ -540,7 +505,6 @@ public class AntStall extends ModelTask {
             if (!signListModel.getBoolean("currentKeySigned")) {
                 signToday();
             }
-
             JSONArray taskModels = jo.getJSONArray("taskModels");
             for (int i = 0; i < taskModels.length(); i++) {
                 try {
@@ -638,7 +602,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void signToday() {
         String s = AntStallRpcCall.signToday();
         try {
@@ -653,7 +616,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void receiveTaskAward(String taskType) {
         if (!stallReceiveAward.getValue()) {
             return;
@@ -671,7 +633,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private boolean finishTask(String taskType) {
         String s = AntStallRpcCall.finishTask(taskType + "_" + System.currentTimeMillis(), taskType);
         try {
@@ -687,7 +648,6 @@ public class AntStall extends ModelTask {
         }
         return false;
     }
-
     private boolean inviteRegister() {
         if (!stallInviteRegister.getValue()) {
             return false;
@@ -728,7 +688,6 @@ public class AntStall extends ModelTask {
         }
         return false;
     }
-
     private String shareP2P() {
         try {
             String s = AntStallRpcCall.shareP2P();
@@ -746,7 +705,6 @@ public class AntStall extends ModelTask {
         }
         return null;
     }
-
     /**
      * 助力好友
      */
@@ -789,7 +747,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     // 捐赠项目
     private void donate() {
         try {
@@ -797,7 +754,6 @@ public class AntStall extends ModelTask {
             String response = AntStallRpcCall.projectList();
             // 将返回的 JSON 字符串转换为 JSONObject 对象
             JSONObject jsonResponse = new JSONObject(response);
-
             // 检查返回结果是否成功
             if ("SUCCESS".equals(jsonResponse.optString("resultCode", ""))) {
                 // 获取 astUserInfoVO 对象
@@ -811,7 +767,6 @@ public class AntStall extends ModelTask {
                         return;
                     }
                 }
-
                 // 获取项目列表中的 astProjectVOS 数组
                 JSONArray projects = jsonResponse.optJSONArray("astProjectVOS");
                 // 遍历项目列表
@@ -853,9 +808,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
-
-
     // 进入下一村
     private void roadmap() {
         try {
@@ -879,7 +831,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void collectManure() {
         String s = AntStallRpcCall.queryManureInfo();
         try {
@@ -902,7 +853,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void throwManure(JSONArray dynamicList) {
         try {
             String s = AntStallRpcCall.throwManure(dynamicList);
@@ -921,7 +871,6 @@ public class AntStall extends ModelTask {
             }
         }
     }
-
     private void throwManure() {
         try {
             String s = AntStallRpcCall.dynamicLoss();
@@ -962,7 +911,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private void settleReceivable() {
         String s = AntStallRpcCall.settleReceivable();
         try {
@@ -975,7 +923,6 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 贴罚单
      */
@@ -1063,40 +1010,24 @@ public class AntStall extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     public interface StallOpenType {
-
         int OPEN = 0;
         int CLOSE = 1;
-
         String[] nickNames = {"选中摆摊", "选中不摆摊"};
-
     }
-
     public interface StallTicketType {
-
         int TICKET = 0;
         int DONT_TICKET = 1;
-
         String[] nickNames = {"选中贴罚单", "选中不贴罚单"};
-
     }
-
     public interface StallThrowManureType {
-
         int THROW = 0;
         int DONT_THROW = 1;
-
         String[] nickNames = {"选中丢肥料", "选中不丢肥料"};
-
     }
-
     public interface StallInviteShopType {
-
         int INVITE = 0;
         int DONT_INVITE = 1;
-
         String[] nickNames = {"选中邀请", "选中不邀请"};
     }
-
 }

@@ -1,26 +1,19 @@
 package fansirsqi.xposed.sesame.task.AnswerAI;
-
 import fansirsqi.xposed.sesame.util.Log;
 import okhttp3.*;
 import org.json.JSONObject;
-
 import java.util.List;
-
 import static fansirsqi.xposed.sesame.util.JsonUtil.getValueByPath;
-
 /**
  * GenAI帮助类，用于与GenAI接口交互以获取AI回答
  * 支持单条文本问题及带有候选答案列表的问题请求
  */
 public class GenAI implements AnswerAIInterface {
     private final String TAG = GenAI.class.getSimpleName();
-
     // GenAI服务接口URL
     private final String url = "https://api.genai.gd.edu.kg/google";
-
     // 认证Token，用于访问GenAI接口
     private final String token;
-
     /**
      * 私有构造函数，防止外部实例化
      *
@@ -29,7 +22,6 @@ public class GenAI implements AnswerAIInterface {
     public GenAI(String token) {
         this.token = (token != null && !token.isEmpty()) ? token : "";
     }
-
     /**
      * 向AI接口发送请求获取回答
      *
@@ -52,33 +44,28 @@ public class GenAI implements AnswerAIInterface {
                     "        }\n" +
                     "    ]\n" +
                     "}";
-
             // 配置OkHttp客户端和请求体
             OkHttpClient client = new OkHttpClient();
             MediaType mediaType = MediaType.parse("application/json");
             RequestBody body = RequestBody.create(content, mediaType);
             String requestUrl = url + "/v1beta/models/gemini-1.5-flash:generateContent?key=" + token;
-
             // 构建HTTP请求
             Request request = new Request.Builder()
                     .url(requestUrl)
                     .post(body)
                     .addHeader("Content-Type", "application/json")
                     .build();
-
             // 执行请求并获取响应
             Response response = client.newCall(request).execute();
             if (response.body() == null) {
                 return result;
             }
-
             String jsonResponse = response.body().string();
             if (!response.isSuccessful()) {
                 Log.other("Gemini请求失败");
                 Log.runtime("Gemini接口异常：" + jsonResponse);
                 return result; // 可能的API Key错误
             }
-
             // 解析JSON响应，获取回答内容
             JSONObject jsonObject = new JSONObject(jsonResponse);
             result = getValueByPath(jsonObject, "candidates.[0].content.parts.[0].text");
@@ -87,7 +74,6 @@ public class GenAI implements AnswerAIInterface {
         }
         return result;
     }
-
     /**
      * 向AI接口发送请求，结合候选答案判断最终的回答
      *
@@ -102,12 +88,10 @@ public class GenAI implements AnswerAIInterface {
         for (String answer : answerList) {
             answerStr.append("[").append(answer).append("]");
         }
-
         // 发送请求并获取AI回答结果
         String answerResult = getAnswer(title + "\n" + answerStr);
         if (answerResult != null && !answerResult.isEmpty()) {
             Log.record("AI🧠回答：" + answerResult);
-
             // 查找并返回与候选答案匹配的项
             for (String answer : answerList) {
                 if (answerResult.contains(answer)) {

@@ -1,12 +1,9 @@
 package fansirsqi.xposed.sesame.task.consumeGold;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
@@ -17,25 +14,20 @@ import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-
 public class ConsumeGold extends ModelTask {
     private static final String TAG = ConsumeGold.class.getSimpleName();
-
     @Override
     public String getName() {
-        return "消费金💰";
+        return "消费金";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.OTHER;
     }
-
     @Override
     public String getIcon() {
         return "ConsumeGold.svg";
     }
-
     private IntegerModelField lastExecutionInterval;
     private BooleanModelField consumeGoldSign;
     private BooleanModelField consumeGoldAward;
@@ -45,7 +37,6 @@ public class ConsumeGold extends ModelTask {
     private BooleanModelField consumeGoldGainTask;
     private IntegerModelField eachTaskDelay;
     private IntegerModelField watchAdDelay;
-
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -60,7 +51,6 @@ public class ConsumeGold extends ModelTask {
         modelFields.addField(watchAdDelay = new IntegerModelField("watchAdDelay", "观看15s广告任务执行延时（毫秒，默认16000）", 16000));
         return modelFields;
     }
-
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME) {
             return false;
@@ -68,7 +58,6 @@ public class ConsumeGold extends ModelTask {
         long executeTime = RuntimeInfo.getInstance().getLong("consumeGold", 0);
         return System.currentTimeMillis() - executeTime >= lastExecutionInterval.getValue();
     }
-
     public void run() {
         try {
             Log.other("执行开始-" + getName());
@@ -99,7 +88,6 @@ public class ConsumeGold extends ModelTask {
             Log.other("执行结束-" + getName());
         }
     }
-
     /**
      * 签到
      */
@@ -152,7 +140,6 @@ public class ConsumeGold extends ModelTask {
             Log.printStackTrace(TAG + ".consumeGoldSign", t);
         }
     }
-
     /**
      * 抽奖
      */
@@ -205,7 +192,6 @@ public class ConsumeGold extends ModelTask {
             Log.printStackTrace(TAG + ".consumeGoldAward", t);
         }
     }
-
     /**
      * 领取补签卡
      */
@@ -238,7 +224,6 @@ public class ConsumeGold extends ModelTask {
             Log.printStackTrace(TAG + ".consumeGoldGainRepair", t);
         }
     }
-
     /**
      * 使用补签卡
      */
@@ -312,7 +297,6 @@ public class ConsumeGold extends ModelTask {
             Log.printStackTrace(TAG + ".consumeGoldRepairSign", t);
         }
     }
-
     /**
      * 积分任务
      */
@@ -333,7 +317,6 @@ public class ConsumeGold extends ModelTask {
             Log.printStackTrace(TAG + ".consumeGoldGainTask", t);
         }
     }
-
     /**
      * 执行任务
      *

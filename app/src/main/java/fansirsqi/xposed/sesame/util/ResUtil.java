@@ -1,11 +1,8 @@
 package fansirsqi.xposed.sesame.util;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 public class ResUtil {
     private static final String TAG = ResUtil.class.getSimpleName();
-
     // 写一个将str转换为jsonobj的方法
     public static String strToJson(String str) {
         try {
@@ -15,21 +12,17 @@ public class ResUtil {
             return null;
         }
     }
-
     public static Boolean checkResCode(String str) throws JSONException {
         JSONObject jsonObj = new JSONObject(str);
         return checkResCode(TAG, jsonObj);
     }
-
     public static Boolean checkResCode(String TAG, String str) throws JSONException {
         JSONObject jsonObj = new JSONObject(str);
         return checkResCode(TAG, jsonObj);
     }
-
     public static Boolean checkResCode(JSONObject jo) {
         return checkResCode(TAG, jo);
     }
-
     /**
      * 检查JSON对象中的响应码（resultCode），并根据其类型和值返回处理结果。
      *
@@ -70,22 +63,17 @@ public class ResUtil {
         }
         return false;
     }
-
-
     public static Boolean checkSuccess(String str) throws JSONException {
         JSONObject jo = new JSONObject(str);
         return checkSuccess(TAG, jo);
     }
-
     public static Boolean checkSuccess(String tag, String str) throws JSONException {
         JSONObject jo = new JSONObject(str);
         return checkSuccess(tag, jo);
     }
-
     public static Boolean checkSuccess(JSONObject jo) {
         return checkSuccess(TAG, jo);
     }
-
     public static Boolean checkSuccess(String tag, JSONObject jo) {
         if (!jo.optBoolean("success") && !jo.optBoolean("isSuccess")) {
             logErrorDetails(tag, jo);
@@ -93,8 +81,6 @@ public class ResUtil {
         }
         return true;
     }
-
-
     private static void recordError(String TAG, JSONObject jo, String key, String prefix) throws JSONException {
         if (jo.has(key)) {
             Log.record(TAG + prefix + ": " + jo.getString(key));
@@ -104,8 +90,6 @@ public class ResUtil {
             Log.record(TAG + prefix + ": " + jo);
         }
     }
-
-
     private static void logErrorDetails(String tag, JSONObject jo) {
         try {
             if (jo.has("errorMsg")) {

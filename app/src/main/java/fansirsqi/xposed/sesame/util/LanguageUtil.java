@@ -1,16 +1,12 @@
 package fansirsqi.xposed.sesame.util;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import java.util.Locale;
-
 import fansirsqi.xposed.sesame.model.BaseModel;
-
 /**
  * 语言工具类，用于设置应用程序的语言环境。
  */
 public class LanguageUtil {
-
     /**
      * 设置应用程序的语言环境为简体中文。
      * 如果配置指定使用简体中文，则忽略系统语言设置，强制应用简体中文。
@@ -24,7 +20,6 @@ public class LanguageUtil {
             Locale locale = new Locale("zh", "CN");
             // 设置默认的Locale
             Locale.setDefault(locale);
-
             // 获取当前的配置信息
             Configuration config = new Configuration(context.getResources().getConfiguration());
             // 更新配置信息中的Locale

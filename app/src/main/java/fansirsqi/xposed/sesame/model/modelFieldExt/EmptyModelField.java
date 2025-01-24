@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.model.modelFieldExt;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -9,36 +8,27 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import androidx.core.content.ContextCompat;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
-
 public class EmptyModelField extends ModelField<Object> {
-
     private final Runnable clickRunner;
-
     public EmptyModelField(String code, String name) {
         super(code, name, null);
         this.clickRunner = null;
     }
-
     public EmptyModelField(String code, String name, Runnable clickRunner) {
         super(code, name, null);
         this.clickRunner = clickRunner;
     }
-
     @Override
     public String getType() {
         return "EMPTY";
     }
-
     @Override
     public void setObjectValue(Object value) {
     }
-
     @JsonIgnore
     public View getView(Context context) {
         Button btn = new Button(context);
@@ -64,5 +54,4 @@ public class EmptyModelField extends ModelField<Object> {
         }
         return btn;
     }
-
 }

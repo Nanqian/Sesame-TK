@@ -1,43 +1,34 @@
 package fansirsqi.xposed.sesame.hook.rpc.intervallimit;
-
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.concurrent.ThreadLocalRandom;
-
 /**
  * 用于实现一个可变间隔限制器。
  * 支持固定间隔或范围间隔两种模式。
  */
 public class FixedOrRangeIntervalLimit implements IntervalLimit {
-
     /**
      * 是否为固定间隔模式。如果为 true，则表示固定间隔；否则为范围间隔。
      */
     private final Boolean fixedOrRange;
-
     /**
      * 固定间隔时间（毫秒），仅在固定间隔模式下使用。
      */
     private final Integer fixedInt;
-
     /**
      * 范围间隔的最小值（毫秒），仅在范围间隔模式下使用。
      */
     private final Integer rangeMin;
-
     /**
      * 范围间隔的最大值（毫秒，非闭区间），仅在范围间隔模式下使用。
      */
     private final Integer rangeMax;
-
     /**
      * 上一次调用的时间戳（毫秒）。
      */
     @Getter
     @Setter
     private Long time = 0L;
-
     /**
      * 构造函数，根据输入字符串决定使用固定间隔还是范围间隔模式。
      *
@@ -51,7 +42,6 @@ public class FixedOrRangeIntervalLimit implements IntervalLimit {
         if (min > max) {
             max = min;
         }
-
         if (fixedOrRangeStr != null && !fixedOrRangeStr.isEmpty()) {
             String[] split = fixedOrRangeStr.split("-");
             if (split.length == 2) {
@@ -97,7 +87,6 @@ public class FixedOrRangeIntervalLimit implements IntervalLimit {
             fixedOrRange = true;
         }
     }
-
     /**
      * 获取当前间隔时间。
      *

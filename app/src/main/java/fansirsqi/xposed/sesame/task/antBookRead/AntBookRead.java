@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.task.antBookRead;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import fansirsqi.xposed.sesame.model.ModelFields;
@@ -11,30 +10,24 @@ import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 public class AntBookRead extends ModelTask {
     private static final String TAG = AntBookRead.class.getSimpleName();
-
     @Override
     public String getName() {
-        return "读书听书📚";
+        return "读书听书";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.OTHER;
     }
-
     @Override
     public String getIcon() {
         return "AntBookRead.png";
     }
-
     @Override
     public ModelFields getFields() {
         return new ModelFields();
     }
-
     @Override
     public Boolean check() {
         if (TaskCommon.IS_ENERGY_TIME || !TaskCommon.IS_AFTER_8AM) {
@@ -43,7 +36,6 @@ public class AntBookRead extends ModelTask {
         long executeTime = RuntimeInfo.getInstance().getLong("consumeGold", 0);
         return System.currentTimeMillis() - executeTime >= 21600000;
     }
-
     @Override
     public void run() {
         try {
@@ -59,7 +51,6 @@ public class AntBookRead extends ModelTask {
             Log.other("执行结束-" + getName());
         }
     }
-
     private static void queryTaskCenterPage() {
         try {
             String s = AntBookReadRpcCall.queryTaskCenterPage();
@@ -112,7 +103,6 @@ public class AntBookRead extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void queryTask() {
         boolean doubleCheck = false;
         try {
@@ -173,7 +163,6 @@ public class AntBookRead extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void collectTaskPrize(String taskId, String taskType, String name) {
         try {
             String s = AntBookReadRpcCall.collectTaskPrize(taskId, taskType);
@@ -187,7 +176,6 @@ public class AntBookRead extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void taskFinish(String taskId, String taskType) {
         try {
             String s = AntBookReadRpcCall.taskFinish(taskId, taskType);
@@ -198,7 +186,6 @@ public class AntBookRead extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-
     private static void queryTreasureBox() {
         try {
             String s = AntBookReadRpcCall.queryTreasureBox();

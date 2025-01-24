@@ -1,14 +1,11 @@
 package fansirsqi.xposed.sesame.task.ancientTree;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Locale;
-
 import fansirsqi.xposed.sesame.entity.AreaCode;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
@@ -20,28 +17,22 @@ import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 public class AncientTree extends ModelTask {
     private static final String TAG = AncientTree.class.getSimpleName();
-
     @Override
     public String getName() {
-        return "古树🌳";
+        return "古树";
     }
-
     @Override
     public ModelGroup getGroup() {
         return ModelGroup.FOREST;
     }
-
     @Override
     public String getIcon() {
         return "AncientTree.png";
     }
-
     private BooleanModelField ancientTreeOnlyWeek;
     private SelectModelField ancientTreeCityCodeList;
-
     @Override
     public ModelFields getFields() {
         ModelFields modelFields = new ModelFields();
@@ -49,7 +40,6 @@ public class AncientTree extends ModelTask {
         modelFields.addField(ancientTreeCityCodeList = new SelectModelField("ancientTreeCityCodeList", "古树区划代码列表", new LinkedHashSet<>(), AreaCode::getList));
         return modelFields;
     }
-
     @Override
     public Boolean check() {
         if (!TaskCommon.IS_ENERGY_TIME && TaskCommon.IS_AFTER_8AM) {
@@ -62,7 +52,6 @@ public class AncientTree extends ModelTask {
         }
         return false;
     }
-
     @Override
     public void run() {
         try {
@@ -75,7 +64,6 @@ public class AncientTree extends ModelTask {
             Log.other("结束执行"+getName());
         }
     }
-
     private static void ancientTree(Collection<String> ancientTreeCityCodeList) {
         try {
             for (String cityCode : ancientTreeCityCodeList) {
@@ -89,7 +77,6 @@ public class AncientTree extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     private static void ancientTreeProtect(String cityCode) {
         try {
             JSONObject jo = new JSONObject(AncientTreeRpcCall.homePage(cityCode));
@@ -116,7 +103,6 @@ public class AncientTree extends ModelTask {
             Log.printStackTrace(TAG, th);
         }
     }
-
     private static void districtDetail(String districtCode) {
         try {
             JSONObject jo = new JSONObject(AncientTreeRpcCall.districtDetail(districtCode));

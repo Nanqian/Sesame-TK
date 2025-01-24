@@ -1,15 +1,11 @@
 package fansirsqi.xposed.sesame.task.antOrchard;
-
 import android.util.Base64;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
@@ -24,17 +20,12 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.StatusUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-
 public class AntOrchard extends ModelTask {
   private static final String TAG = AntOrchard.class.getSimpleName();
-
   private String userId;
   private String treeLevel;
-
   private String[] wuaList;
-
   private Integer executeIntervalInt;
-
   private IntegerModelField executeInterval;
   private BooleanModelField receiveOrchardTaskAward;
   private IntegerModelField orchardSpreadManureCount;
@@ -43,22 +34,18 @@ public class AntOrchard extends ModelTask {
   private SelectModelField dontWeedingList;
   // 助力好友列表
   private SelectModelField assistFriendList;
-
   @Override
   public String getName() {
-    return "农场🌾";
+    return "农场";
   }
-
   @Override
   public ModelGroup getGroup() {
     return ModelGroup.ORCHARD;
   }
-
   @Override
   public String getIcon() {
     return "AntOrchard.png";
   }
-
   @Override
   public ModelFields getFields() {
     ModelFields modelFields = new ModelFields();
@@ -71,12 +58,10 @@ public class AntOrchard extends ModelTask {
     modelFields.addField(dontWeedingList = new SelectModelField("dontWeedingList", "除草 | 不除草好友列表", new LinkedHashSet<>(), AlipayUser::getList));
     return modelFields;
   }
-
   @Override
   public Boolean check() {
     return !TaskCommon.IS_ENERGY_TIME;
   }
-
   @Override
   public void run() {
     try {
@@ -102,7 +87,6 @@ public class AntOrchard extends ModelTask {
             }
             Integer orchardSpreadManureCountValue = orchardSpreadManureCount.getValue();
             if (orchardSpreadManureCountValue > 0 && StatusUtil.canSpreadManureToday(userId)) orchardSpreadManure();
-
             if (orchardSpreadManureCountValue >= 3 && orchardSpreadManureCountValue < 10) {
               querySubplotsActivity(3);
             } else if (orchardSpreadManureCountValue >= 10) {
@@ -128,7 +112,6 @@ public class AntOrchard extends ModelTask {
       Log.other("执行结束-" + getName());
     }
   }
-
   private String getWua() {
     if (wuaList == null) {
       try {
@@ -143,7 +126,6 @@ public class AntOrchard extends ModelTask {
     }
     return "null";
   }
-
   private boolean canSpreadManureContinue(int stageBefore, int stageAfter) {
     if (stageAfter - stageBefore > 1) {
       return true;
@@ -151,7 +133,6 @@ public class AntOrchard extends ModelTask {
     Log.record("施肥只加0.01%进度今日停止施肥！");
     return false;
   }
-
   private void orchardSpreadManure() {
     try {
       do {
@@ -217,7 +198,6 @@ public class AntOrchard extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void extraInfoGet() {
     try {
       String s = AntOrchardRpcCall.extraInfoGet();
@@ -240,7 +220,6 @@ public class AntOrchard extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void drawLotteryPlus(JSONObject lotteryPlusInfo) {
     try {
       if (!lotteryPlusInfo.has("userSevenDaysGiftsItem")) return;
@@ -276,7 +255,6 @@ public class AntOrchard extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void doOrchardDailyTask(String userId) {
     try {
       String s = AntOrchardRpcCall.orchardListTask();
@@ -312,7 +290,6 @@ public class AntOrchard extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void orchardSign(JSONObject signTaskInfo) {
     try {
       JSONObject currentSignItem = signTaskInfo.getJSONObject("currentSignItem");
@@ -332,7 +309,6 @@ public class AntOrchard extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private static void triggerTbTask() {
     try {
       String s = AntOrchardRpcCall.orchardListTask();
@@ -363,7 +339,6 @@ public class AntOrchard extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   private void querySubplotsActivity(int taskRequire) {
     try {
       String s = AntOrchardRpcCall.querySubplotsActivity(treeLevel);
@@ -416,7 +391,6 @@ public class AntOrchard extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
   /**
    * 创建动物信息JSON字符串。
    *
@@ -429,7 +403,6 @@ public class AntOrchard extends ModelTask {
   private String createAnimalInfoJson(String animalUserId, int earnManureCount, String groupId, String orchardUserId) {
     return "{\"animalUserId\":\"" + animalUserId + "\",\"earnManureCount\":" + earnManureCount + ",\"groupId\":\"" + groupId + "\",\"orchardUserId\":\"" + orchardUserId + "\"}";
   }
-
   /** 一键捉鸡除草 */
   private void batchHireAnimalRecommend() {
     try {
@@ -443,7 +416,6 @@ public class AntOrchard extends ModelTask {
             String animalUserId = jo.getString("animalUserId");
             if (dontHireList.getValue().contains(animalUserId))
               continue;
-
             int earnManureCount = jo.getInt("earnManureCount");
             String groupId = jo.getString("groupId");
             String orchardUserId = jo.getString("orchardUserId");
@@ -468,9 +440,6 @@ public class AntOrchard extends ModelTask {
       Log.printStackTrace(TAG, t);
     }
   }
-
-
-
   // 助力
   private void orchardassistFriend() {
     try {

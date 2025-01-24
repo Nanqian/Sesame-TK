@@ -1,15 +1,11 @@
 package fansirsqi.xposed.sesame.entity;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
-
 /**
  * 区域代码类，继承自IdAndName。
  * 该类用于管理城市代码和城市名称。
@@ -17,7 +13,6 @@ import fansirsqi.xposed.sesame.util.Log;
 public class AreaCode extends MapperEntity {
     private static final String TAG = AreaCode.class.getSimpleName();
     private static List<AreaCode> list;
-
     /**
      * 构造函数，初始化区域代码对象。
      *
@@ -28,7 +23,6 @@ public class AreaCode extends MapperEntity {
         id = i;
         name = n;
     }
-
     /**
      * 获取区域代码列表。
      * 如果列表尚未初始化，则从文件中读取城市代码。
@@ -41,7 +35,6 @@ public class AreaCode extends MapperEntity {
             String cityCode = Files.readFromFile(Files.getCityCodeFile());
             JSONArray ja = parseCityCode(cityCode);
             list = new ArrayList<>();
-
             for (int i = 0; i < ja.length(); i++) {
                 try {
                     JSONObject jo = ja.getJSONObject(i);
@@ -53,7 +46,6 @@ public class AreaCode extends MapperEntity {
         }
         return list;
     }
-
     /**
      * 解析城市代码字符串为JSONArray。
      * 如果解析失败，则返回默认的城市代码JSONArray。
@@ -77,5 +69,4 @@ public class AreaCode extends MapperEntity {
             return defaultCities;
         }
     }
-
 }

@@ -1,33 +1,26 @@
 package fansirsqi.xposed.sesame.model.modelFieldExt;
-
 import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-
 import androidx.core.content.ContextCompat;
-
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.ui.StringDialog;
-
 /**
  * Integer 类型字段类，继承自 ModelField<Integer>
  * 该类用于表示具有最小值和最大值限制的整数字段。
  */
 @Getter
 public class IntegerModelField extends ModelField<Integer> {
-
     /** 最小值限制 */
     protected final Integer minLimit;
-
     /** 最大值限制 */
     protected final Integer maxLimit;
-
     /**
      * 构造函数：创建一个没有最小值和最大值限制的 Integer 类型字段
      *
@@ -40,7 +33,6 @@ public class IntegerModelField extends ModelField<Integer> {
         this.minLimit = null;  // 无最小值限制
         this.maxLimit = null;  // 无最大值限制
     }
-
     /**
      * 构造函数：创建一个具有最小值和最大值限制的 Integer 类型字段
      *
@@ -55,7 +47,6 @@ public class IntegerModelField extends ModelField<Integer> {
         this.minLimit = minLimit;  // 设置最小值限制
         this.maxLimit = maxLimit;  // 设置最大值限制
     }
-
     /**
      * 获取字段类型
      *
@@ -65,7 +56,6 @@ public class IntegerModelField extends ModelField<Integer> {
     public String getType() {
         return "INTEGER";
     }
-
     /**
      * 获取字段的配置值（将当前的值转换为字符串）
      *
@@ -75,7 +65,6 @@ public class IntegerModelField extends ModelField<Integer> {
     public String getConfigValue() {
         return String.valueOf(value);  // 返回字段值的字符串表示
     }
-
     /**
      * 设置字段的配置值（根据配置值设置新的值，并且在有最小/最大值限制的情况下进行限制）
      *
@@ -96,7 +85,6 @@ public class IntegerModelField extends ModelField<Integer> {
                 newValue = defaultValue;  // 如果转换失败，使用默认值
             }
         }
-
         // 根据最小值限制调整新值
         if (minLimit != null) {
             newValue = Math.max(minLimit, newValue);
@@ -105,11 +93,9 @@ public class IntegerModelField extends ModelField<Integer> {
         if (maxLimit != null) {
             newValue = Math.min(maxLimit, newValue);
         }
-
         // 设置字段值
         this.value = newValue;
     }
-
     /**
      * 获取视图（返回一个 Button，点击后弹出编辑框）
      *
@@ -141,17 +127,14 @@ public class IntegerModelField extends ModelField<Integer> {
         btn.setOnClickListener(v -> StringDialog.showEditDialog(v.getContext(), ((Button) v).getText(), this));
         return btn;
     }
-
     /**
      * MultiplyIntegerModelField 类，继承自 IntegerModelField，处理带乘数的整数类型字段
      * 该类在设置值时会乘以指定的倍数。
      */
     @Getter
     public static class MultiplyIntegerModelField extends IntegerModelField {
-
         /** 乘数，用于计算最终值 */
         private final Integer multiple;
-
         /**
          * 构造函数：创建一个带乘数限制的整数类型字段
          *
@@ -166,7 +149,6 @@ public class IntegerModelField extends ModelField<Integer> {
             super(code, name, value * multiple, minLimit, maxLimit);  // 调用父类构造函数，并且初始值乘以 multiple
             this.multiple = multiple;  // 设置乘数
         }
-
         /**
          * 获取字段类型
          *
@@ -176,7 +158,6 @@ public class IntegerModelField extends ModelField<Integer> {
         public String getType() {
             return "MULTIPLY_INTEGER";
         }
-
         /**
          * 设置字段的配置值（乘数影响最终值）
          *
@@ -198,7 +179,6 @@ public class IntegerModelField extends ModelField<Integer> {
             }
             reset();  // 如果出现异常，重置字段
         }
-
         /**
          * 获取字段的配置值（返回值除以乘数）
          *

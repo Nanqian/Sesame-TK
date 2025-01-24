@@ -1,12 +1,8 @@
 package fansirsqi.xposed.sesame.util;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-
 public class ThreadUtil {
-
     private static final String TAG = ThreadUtil.class.getSimpleName();
-
     public static void shutdownAndWait(Thread thread, long timeout, TimeUnit unit) {
         if (thread != null) {
             thread.interrupt();
@@ -20,13 +16,11 @@ public class ThreadUtil {
             }
         }
     }
-
     public static void shutdownNow(ExecutorService pool) {
         if (pool != null && !pool.isShutdown()) {
             pool.shutdownNow();
         }
     }
-
     /**
      * 使当前线程暂停指定的毫秒数。
      *
@@ -39,8 +33,6 @@ public class ThreadUtil {
             throw new RuntimeException(e);
         }
     }
-
-
     public boolean shutdownAndAwaitTermination(ExecutorService pool) {
         try {
             shutdownAndAwaitTermination(pool, 30, TimeUnit.SECONDS);
@@ -51,7 +43,6 @@ public class ThreadUtil {
         }
         return true;
     }
-
     public static void shutdownAndAwaitTermination(ExecutorService pool, long timeout, TimeUnit unit) {
         if (pool != null && !pool.isShutdown()) {
             pool.shutdown();
@@ -68,5 +59,4 @@ public class ThreadUtil {
             }
         }
     }
-
 }

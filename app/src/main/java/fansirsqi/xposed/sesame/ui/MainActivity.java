@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.ui;
-
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -17,14 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.UIConfig;
@@ -40,36 +36,25 @@ import fansirsqi.xposed.sesame.util.PermissionUtil;
 import fansirsqi.xposed.sesame.util.StatisticsUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
-
 public class MainActivity extends BaseActivity {
-
     private boolean hasPermissions = false;
-
     private boolean isClick = false;
-
     private TextView tvStatistics;
-
     private final Handler viewHandler = new Handler(Looper.getMainLooper());
-
     private Runnable titleRunner;
-
     private String[] userNameArray = {"默认"};
-
     private UserEntity[] userEntityArray = {null};
-
     @SuppressLint({"UnspecifiedRegisterReceiverFlag", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ToastUtil.init(this); // 初始化全局 Context
-
         hasPermissions = PermissionUtil.checkOrRequestFilePermissions(this);
         if (!hasPermissions) {
             Toast.makeText(this, "未获取文件读写权限", Toast.LENGTH_LONG).show();
             finish(); // 如果权限未获取，终止当前 Activity
             return;
         }
-
         setContentView(R.layout.activity_main);
         View mainImage = findViewById(R.id.main_image);
         tvStatistics = findViewById(R.id.tv_statistics);
@@ -97,7 +82,6 @@ public class MainActivity extends BaseActivity {
                         return false; // 如果不是目标视图，返回false
                     });
         }
-
         BroadcastReceiver broadcastReceiver =
                 new BroadcastReceiver() {
                     @Override
@@ -119,7 +103,6 @@ public class MainActivity extends BaseActivity {
                                                     public void onSuccess(String result) {
                                                         runOnUiThread(() -> updateOneWord(result, oneWord)); // 在主线程中更新UI
                                                     }
-
                                                     @Override
                                                     public void onFailure(String error) {
                                                         runOnUiThread(() -> updateOneWord(error, oneWord)); // 在主线程中更新UI
@@ -155,7 +138,6 @@ public class MainActivity extends BaseActivity {
                     public void onSuccess(String result) {
                         runOnUiThread(() -> oneWord.setText(result)); // 在主线程中更新UI
                     }
-
                     @Override
                     public void onFailure(String error) {
                         runOnUiThread(() -> oneWord.setText(error)); // 在主线程中更新UI
@@ -165,12 +147,9 @@ public class MainActivity extends BaseActivity {
         buildTarget.setText("Build Target: " + ViewAppInfo.getAppBuildTarget()); // 编译日期信息
         StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
     }
-
     private void updateOneWord(String str, TextView oneWord) {
         oneWord.setText(str);
     }
-
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -228,7 +207,6 @@ public class MainActivity extends BaseActivity {
             }
         }
     }
-
     @SuppressLint("NonConstantResourceId")
     public void onClick(View v) {
         if (v.getId() == R.id.main_image) {
@@ -255,14 +233,14 @@ public class MainActivity extends BaseActivity {
             selectSettingUid();
             return;
         } else if (id == R.id.btn_friend_watch) {
-            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
+            String userId = UserMap.getCurrentUid();
+            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userId), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
             return;
         }
         Intent it = new Intent(this, HtmlViewerActivity.class);
         it.setData(Uri.parse(data));
         startActivity(it);
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         PackageManager packageManager = getPackageManager();
@@ -285,7 +263,6 @@ public class MainActivity extends BaseActivity {
         }
         return super.onCreateOptionsMenu(menu);
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -355,7 +332,6 @@ public class MainActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
     public void selectSettingUid() {
         AtomicBoolean selected = new AtomicBoolean(false);
         AlertDialog dialog =
@@ -373,7 +349,6 @@ public class MainActivity extends BaseActivity {
                             selected.set(true);
                             dialog1.dismiss();
                         });
-
         int length = userNameArray.length;
         if (length > 0 && length < 3) {
             new Thread(
@@ -393,7 +368,6 @@ public class MainActivity extends BaseActivity {
                     .start();
         }
     }
-
     /**
      * 启动设置活动，根据用户选择的配置项启动不同的设置界面。
      *
@@ -401,15 +375,11 @@ public class MainActivity extends BaseActivity {
      */
     private void goSettingActivity(int index) {
         UserEntity userEntity = userEntityArray[index];
-
 //        Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? DemoSettingActivity.class : SettingsActivity.class;
         Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? NewSettingsActivity.class : SettingsActivity.class;
-
         // targetActivity：使用 UIConfig 和 ViewAppInfo 中的信息判断启动 NewSettingsActivity 还是 SettingsActivity，简化条件判断。
         // intent.putExtra：userEntity 不为空时，设置用户的 userId 和 userName；若为空，则仅传递 userName。
-
         Intent intent = new Intent(this, targetActivity);
-
         // 设置意图的额外信息：用户 ID 和显示名称
         if (userEntity != null) {
             intent.putExtra("userId", userEntity.getUserId());
@@ -419,7 +389,6 @@ public class MainActivity extends BaseActivity {
         }
         startActivity(intent);
     }
-
     private void updateSubTitle(RunType runType) {
         setBaseTitle(ViewAppInfo.getAppTitle() + "[" + runType.getName() + "]");
         switch (runType) {

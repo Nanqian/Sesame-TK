@@ -5,58 +5,34 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
+import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
-import lombok.Getter;
-import lombok.Setter;
 
-/**
- * 表示好友能量监视器的实体类，提供能量收集的统计和管理功能。
- * 该类是线程安全的，适用于多线程环境。
- *
- * @author Byseven
- * @since 2025/01/22
- */
-@Setter
-@Getter
 public class FriendWatch extends MapperEntity {
 
-    // 日志标签
     private static final String TAG = FriendWatch.class.getSimpleName();
 
-    // 用于存储好友能量数据的 Map
-    private static final Map<String, FriendWatch> friendWatchMap = new HashMap<>();
+    private static JSONObject joFriendWatch;
 
-    // Getter 和 Setter 方法
-    private String startTime; // 开始统计时间
-    private int allGet; // 总收集能量
-    private int weekGet; // 本周收集能量
+    private String startTime;
 
-    /**
-     * 构造方法，初始化好友监视器对象。
-     *
-     * @param id   好友 ID
-     * @param name 好友名称
-     */
+    private int allGet;
+
+    private int weekGet;
+
     public FriendWatch(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    /**
-     * 比较两个好友的周收能量，用于排序。
-     *
-     * @param o 要比较的另一个对象
-     * @return 比较结果
-     */
     @Override
     public int compareTo(MapperEntity o) {
         FriendWatch another = (FriendWatch) o;
@@ -68,110 +44,85 @@ public class FriendWatch extends MapperEntity {
         return super.compareTo(o);
     }
 
-    /**
-     * 更新好友的能量收集数据。
-     *
-     * @param id              好友 ID
-     * @param collectedEnergy 本次收集的能量
-     */
     public static void friendWatch(String id, int collectedEnergy) {
         try {
-            FriendWatch friendWatch = friendWatchMap.get(id);
-            if (friendWatch == null) {
-                friendWatch = new FriendWatch(id, UserMap.getMaskName(id));
-                friendWatch.startTime = TimeUtil.getFormatDate();
-                friendWatch.allGet = 0;
-                friendWatch.weekGet = 0;
-                friendWatchMap.put(id, friendWatch);
+            JSONObject joSingle = joFriendWatch.optJSONObject(id);
+            if (joSingle == null) {
+                joSingle = new JSONObject();
+                joSingle.put("name", UserMap.getMaskName(id));
+                joSingle.put("allGet", 0);
+                joSingle.put("startTime", TimeUtil.getDateStr());
+                joFriendWatch.put(id, joSingle);
             }
-            friendWatch.weekGet += collectedEnergy;
+            joSingle.put("weekGet", joSingle.optInt("weekGet", 0) + collectedEnergy);
         } catch (Throwable th) {
             Log.runtime(TAG, "friendWatch err:");
             Log.printStackTrace(TAG, th);
         }
     }
 
-    /**
-     * 保存好友能量数据到文件。
-     */
     public static synchronized void save(String userId) {
         try {
-            if (userId == null) return;
-            JSONObject joFriendWatch = new JSONObject(friendWatchMap);
+            String notformat = joFriendWatch.toString();
             String formattedJson = JsonUtil.formatJson(joFriendWatch);
-            Files.write2File(formattedJson, Files.getFriendWatchFile(userId));
+            Log.debug(TAG, "friendWatch save: " + formattedJson + " " + notformat);
+            if (Objects.equals(formattedJson, "{}")) {
+                Files.write2File(formattedJson, Files.getFriendWatchFile(userId));
+            } else {
+                Files.write2File(notformat, Files.getFriendWatchFile(userId));
+            }
         } catch (Exception e) {
             Log.runtime(TAG, "friendWatch save err:");
             Log.printStackTrace(TAG, e);
         }
     }
 
-    /**
-     * 更新每日统计数据，如果需要更新周数据则进行重置。
-     */
     public static void updateDay(String userId) {
-        if (userId == null) return;
         if (!needUpdateAll(Files.getFriendWatchFile(userId).lastModified())) {
             return;
         }
+        JSONObject joSingle;
         try {
-            String dateStr = TimeUtil.getFormatDate();
-            for (FriendWatch friendWatch : friendWatchMap.values()) {
-                friendWatch.allGet += friendWatch.weekGet;
-                friendWatch.weekGet = 0;
-                if (friendWatch.startTime == null) {
-                    friendWatch.startTime = dateStr;
+            String dateStr = TimeUtil.getDateStr();
+            Iterator<String> ids = joFriendWatch.keys();
+            while (ids.hasNext()) {
+                String id = ids.next();
+                joSingle = joFriendWatch.getJSONObject(id);
+                joSingle.put("name", joSingle.optString("name"));
+                joSingle.put("allGet", joSingle.optInt("allGet", 0) + joSingle.optInt("weekGet", 0));
+                joSingle.put("weekGet", 0);
+                if (!joSingle.has("startTime")) {
+                    joSingle.put("startTime", dateStr);
                 }
+                joFriendWatch.put(id, joSingle);
             }
-            save(userId);
+            Files.write2File(joFriendWatch.toString(), Files.getFriendWatchFile(userId));
         } catch (Throwable th) {
-            Log.runtime(TAG, "friendWatch updateDay err:");
+            Log.runtime(TAG, "friendWatchNewWeek err:");
             Log.printStackTrace(TAG, th);
         }
     }
 
-    /**
-     * 加载好友能量数据。
-     *
-     * @return 加载是否成功
-     */
     public static synchronized Boolean load(String userId) {
         try {
-            if (userId == null) return false;
             String strFriendWatch = Files.readFromFile(Files.getFriendWatchFile(userId));
-            JSONObject joFriendWatch = strFriendWatch.isEmpty() ? new JSONObject() : new JSONObject(strFriendWatch);
-            friendWatchMap.clear();
-            Iterator<String> ids = joFriendWatch.keys();
-            while (ids.hasNext()) {
-                String id = ids.next();
-                JSONObject friend = joFriendWatch.getJSONObject(id);
-                FriendWatch friendWatch = new FriendWatch(id, friend.optString("name"));
-                friendWatch.startTime = friend.optString("startTime", "无");
-                friendWatch.weekGet = friend.optInt("weekGet", 0);
-                friendWatch.allGet = friend.optInt("allGet", 0);
-                friendWatchMap.put(id, friendWatch);
+            if (!strFriendWatch.isEmpty()) {
+                joFriendWatch = new JSONObject(strFriendWatch);
+            } else {
+                joFriendWatch = new JSONObject();
             }
             return true;
         } catch (JSONException e) {
             Log.printStackTrace(e);
-            friendWatchMap.clear();
+            joFriendWatch = new JSONObject();
         }
         return false;
     }
 
-    /**
-     * 卸载好友能量数据，清空内存中的缓存。
-     */
     public static synchronized void unload() {
-        friendWatchMap.clear();
+        joFriendWatch = new JSONObject();
     }
 
-    /**
-     * 判断是否需要更新所有数据（周一重置）。
-     *
-     * @param last 上次更新时间的时间戳
-     * @return 是否需要更新
-     */
     public static boolean needUpdateAll(long last) {
         if (last == 0L) {
             return true;
@@ -179,17 +130,48 @@ public class FriendWatch extends MapperEntity {
         Calendar cLast = Calendar.getInstance();
         cLast.setTimeInMillis(last);
         Calendar cNow = Calendar.getInstance();
-        return cLast.get(Calendar.DAY_OF_YEAR) != cNow.get(Calendar.DAY_OF_YEAR) &&
-                cNow.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY;
+        if (cLast.get(Calendar.DAY_OF_YEAR) == cNow.get(Calendar.DAY_OF_YEAR)) {
+            return false;
+        }
+        return cNow.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY;
     }
 
-    /**
-     * 获取好友能量列表，用于展示。
-     *
-     * @return 包含所有好友能量数据的列表
-     */
-    public static List<FriendWatch> getList() {
-        return new ArrayList<>(friendWatchMap.values());
+    public static List<FriendWatch> getList(String userId) {
+        ArrayList<FriendWatch> list = new ArrayList<>();
+        String strFriendWatch = Files.readFromFile(Files.getFriendWatchFile(userId));
+        try {
+            JSONObject joFriendWatch;
+            if (StringUtil.isEmpty(strFriendWatch)) {
+                joFriendWatch = new JSONObject();
+            } else {
+                joFriendWatch = new JSONObject(strFriendWatch);
+            }
+            Iterator<String> ids = joFriendWatch.keys();
+            while (ids.hasNext()) {
+                String id = ids.next();
+                JSONObject friend = joFriendWatch.optJSONObject(id);
+                if (friend == null) {
+                    friend = new JSONObject();
+                }
+                String name = friend.optString("name");
+                FriendWatch friendWatch = new FriendWatch(id, name);
+                friendWatch.startTime = friend.optString("startTime", "无");
+                friendWatch.weekGet = friend.optInt("weekGet", 0);
+                friendWatch.allGet = friend.optInt("allGet", 0) + friendWatch.weekGet;
+                String showText = name + "(开始统计时间:" + friendWatch.startTime + ")\n\n";
+                showText = showText + "周收:" + friendWatch.weekGet + " 总收:" + friendWatch.allGet;
+                friendWatch.name = showText;
+                list.add(friendWatch);
+            }
+        } catch (Throwable t) {
+            Log.runtime(TAG, "FriendWatch getList: ");
+            Log.printStackTrace(TAG, t);
+            try {
+                Files.write2File(new JSONObject().toString(), Files.getFriendWatchFile(userId));
+            } catch (Exception e) {
+                Log.printStackTrace(e);
+            }
+        }
+        return list;
     }
-
 }

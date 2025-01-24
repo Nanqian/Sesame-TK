@@ -1,7 +1,5 @@
 package fansirsqi.xposed.sesame.ui;
-
 import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -16,22 +14,17 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import org.json.JSONException;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.Config;
@@ -60,30 +53,21 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
-
 public class NewSettingsActivity extends BaseActivity {
-
     private static final Integer EXPORT_REQUEST_CODE = 1;
-
     private static final Integer IMPORT_REQUEST_CODE = 2;
-
     private ActivityResultLauncher<Intent> exportLauncher;
     private ActivityResultLauncher<Intent> importLauncher;
-
     private WebView webView;
     private Context context;
     private String userId = null;
     private String userName = null;
-
     private final List<ModelDto> tabList = new ArrayList<>();
-
     private final List<ModelGroupDto> groupList = new ArrayList<>();
-
     @Override
     public String getBaseSubtitle() {
         return getString(R.string.settings);
     }
-
     @SuppressLint({"MissingInflatedId", "SetJavaScriptEnabled"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +91,6 @@ public class NewSettingsActivity extends BaseActivity {
         Config.load(userId);
         LanguageUtil.setLocale(this);
         setContentView(R.layout.activity_new_settings);
-
         //处理返回键
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -120,7 +103,6 @@ public class NewSettingsActivity extends BaseActivity {
                 }
             }
         });
-
         // 初始化导出逻辑
         exportLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -130,7 +112,6 @@ public class NewSettingsActivity extends BaseActivity {
                     }
                 }
         );
-
         // 初始化导入逻辑
         importLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -140,8 +121,6 @@ public class NewSettingsActivity extends BaseActivity {
                     }
                 }
         );
-
-
         if (userName != null) {
             setBaseSubtitle(getString(R.string.settings) + ": " + userName);
         }
@@ -183,7 +162,6 @@ public class NewSettingsActivity extends BaseActivity {
                 Toast.makeText(context, "Forbidden Scheme:\"" + scheme + "\"", Toast.LENGTH_SHORT).show();
                 return false;
             }
-
         });
         if (isApkInDebug()) {
             WebView.setWebContentsDebuggingEnabled(true);
@@ -201,8 +179,6 @@ public class NewSettingsActivity extends BaseActivity {
             groupList.add(new ModelGroupDto(modelGroup.getCode(), modelGroup.getName(), modelGroup.getIcon()));
         }
     }
-
-
 //    @Override
 //    public void onBackPressed() {
 //        if (webView.canGoBack()) {
@@ -212,7 +188,6 @@ public class NewSettingsActivity extends BaseActivity {
 //            save();
 //        }
 //    }
-
     public class WebAppInterface {
         @JavascriptInterface
         public void onBackPressed() {
@@ -224,13 +199,11 @@ public class NewSettingsActivity extends BaseActivity {
                 }
             });
         }
-
         @JavascriptInterface
         public void onExit() {
             runOnUiThread(NewSettingsActivity.this::finish);
         }
     }
-
     private class WebViewCallback {
         @JavascriptInterface
         public String getTabs() {
@@ -240,12 +213,10 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return result;
         }
-
         @JavascriptInterface
         public String getBuildInfo() {
             return BuildConfig.APPLICATION_ID + ":" + BuildConfig.VERSION_NAME;
         }
-
         @JavascriptInterface
         public String getGroup() {
             String result = JsonUtil.formatJson(groupList, false);
@@ -254,7 +225,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return result;
         }
-
         @JavascriptInterface
         public String getModelByGroup(String groupCode) {
             Collection<ModelConfig> modelConfigCollection = ModelTask.getGroupModelConfig(ModelGroup.getByCode(groupCode)).values();
@@ -272,7 +242,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return result;
         }
-
         @JavascriptInterface
         public String setModelByGroup(String groupCode, String modelsValue) {
             List<ModelDto> modelDtoList = JsonUtil.parseObject(modelsValue, new TypeReference<List<ModelDto>>() {
@@ -296,7 +265,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "SUCCESS";
         }
-
         @JavascriptInterface
         public String getModel(String modelCode) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -314,7 +282,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return null;
         }
-
         @JavascriptInterface
         public String setModel(String modelCode, String fieldsValue) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -346,7 +313,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "FAILED";
         }
-
         @JavascriptInterface
         public String getField(String modelCode, String fieldCode) throws JSONException {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -362,7 +328,6 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return null;
         }
-
         @JavascriptInterface
         public String setField(String modelCode, String fieldCode, String fieldValue) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -379,13 +344,11 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "FAILED";
         }
-
         @JavascriptInterface
         public void Log(String log) {
             Log.record("设置：" + log);
         }
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 1, 1, "导出配置");
@@ -395,7 +358,6 @@ public class NewSettingsActivity extends BaseActivity {
         menu.add(0, 5, 5, "切换至旧UI");
         return super.onCreateOptionsMenu(menu);
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -415,7 +377,6 @@ public class NewSettingsActivity extends BaseActivity {
 //                startActivityForResult(importIntent, IMPORT_REQUEST_CODE);
                 importLauncher.launch(importIntent);
                 break;
-
             case 3:
                 new AlertDialog.Builder(context)
                         .setTitle("警告")
@@ -456,8 +417,6 @@ public class NewSettingsActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-
 //    @Override
 //    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        super.onActivityResult(requestCode, resultCode, data);
@@ -520,7 +479,6 @@ public class NewSettingsActivity extends BaseActivity {
 //            }
 //        }
 //    }
-
     private void save() {
         if (Config.isModify(userId) && Config.save(userId, false)) {
             Toast.makeText(this, "保存成功！", Toast.LENGTH_SHORT).show();
@@ -539,5 +497,4 @@ public class NewSettingsActivity extends BaseActivity {
             CooperateMap.getInstance(CooperateMap.class).save(userId);
         }
     }
-
 }

@@ -1,7 +1,5 @@
 package fansirsqi.xposed.sesame.util.Maps;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import de.robv.android.xposed.XposedHelpers;
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
@@ -9,11 +7,9 @@ import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
 import fansirsqi.xposed.sesame.entity.UserEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
-
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * 用于管理和操作用户数据的映射关系，
  * 通常在应用程序中用于处理用户信息，
@@ -22,19 +18,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * 同时提供线程安全的访问机制。
  */
 public class UserMap {
-
     // 存储用户信息的线程安全映射
     private static final Map<String, UserEntity> userMap = new ConcurrentHashMap<>();
-
     // 只读的用户信息映射
     private static final Map<String, UserEntity> readOnlyUserMap = Collections.unmodifiableMap(userMap);
-
     /**
      * 当前用户ID
      */
     @Getter
     private static String currentUid = null;
-
     /**
      * 获取只读的用户信息映射
      *
@@ -43,7 +35,6 @@ public class UserMap {
     public static Map<String, UserEntity> getUserMap() {
         return readOnlyUserMap;
     }
-
     /**
      * 获取所有用户ID的集合
      *
@@ -52,7 +43,6 @@ public class UserMap {
     public static Set<String> getUserIdSet() {
         return userMap.keySet();
     }
-
     /**
      * 获取所有用户实体的集合
      *
@@ -61,7 +51,6 @@ public class UserMap {
     public static Collection<UserEntity> getUserEntityCollection() {
         return userMap.values();
     }
-
     /**
      * 初始化用户数据
      *
@@ -70,7 +59,6 @@ public class UserMap {
     public static synchronized void initUser(String currentUserId) {
         // 设置当前用户ID
         setCurrentUserId(currentUserId);
-
         // 在主线程中执行初始化逻辑
         ApplicationHook.getMainHandler().post(() -> {
             ClassLoader loader;
@@ -85,17 +73,14 @@ public class UserMap {
                 // 卸载现有数据
                 UserMap.unload();
                 String selfId = ApplicationHook.getUserId();
-
                 // 反射加载类
                 Class<?> clsUserIndependentCache = loader.loadClass("com.alipay.mobile.socialcommonsdk.bizdata.UserIndependentCache");
                 Class<?> clsAliAccountDaoOp = loader.loadClass("com.alipay.mobile.socialcommonsdk.bizdata.contact.data.AliAccountDaoOp");
                 Object aliAccountDaoOp = XposedHelpers.callStaticMethod(clsUserIndependentCache, "getCacheObj", clsAliAccountDaoOp);
-
                 // 获取好友列表
                 List<?> allFriends = (List<?>) XposedHelpers.callMethod(aliAccountDaoOp, "getAllFriends", new Object[0]);
                 if (!allFriends.isEmpty()) {
                     Class<?> friendClass = allFriends.get(0).getClass();
-
                     // 通过反射获取字段
                     Field userIdField = XposedHelpers.findField(friendClass, "userId");
                     Field accountField = XposedHelpers.findField(friendClass, "account");
@@ -103,9 +88,7 @@ public class UserMap {
                     Field nickNameField = XposedHelpers.findField(friendClass, "nickName");
                     Field remarkNameField = XposedHelpers.findField(friendClass, "remarkName");
                     Field friendStatusField = XposedHelpers.findField(friendClass, "friendStatus");
-
                     UserEntity selfEntity = null;
-
                     // 遍历所有好友数据并添加到映射中
                     for (Object userObject : allFriends) {
                         try {
@@ -136,7 +119,6 @@ public class UserMap {
             }
         });
     }
-
     /**
      * 设置当前用户ID
      *
@@ -145,7 +127,6 @@ public class UserMap {
     public static synchronized void setCurrentUserId(String userId) {
         currentUid = (userId == null || userId.isEmpty()) ? null : userId;
     }
-
     /**
      * 获取当前用户的掩码名称
      *
@@ -154,7 +135,6 @@ public class UserMap {
     public static String getCurrentMaskName() {
         return getMaskName(currentUid);
     }
-
     /**
      * 获取指定用户的掩码名称
      *
@@ -165,7 +145,6 @@ public class UserMap {
         UserEntity userEntity = userMap.get(userId);
         return userEntity == null ? null : userEntity.getMaskName();
     }
-
     /**
      * 获取指定用户的完整名称
      *
@@ -176,7 +155,6 @@ public class UserMap {
         UserEntity userEntity = userMap.get(userId);
         return userEntity == null ? null : userEntity.getFullName();
     }
-
     /**
      * 获取指定用户实体
      *
@@ -186,7 +164,6 @@ public class UserMap {
     public static UserEntity get(String userId) {
         return userMap.get(userId);
     }
-
     /**
      * 添加用户到映射
      *
@@ -197,7 +174,6 @@ public class UserMap {
             userMap.put(userEntity.getUserId(), userEntity);
         }
     }
-
     /**
      * 从映射中移除指定用户
      *
@@ -206,7 +182,6 @@ public class UserMap {
     public static synchronized void remove(String userId) {
         userMap.remove(userId);
     }
-
     /**
      * 加载用户数据
      *
@@ -227,15 +202,12 @@ public class UserMap {
             Log.printStackTrace(e);
         }
     }
-
-
     /**
      * 卸载用户数据
      */
     public static synchronized void unload() {
         userMap.clear();
     }
-
     /**
      * 保存用户数据到文件
      *
@@ -245,7 +217,6 @@ public class UserMap {
     public static synchronized boolean save(String userId) {
         return Files.write2File(JsonUtil.formatJson(userMap), Files.getFriendIdMapFile(userId));
     }
-
     /**
      * 加载当前用户的数据
      *
@@ -264,7 +235,6 @@ public class UserMap {
             Log.printStackTrace(e);
         }
     }
-
     /**
      * 保存当前用户数据到文件
      *

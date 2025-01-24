@@ -1,16 +1,12 @@
 package fansirsqi.xposed.sesame.task.antForest;
-
 import static fansirsqi.xposed.sesame.task.antForest.AntForest.ecoLifeOpen;
 import static fansirsqi.xposed.sesame.task.antForest.AntForest.ecoLifeOption;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
@@ -20,13 +16,10 @@ import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.model.modelFieldExt.TextModelField;
 import fansirsqi.xposed.sesame.util.ToastUtil;
-
-
 public class EcoLife {
     public static final String TAG = EcoLife.class.getSimpleName();
     public static TextModelField photoGuangPanBefore = new TextModelField("photoGuangPanBefore", "绿色|光盘前图片ID", "");
     public static TextModelField photoGuangPanAfter = new TextModelField("photoGuangPanAfter", "绿色|光盘后图片ID", "");
-
     public static void resetPhotoGuangPan() {
         try {
             if (photoGuangPanBefore != null) {
@@ -44,7 +37,6 @@ public class EcoLife {
             ToastUtil.showToast(e.getMessage());
         }
     }
-
     /**
      * 执行绿色行动任务，包括查询任务开通状态、开通绿色任务、执行打卡任务等操作。
      * 1. 调用接口查询绿色行动的首页数据，检查是否成功。
@@ -90,7 +82,6 @@ public class EcoLife {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 封装绿色任务开通的逻辑
      *
@@ -111,8 +102,6 @@ public class EcoLife {
         ThreadUtil.sleep(300);
         return true;
     }
-
-
     /**
      * 执行绿色行动打卡任务，遍历任务列表，依次提交每个未完成的任务。
      * 1. 遍历给定的任务列表（`actionListVO`），每个任务项包含多个子任务。
@@ -155,7 +144,6 @@ public class EcoLife {
             Log.printStackTrace(TAG, th);
         }
     }
-
     /**
      * 执行光盘行动任务，上传餐前餐后照片并提交任务。
      * 1. 查询当前任务的状态。

@@ -1,5 +1,4 @@
 package fansirsqi.xposed.sesame.ui;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,22 +9,17 @@ import android.text.Html;
 import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
-
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.model.ModelField;
 import fansirsqi.xposed.sesame.util.Log;
-
 /**
  * 字符串对话框工具类。
  * 提供了显示编辑对话框和读取对话框的静态方法。
  */
 public class StringDialog {
-
     private static ModelField<?> modelField;
-
     /**
      * 显示编辑对话框。
      *
@@ -36,7 +30,6 @@ public class StringDialog {
     public static void showEditDialog(Context c, CharSequence title, ModelField<?> modelField) {
         showEditDialog(c, title, modelField, null);
     }
-
     /**
      * 显示编辑对话框。
      *
@@ -54,7 +47,6 @@ public class StringDialog {
         editDialog.setTitle(title);
         editDialog.show();
     }
-
     /**
      * 获取编辑对话框。
      *
@@ -70,12 +62,10 @@ public class StringDialog {
                         c.getString(R.string.ok),
                         new DialogInterface.OnClickListener() {
                             Context context;
-
                             public DialogInterface.OnClickListener setData(Context c) {
                                 context = c;
                                 return this;
                             }
-
                             public void onClick(DialogInterface p1, int p2) {
                                 try {
                                     Editable text = edt.getText();
@@ -105,7 +95,6 @@ public class StringDialog {
         edt.setText(String.valueOf(modelField.getConfigValue()));
         return editDialog;
     }
-
     /**
      * 显示读取对话框。
      *
@@ -116,7 +105,6 @@ public class StringDialog {
     public static void showReadDialog(Context c, CharSequence title, ModelField<?> modelField) {
         showReadDialog(c, title, modelField, null);
     }
-
     /**
      * 显示读取对话框。
      *
@@ -134,7 +122,6 @@ public class StringDialog {
         readDialog.setTitle(title);
         readDialog.show();
     }
-
     /**
      * 获取读取对话框。
      *
@@ -151,7 +138,6 @@ public class StringDialog {
                 .setView(edt)
                 .create();
     }
-
     /**
      * 显示警告对话框，使用默认的“确定”按钮文本。
      *
@@ -162,7 +148,6 @@ public class StringDialog {
     public static void showAlertDialog(Context c, String title, String msg) {
         showAlertDialog(c, title, msg, "确定");
     }
-
     /**
      * 显示警告对话框，允许自定义按钮文本。
      *
@@ -186,9 +171,7 @@ public class StringDialog {
                 .setMessage(parsedMsg) // 设置消息内容
                 .setPositiveButton(positiveButton, (dialog, which) -> dialog.dismiss()) // 设置按钮
                 .create();
-
         alertDialog.show();
-
         // 设置确认按钮颜色
         Button button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (button != null) {
@@ -199,8 +182,6 @@ public class StringDialog {
             }
         }
     }
-
-
     /**
      * 显示选择对话框，允许选择一个项目。
      *
@@ -220,9 +201,7 @@ public class StringDialog {
                 .setOnDismissListener(onDismiss)
                 .setPositiveButton(positiveButton, (dialog, which) -> dialog.dismiss())
                 .create();
-
         alertDialog.show();
-
         // 获取并设置确认按钮的颜色
         Button button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (button != null) {
@@ -230,5 +209,4 @@ public class StringDialog {
         }
         return alertDialog;
     }
-
 }

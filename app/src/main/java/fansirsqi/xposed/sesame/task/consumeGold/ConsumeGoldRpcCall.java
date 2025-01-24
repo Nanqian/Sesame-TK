@@ -1,12 +1,8 @@
 package fansirsqi.xposed.sesame.task.consumeGold;
-
 import java.util.UUID;
-
 import fansirsqi.xposed.sesame.hook.RequestManager;
-
 public class ConsumeGoldRpcCall {
     private static final String ALIPAY_VERSION = "10.6.80.8000";
-
     private static String getRequestId() {
         StringBuilder sb = new StringBuilder();
         for (String str : UUID.randomUUID().toString().split("-")) {
@@ -14,11 +10,9 @@ public class ConsumeGoldRpcCall {
         }
         return sb.toString().toUpperCase();
     }
-
     private static String getClientTraceId() {
         return UUID.randomUUID().toString();
     }
-
     /**
      * 获取签到状态
      */
@@ -27,7 +21,6 @@ public class ConsumeGoldRpcCall {
                 "[{\"alipayAppVersion\":\"" + ALIPAY_VERSION + "\",\"appClient\":\"Android\",\"appSource\":\"consumeGold\",\"clientTraceId\":\""
                         + getClientTraceId() + "\",\"clientVersion\":\"6.5.0\"}]");
     }
-
     /**
      * 签到
      */
@@ -35,7 +28,6 @@ public class ConsumeGoldRpcCall {
         return RequestManager.requestString("alipay.mobile.ipsponsorprod.consume.gold.task.openBoxAward",
                 "[{\"actionAwardDetails\":[{\"actionType\":\"date_sign_start\"}],\"appClient\":\"Android\",\"appSource\":\"consumeGold\",\"bizType\":\"CONSUME_GOLD\",\"boxType\":\"CONSUME_GOLD_SIGN_DATE\",\"timeScaleType\":0,\"userType\":\"old\"}]");
     }
-
     /**
      * 消费金首页
      */
@@ -44,7 +36,6 @@ public class ConsumeGoldRpcCall {
                 "[{\"alipayAppVersion\":\"" + ALIPAY_VERSION + "\",\"appClient\":\"Android\",\"appSource\":\"consumeGold\",\"cacheMap\":{},\"clientTraceId\":\""
                         + getClientTraceId() + "\",\"clientVersion\":\"6.5.0\",\"favoriteStatus\":\"UnFavorite\"}]");
     }
-
     /**
      * 消费金抽奖
      */
@@ -55,14 +46,12 @@ public class ConsumeGoldRpcCall {
                         + "\",\"clientVersion\":\"6.5.0\",\"favoriteStatus\":\"UnFavorite\",\"requestId\":\""
                         + getRequestId() + "\"}]");
     }
-
     public static String taskV2Index(String taskSceneCode) {
         return RequestManager.requestString("alipay.mobile.ipsponsorprod.consume.gold.taskV2.index",
                 "[{\"alipayAppVersion\":\"" + ALIPAY_VERSION + "\",\"appClient\":\"Android\",\"appSource\":\"consumeGold\",\"cacheMap\":{},\"clientTraceId\":\""
                         + getClientTraceId() + "\",\"clientVersion\":\"6.5.0\",\"favoriteStatus\":\"\",\"taskSceneCode\":\""
                         + taskSceneCode + "\"}]");
     }
-
     public static String taskV2Trigger(String taskId, String taskSceneCode, String action) {
         return RequestManager.requestString("alipay.mobile.ipsponsorprod.consume.gold.taskV2.trigger",
                 "[{\"alipayAppVersion\":\"" + ALIPAY_VERSION + "\",\"appClient\":\"Android\",\"appSource\":\"consumeGold\",\"clientTraceId\":\""
@@ -71,7 +60,6 @@ public class ConsumeGoldRpcCall {
                         + taskSceneCode + "\",\"triggerAction\":\""
                         + action + "\"}]");
     }
-
     /**
      * 补签
      *

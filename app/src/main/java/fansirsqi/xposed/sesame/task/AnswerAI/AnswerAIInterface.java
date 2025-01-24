@@ -1,9 +1,6 @@
 package fansirsqi.xposed.sesame.task.AnswerAI;
-
 import java.util.List;
-
 public interface AnswerAIInterface {
-
     /**
      * 获取AI回答结果
      *
@@ -11,7 +8,6 @@ public interface AnswerAIInterface {
      * @return AI回答结果
      */
     String getAnswer(String text);
-
     /**
      * 获取答案
      *
@@ -20,15 +16,12 @@ public interface AnswerAIInterface {
      * @return 空没有获取到
      */
     String getAnswer(String title, List<String> answerList);
-
-
     static AnswerAIInterface getInstance() {
         return new AnswerAIInterface() {
             @Override
             public String getAnswer(String text) {
                 return "";
             }
-
             @Override
             public String getAnswer(String title, List<String> answerList) {
                 return "";
