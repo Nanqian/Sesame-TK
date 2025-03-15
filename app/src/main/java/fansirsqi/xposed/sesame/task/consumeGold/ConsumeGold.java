@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -52,15 +53,21 @@ public class ConsumeGold extends ModelTask {
         return modelFields;
     }
     public Boolean check() {
-        if (TaskCommon.IS_ENERGY_TIME) {
+        if (TaskCommon.IS_ENERGY_TIME){
+            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
             return false;
+        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            return false;
+        } else {
+            long executeTime = RuntimeInfo.getInstance().getLong("consumeGold", 0);
+            return System.currentTimeMillis() - executeTime >= lastExecutionInterval.getValue();
         }
-        long executeTime = RuntimeInfo.getInstance().getLong("consumeGold", 0);
-        return System.currentTimeMillis() - executeTime >= lastExecutionInterval.getValue();
+
     }
     public void run() {
         try {
-            Log.other("执行开始-" + getName());
+            Log.record("执行开始-" + getName());
             RuntimeInfo.getInstance().put("consumeGold", System.currentTimeMillis());
             if (consumeGoldSign.getValue()) {
                 consumeGoldSign();
@@ -85,7 +92,7 @@ public class ConsumeGold extends ModelTask {
         } catch (Throwable t) {
             Log.printStackTrace(TAG + ".run", t);
         } finally {
-            Log.other("执行结束-" + getName());
+            Log.record("执行结束-" + getName());
         }
     }
     /**
@@ -180,13 +187,6 @@ public class ConsumeGold extends ModelTask {
                 jo = jo.getJSONObject("homePromoPrizeInfoDTO");
                 int quantity = jo.getInt("quantity");
                 Log.other("消费金🪙[抽奖(" + (j + 1) + "/" + tokenTotalAmount + ")]#获得" + quantity);
-                // 看广告+5
-//                if (homePromoPrizeInfoDTO.has("promoAdvertisementInfo")) {
-//                    JSONObject promoAdvertisementInfo = homePromoPrizeInfoDTO
-//                            .getJSONObject("promoAdvertisementInfo");
-//                    String outBizNo = promoAdvertisementInfo.getString("outBizNo");
-//                    jo = new JSONObject(ConsumeGoldRpcCall.advertisement(outBizNo));
-//                }
             }
         } catch (Throwable t) {
             Log.printStackTrace(TAG + ".consumeGoldAward", t);

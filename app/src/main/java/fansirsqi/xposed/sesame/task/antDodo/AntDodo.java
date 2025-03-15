@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -57,12 +58,20 @@ public class AntDodo extends ModelTask {
     }
     @Override
     public Boolean check() {
-        return !TaskCommon.IS_ENERGY_TIME;
+        if (TaskCommon.IS_ENERGY_TIME){
+            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            return false;
+        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            return false;
+        } else {
+            return true;
+        }
     }
     @Override
     public void run() {
         try {
-            Log.other("执行开始-" + getName());
+            Log.record("执行开始-" + getName());
             receiveTaskAward();
             propList();
             collect();
@@ -76,7 +85,7 @@ public class AntDodo extends ModelTask {
             Log.runtime(TAG, "start.run err:");
             Log.printStackTrace(TAG, t);
         }finally {
-            Log.other("执行结束-" + getName());
+            Log.record("执行结束-" + getName());
         }
     }
     /*

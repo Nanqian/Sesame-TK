@@ -1,4 +1,6 @@
 package fansirsqi.xposed.sesame.ui;
+import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_NEW;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -211,7 +213,7 @@ public class SettingsActivity extends BaseActivity {
                 ListDialog.show(this, "单向好友列表", AlipayUser.getList(user -> user.getFriendStatus() != 1), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
                 break;
             case 5: // 切换到新 UI
-                UIConfig.INSTANCE.setNewUI(true);
+                UIConfig.INSTANCE.setUiOption(UI_OPTION_NEW);
                 if (UIConfig.save()) {
                     Intent intent = new Intent(this, NewSettingsActivity.class);
                     intent.putExtra("userId", this.userId);

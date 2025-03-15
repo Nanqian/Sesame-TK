@@ -1,22 +1,31 @@
 package fansirsqi.xposed.sesame.util;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
 public class JsonUtil {
     private static final ObjectMapper MAPPER = new ObjectMapper(); // JSON对象映射器
     public static final TypeFactory TYPE_FACTORY = TypeFactory.defaultInstance(); // 类型工厂
     public static final JsonFactory JSON_FACTORY = new JsonFactory(); // JSON工厂
+
     static {
         // 配置 ObjectMapper
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // 忽略未知属性
@@ -25,9 +34,30 @@ public class JsonUtil {
         MAPPER.setTimeZone(TimeZone.getDefault()); // 设置时区
         MAPPER.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())); // 设置日期格式
     }
+
     public static ObjectMapper copyMapper() {
         return MAPPER.copy(); // 复制 ObjectMapper
     }
+
+    /**
+     * 将对象转换为格式化的 JSON 字符串
+     *
+     * @param object 要转换的对象
+     * @return 格式化后的 JSON 字符串
+     */
+    public static String formatJson(Object object) {
+        try {
+            if (object instanceof JSONObject) {
+                return ((JSONObject) object).toString(4); // 使用 4 个空格进行缩进
+            }
+            return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
+        } catch (Exception e) {
+            Log.runtime("formatJson", "err:");
+            Log.printStackTrace(e);
+            return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
+        }
+    }
+
     /**
      * 将对象转换为 JSON 字符串
      *
@@ -36,21 +66,26 @@ public class JsonUtil {
      * @return JSON 字符串
      */
     public static String formatJson(Object object, boolean pretty) {
-        if (pretty) {
+        try {
+            if (object instanceof JSONObject) {
+                if (pretty) {
+                    return ((JSONObject) object).toString(4);
+                } else {
+                    return ((JSONObject) object).toString();
+                }
+            }
+            if (pretty) {
+                return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
+            } else {
+                return execute(() -> MAPPER.writeValueAsString(object));
+            }
+        } catch (Exception e) {
+            Log.runtime("formatJson", "err:");
+            Log.printStackTrace(e);
             return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
-        } else {
-            return execute(() -> MAPPER.writeValueAsString(object));
         }
     }
-    /**
-     * 将对象转换为格式化的 JSON 字符串
-     *
-     * @param object 要转换的对象
-     * @return 格式化后的 JSON 字符串
-     */
-    public static String formatJson(Object object) {
-        return execute(() -> MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object));
-    }
+
     /**
      * 创建 JSON 解析器
      *
@@ -60,6 +95,7 @@ public class JsonUtil {
     public static JsonParser getJsonParser(String body) {
         return execute(() -> JSON_FACTORY.createParser(body)); // 执行解析器创建
     }
+
     /**
      * 解析 JSON 字符串为指定类型的对象
      *
@@ -71,6 +107,7 @@ public class JsonUtil {
     public static <T> T parseObject(String body, Type type) {
         return parseObjectInternal(() -> MAPPER.readValue(body, TYPE_FACTORY.constructType(type))); // 执行解析
     }
+
     /**
      * 解析 JSON 字符串为指定类型的对象
      *
@@ -82,6 +119,7 @@ public class JsonUtil {
     public static <T> T parseObject(String body, JavaType javaType) {
         return parseObjectInternal(() -> MAPPER.readValue(body, javaType)); // 执行解析
     }
+
     /**
      * 解析 JSON 字符串为指定类型的对象
      *
@@ -93,6 +131,7 @@ public class JsonUtil {
     public static <T> T parseObject(String body, TypeReference<T> valueTypeRef) {
         return parseObjectInternal(() -> MAPPER.readValue(body, valueTypeRef)); // 执行解析
     }
+
     /**
      * 解析 JSON 字符串为指定类型的对象
      *
@@ -104,6 +143,7 @@ public class JsonUtil {
     public static <T> T parseObject(String body, Class<T> clazz) {
         return parseObjectInternal(() -> MAPPER.readValue(body, clazz)); // 执行解析
     }
+
     /**
      * 从 JsonParser 解析为指定类型的对象
      *
@@ -115,6 +155,7 @@ public class JsonUtil {
     public static <T> T parseObject(JsonParser jsonParser, Type type) {
         return parseObjectInternal(() -> MAPPER.readValue(jsonParser, TYPE_FACTORY.constructType(type))); // 执行解析
     }
+
     /**
      * 从 JsonParser 解析为指定类型的对象
      *
@@ -126,6 +167,7 @@ public class JsonUtil {
     public static <T> T parseObject(JsonParser jsonParser, JavaType javaType) {
         return parseObjectInternal(() -> MAPPER.readValue(jsonParser, javaType)); // 执行解析
     }
+
     /**
      * 从 JsonParser 解析为指定类型的对象
      *
@@ -137,6 +179,7 @@ public class JsonUtil {
     public static <T> T parseObject(JsonParser jsonParser, TypeReference<T> valueTypeRef) {
         return parseObjectInternal(() -> MAPPER.readValue(jsonParser, valueTypeRef)); // 执行解析
     }
+
     /**
      * 从 JsonParser 解析为指定类型的对象
      *
@@ -148,6 +191,7 @@ public class JsonUtil {
     public static <T> T parseObject(JsonParser jsonParser, Class<T> clazz) {
         return parseObjectInternal(() -> MAPPER.readValue(jsonParser, clazz)); // 执行解析
     }
+
     /**
      * 将对象转换为指定类型的对象
      *
@@ -159,6 +203,7 @@ public class JsonUtil {
     public static <T> T parseObject(Object bean, Type type) {
         return parseObjectInternal(() -> MAPPER.convertValue(bean, TYPE_FACTORY.constructType(type))); // 执行转换
     }
+
     /**
      * 将对象转换为指定类型的对象
      *
@@ -170,6 +215,7 @@ public class JsonUtil {
     public static <T> T parseObject(Object bean, JavaType javaType) {
         return parseObjectInternal(() -> MAPPER.convertValue(bean, javaType)); // 执行转换
     }
+
     /**
      * 将对象转换为指定类型的对象
      *
@@ -181,6 +227,7 @@ public class JsonUtil {
     public static <T> T parseObject(Object bean, TypeReference<T> valueTypeRef) {
         return parseObjectInternal(() -> MAPPER.convertValue(bean, valueTypeRef)); // 执行转换
     }
+
     /**
      * 将对象转换为指定类型的对象
      *
@@ -192,6 +239,7 @@ public class JsonUtil {
     public static <T> T parseObject(Object bean, Class<T> clazz) {
         return parseObjectInternal(() -> MAPPER.convertValue(bean, clazz)); // 执行转换
     }
+
     /**
      * 解析 JSON 字符串中的指定字段为字符串
      *
@@ -205,6 +253,7 @@ public class JsonUtil {
             return node != null ? node.asText() : null; // 返回字段值
         });
     }
+
     /**
      * 解析 JSON 字符串中的指定字段为整数
      *
@@ -218,6 +267,7 @@ public class JsonUtil {
             return node != null ? node.asInt() : null; // 返回字段值
         });
     }
+
     /**
      * 解析 JSON 字符串中的指定字段为整数列表
      *
@@ -232,6 +282,7 @@ public class JsonUtil {
             }) : null; // 返回字段值列表
         });
     }
+
     /**
      * 解析 JSON 字符串中的指定字段为布尔值
      *
@@ -245,6 +296,7 @@ public class JsonUtil {
             return node != null ? node.asBoolean() : null; // 返回字段值
         });
     }
+
     /**
      * 解析 JSON 字符串中的指定字段为短整型
      *
@@ -258,6 +310,7 @@ public class JsonUtil {
             return node != null ? (short) node.asInt() : null; // 返回字段值
         });
     }
+
     /**
      * 解析 JSON 字符串中的指定字段为字节型
      *
@@ -271,6 +324,7 @@ public class JsonUtil {
             return node != null ? (byte) node.asInt() : null; // 返回字段值
         });
     }
+
     /**
      * 解析 JSON 字符串为指定类型的对象列表
      *
@@ -282,6 +336,7 @@ public class JsonUtil {
     public static <T> List<T> parseList(String body, Class<T> clazz) {
         return parseObjectInternal(() -> MAPPER.readValue(body, TYPE_FACTORY.constructCollectionType(ArrayList.class, clazz))); // 执行解析
     }
+
     /**
      * 将 JSON 字符串转换为 JsonNode
      *
@@ -291,6 +346,7 @@ public class JsonUtil {
     public static JsonNode toNode(String json) {
         return json == null ? null : execute(() -> MAPPER.readTree(json)); // 执行转换
     }
+
     /**
      * 根据路径获取 JSON 对象中的值
      *
@@ -302,6 +358,7 @@ public class JsonUtil {
         Object value = getValueByPathObject(jsonObject, path); // 获取字段值
         return value == null ? "" : value.toString(); // 返回字段值的字符串形式
     }
+
     /**
      * 根据路径获取 JSON 对象中的值
      *
@@ -328,6 +385,7 @@ public class JsonUtil {
             return null; // 异常时返回 null
         }
     }
+
     /**
      * 将 JSONArray 转换为字符串列表
      *
@@ -346,6 +404,7 @@ public class JsonUtil {
         }
         return list; // 返回列表
     }
+
     /**
      * 内部方法，执行 JSON 操作并处理异常
      *
@@ -356,6 +415,7 @@ public class JsonUtil {
     private static <T> T parseObjectInternal(JsonAction<T> action) {
         return execute(action); // 执行操作
     }
+
     /**
      * 执行 JSON 操作并处理异常
      *
@@ -370,6 +430,7 @@ public class JsonUtil {
             throw new RuntimeException(e); // 异常时抛出运行时异常
         }
     }
+
     /**
      * 函数式接口，用于执行 JSON 操作
      *

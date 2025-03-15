@@ -1,10 +1,14 @@
-package fansirsqi.xposed.sesame.util;
+package fansirsqi.xposed.sesame.data;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import java.io.File;
 import java.util.Calendar;
+
+import fansirsqi.xposed.sesame.util.Files;
+import fansirsqi.xposed.sesame.util.JsonUtil;
+import fansirsqi.xposed.sesame.util.Log;
 import lombok.Data;
 @Data
-public class StatisticsUtil {
+public class Statistics {
     @Data
     public static class TimeStatistics {
         int time;
@@ -22,8 +26,8 @@ public class StatisticsUtil {
             watered = 0;
         }
     }
-    private static final String TAG = StatisticsUtil.class.getSimpleName();
-    public static final StatisticsUtil INSTANCE = new StatisticsUtil();
+    private static final String TAG = Statistics.class.getSimpleName();
+    public static final Statistics INSTANCE = new Statistics();
     private TimeStatistics year = new TimeStatistics();
     private TimeStatistics month = new TimeStatistics();
     private TimeStatistics day = new TimeStatistics();
@@ -34,7 +38,7 @@ public class StatisticsUtil {
      * @param i  增加的数量
      */
     public static void addData(DataType dt, int i) {
-        StatisticsUtil stat = INSTANCE;
+        Statistics stat = INSTANCE;
         switch (dt) {
             case COLLECTED:
                 stat.day.collected += i;
@@ -61,7 +65,7 @@ public class StatisticsUtil {
      * @return 统计值
      */
     public static int getData(TimeType tt, DataType dt) {
-        StatisticsUtil stat = INSTANCE;
+        Statistics stat = INSTANCE;
         int data = 0;
         TimeStatistics ts = switch (tt) {
             case YEAR -> stat.year;
@@ -100,11 +104,11 @@ public class StatisticsUtil {
      *
      * @return 统计实例
      */
-    public static synchronized StatisticsUtil load() {
+    public static synchronized Statistics load() {
         File statisticsFile = Files.getStatisticsFile();
         try {
             if (INSTANCE == null) {
-                return new StatisticsUtil();
+                return new Statistics();
             }
             if (statisticsFile.exists() && statisticsFile.length() > 0) {
                 String json = Files.readFromFile(statisticsFile);
@@ -153,7 +157,7 @@ public class StatisticsUtil {
      */
     private static void resetToDefault() {
         try {
-            StatisticsUtil newInstance = new StatisticsUtil();
+            Statistics newInstance = new Statistics();
             Calendar now = Calendar.getInstance();
             newInstance.year = new TimeStatistics(now.get(Calendar.YEAR));
             newInstance.month = new TimeStatistics(now.get(Calendar.MONTH) + 1); // 注意：Calendar.MONTH 从0开始
@@ -171,7 +175,7 @@ public class StatisticsUtil {
      */
     public static synchronized void unload() {
         try {
-            JsonUtil.copyMapper().updateValue(INSTANCE, new StatisticsUtil());
+            JsonUtil.copyMapper().updateValue(INSTANCE, new Statistics());
         } catch (JsonMappingException e) {
             Log.printStackTrace(TAG, e);
         }

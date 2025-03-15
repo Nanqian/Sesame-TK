@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -18,7 +19,7 @@ import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 public class AntOrchard extends ModelTask {
   private static final String TAG = AntOrchard.class.getSimpleName();
@@ -60,12 +61,20 @@ public class AntOrchard extends ModelTask {
   }
   @Override
   public Boolean check() {
-    return !TaskCommon.IS_ENERGY_TIME;
+    if (TaskCommon.IS_ENERGY_TIME){
+      Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+      return false;
+    }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+      Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+      return false;
+    } else {
+      return true;
+    }
   }
   @Override
   public void run() {
     try {
-      Log.other("执行开始-" + getName());
+      Log.record("执行开始-" + getName());
       executeIntervalInt = Math.max(executeInterval.getValue(), 500);
       String s = AntOrchardRpcCall.orchardIndex();
       JSONObject jo = new JSONObject(s);
@@ -86,7 +95,7 @@ public class AntOrchard extends ModelTask {
               triggerTbTask();
             }
             Integer orchardSpreadManureCountValue = orchardSpreadManureCount.getValue();
-            if (orchardSpreadManureCountValue > 0 && StatusUtil.canSpreadManureToday(userId)) orchardSpreadManure();
+            if (orchardSpreadManureCountValue > 0 && Status.canSpreadManureToday(userId)) orchardSpreadManure();
             if (orchardSpreadManureCountValue >= 3 && orchardSpreadManureCountValue < 10) {
               querySubplotsActivity(3);
             } else if (orchardSpreadManureCountValue >= 10) {
@@ -109,7 +118,7 @@ public class AntOrchard extends ModelTask {
       Log.runtime(TAG, "start.run err:");
       Log.printStackTrace(TAG, t);
     }finally {
-      Log.other("执行结束-" + getName());
+      Log.record("执行结束-" + getName());
     }
   }
   private String getWua() {
@@ -183,7 +192,7 @@ public class AntOrchard extends ModelTask {
             String stageText = jo.getJSONObject("currentStage").getString("stageText");
             Log.farm("农场施肥💩[" + stageText + "]");
             if (!canSpreadManureContinue(seedStage.getInt("totalValue"), jo.getJSONObject("currentStage").getInt("totalValue"))) {
-              StatusUtil.spreadManureToday(userId);
+              Status.spreadManureToday(userId);
               return;
             }
             continue;
@@ -443,7 +452,7 @@ public class AntOrchard extends ModelTask {
   // 助力
   private void orchardassistFriend() {
     try {
-      if (!StatusUtil.canAntOrchardAssistFriendToday()) {
+      if (!Status.canAntOrchardAssistFriendToday()) {
         return;
       }
       Set<String> friendSet = assistFriendList.getValue();
@@ -457,7 +466,7 @@ public class AntOrchard extends ModelTask {
           String code = jsonObject.getString("code");
           if ("600000027".equals(code)) {
             Log.record("农场助力💪今日助力他人次数上限");
-            StatusUtil.antOrchardAssistFriendToday();
+            Status.antOrchardAssistFriendToday();
             return;
           }
           Log.record("农场助力😔失败[" + name + "]" + jsonObject.optString("desc"));
@@ -465,7 +474,7 @@ public class AntOrchard extends ModelTask {
         }
         Log.farm("农场助力💪[助力:" + name + "]");
       }
-      StatusUtil.antOrchardAssistFriendToday();
+      Status.antOrchardAssistFriendToday();
     } catch (Throwable t) {
       Log.runtime(TAG, "orchardassistFriend err:");
       Log.printStackTrace(TAG, t);

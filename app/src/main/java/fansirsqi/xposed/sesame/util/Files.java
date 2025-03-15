@@ -1,6 +1,8 @@
 package fansirsqi.xposed.sesame.util;
+
 import android.annotation.SuppressLint;
 import android.os.Environment;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
+
+import fansirsqi.xposed.sesame.data.General;
+
 public class Files {
     @SuppressLint("StaticFieldLeak")
     private static final String TAG = Files.class.getSimpleName();
@@ -216,9 +223,9 @@ public class Files {
     public static File getStatisticsFile() {
         return getTargetFileofDir(MAIN_DIR, "statistics.json");
     }
-    public static File getUIConfigFile() {
-        return getTargetFileofDir(MAIN_DIR, "ui_config.json");
-    }
+//    public static File getUIConfigFile() {
+//        return getTargetFileofDir(MAIN_DIR, "ui_config.json");
+//    }
     /**
      * 获取已经导出的统计文件在载目录中
      *
@@ -259,15 +266,26 @@ public class Files {
             Log.error(TAG, "Failed to create export directory: " + exportDir.getAbsolutePath());
             return null;
         }
-        File exportFile = new File(exportDir, file.getName());
+        // 获取文件的原始文件名和扩展名
+        String fileNameWithoutExtension = file.getName().substring(0, file.getName().lastIndexOf('.'));
+        String fileExtension = file.getName().substring(file.getName().lastIndexOf('.'));
+
+        // 获取当前日期和时间，并格式化为字符串
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
+        String dateTimeString = simpleDateFormat.format(new Date());
+        // 生成新的文件名，包含日期和时间
+        String newFileName = fileNameWithoutExtension + "_" + dateTimeString + fileExtension;
+        File exportFile = new File(exportDir, newFileName);
         if (exportFile.exists() && exportFile.isDirectory()) {
             if (!exportFile.delete()) {
-                // 如果删除失败，记录错误日志
                 Log.error(TAG, "Failed to delete existing directory: " + exportFile.getAbsolutePath());
                 return null;
             }
         }
-        Files.copyTo(file, exportFile);
+        if(!copyTo(file, exportFile)){
+            Log.error(TAG, "Failed to copy file: " + file.getAbsolutePath() + " to " + exportFile.getAbsolutePath());
+            return null;
+        }
         return exportFile;
     }
     /**
@@ -446,16 +464,13 @@ public class Files {
      * @return 如果复制成功返回 true，否则返回 false
      */
     public static boolean copyTo(File source, File dest) {
-        // 使用 try-with-resources 来自动管理 FileInputStream 和 FileOutputStream 以及 FileChannel 的关闭
         try (FileInputStream fileInputStream = new FileInputStream(source);
              FileOutputStream fileOutputStream = new FileOutputStream(createFile(dest));
              FileChannel inputChannel = fileInputStream.getChannel();
              FileChannel outputChannel = fileOutputStream.getChannel()) {
-            // 将源文件的内容传输到目标文件
             outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
             return true; // 复制成功
         } catch (IOException e) {
-            // 捕获并打印文件操作中的异常
             Log.printStackTrace(e);
         }
         return false; // 复制失败

@@ -1,5 +1,8 @@
 package fansirsqi.xposed.sesame.ui;
+
+import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_OLD;
 import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,17 +17,22 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
+
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import org.json.JSONException;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.Config;
@@ -53,6 +61,7 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
 import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
+
 public class NewSettingsActivity extends BaseActivity {
     private static final Integer EXPORT_REQUEST_CODE = 1;
     private static final Integer IMPORT_REQUEST_CODE = 2;
@@ -64,10 +73,12 @@ public class NewSettingsActivity extends BaseActivity {
     private String userName = null;
     private final List<ModelDto> tabList = new ArrayList<>();
     private final List<ModelGroupDto> groupList = new ArrayList<>();
+
     @Override
     public String getBaseSubtitle() {
         return getString(R.string.settings);
     }
+
     @SuppressLint({"MissingInflatedId", "SetJavaScriptEnabled"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,10 +176,12 @@ public class NewSettingsActivity extends BaseActivity {
         });
         if (isApkInDebug()) {
             WebView.setWebContentsDebuggingEnabled(true);
+            webView.loadUrl("http://127.0.0.1:5500/app/src/main/assets/web/index.html");
+        } else {
+            webView.loadUrl("file:///android_asset/web/index.html");
         }
         webView.addJavascriptInterface(new WebViewCallback(), "HOOK");
-        webView.loadUrl("file:///android_asset/web/index.html");
-        // webView.loadUrl("http://192.168.31.32:5500/app/src/main/assets/web/index.html");
+
         webView.requestFocus();
         Map<String, ModelConfig> modelConfigMap = ModelTask.getModelConfigMap();
         for (Map.Entry<String, ModelConfig> configEntry : modelConfigMap.entrySet()) {
@@ -179,15 +192,8 @@ public class NewSettingsActivity extends BaseActivity {
             groupList.add(new ModelGroupDto(modelGroup.getCode(), modelGroup.getName(), modelGroup.getIcon()));
         }
     }
-//    @Override
-//    public void onBackPressed() {
-//        if (webView.canGoBack()) {
-//            webView.goBack();
-//        } else {
-//            super.onBackPressed();
-//            save();
-//        }
-//    }
+
+
     public class WebAppInterface {
         @JavascriptInterface
         public void onBackPressed() {
@@ -199,11 +205,13 @@ public class NewSettingsActivity extends BaseActivity {
                 }
             });
         }
+
         @JavascriptInterface
         public void onExit() {
             runOnUiThread(NewSettingsActivity.this::finish);
         }
     }
+
     private class WebViewCallback {
         @JavascriptInterface
         public String getTabs() {
@@ -213,10 +221,12 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return result;
         }
+
         @JavascriptInterface
         public String getBuildInfo() {
             return BuildConfig.APPLICATION_ID + ":" + BuildConfig.VERSION_NAME;
         }
+
         @JavascriptInterface
         public String getGroup() {
             String result = JsonUtil.formatJson(groupList, false);
@@ -225,6 +235,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return result;
         }
+
         @JavascriptInterface
         public String getModelByGroup(String groupCode) {
             Collection<ModelConfig> modelConfigCollection = ModelTask.getGroupModelConfig(ModelGroup.getByCode(groupCode)).values();
@@ -242,6 +253,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return result;
         }
+
         @JavascriptInterface
         public String setModelByGroup(String groupCode, String modelsValue) {
             List<ModelDto> modelDtoList = JsonUtil.parseObject(modelsValue, new TypeReference<List<ModelDto>>() {
@@ -265,6 +277,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "SUCCESS";
         }
+
         @JavascriptInterface
         public String getModel(String modelCode) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -282,6 +295,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return null;
         }
+
         @JavascriptInterface
         public String setModel(String modelCode, String fieldsValue) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -313,6 +327,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "FAILED";
         }
+
         @JavascriptInterface
         public String getField(String modelCode, String fieldCode) throws JSONException {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -328,6 +343,7 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return null;
         }
+
         @JavascriptInterface
         public String setField(String modelCode, String fieldCode, String fieldValue) {
             ModelConfig modelConfig = ModelTask.getModelConfigMap().get(modelCode);
@@ -344,11 +360,13 @@ public class NewSettingsActivity extends BaseActivity {
             }
             return "FAILED";
         }
+
         @JavascriptInterface
         public void Log(String log) {
             Log.record("设置：" + log);
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, 1, 1, "导出配置");
@@ -358,6 +376,7 @@ public class NewSettingsActivity extends BaseActivity {
         menu.add(0, 5, 5, "切换至旧UI");
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -403,7 +422,7 @@ public class NewSettingsActivity extends BaseActivity {
                 ListDialog.show(this, "单向好友列表", AlipayUser.getList(user -> user.getFriendStatus() != 1), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
                 break;
             case 5:
-                UIConfig.INSTANCE.setNewUI(false);
+                UIConfig.INSTANCE.setUiOption(UI_OPTION_OLD);
                 if (UIConfig.save()) {
                     Intent intent = new Intent(this, SettingsActivity.class);
                     intent.putExtra("userId", userId);
@@ -417,7 +436,8 @@ public class NewSettingsActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-//    @Override
+
+    //    @Override
 //    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        super.onActivityResult(requestCode, resultCode, data);
 //        if (resultCode != RESULT_OK) {

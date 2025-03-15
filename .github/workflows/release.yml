@@ -2,7 +2,7 @@ name: Build, Upload, and Sync
 
 on:
   release:
-    types: [ published ] # 自动触发同步
+    types: [published] # 自动触发同步
 
 jobs:
   build-and-sync:
@@ -23,8 +23,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
           cache: gradle
 
       # 获取原仓库的预发行版属性
@@ -64,12 +64,10 @@ jobs:
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
           buildToolsVersion: 34.0.0
 
-
       - name: Generate APKS Checksum
         run: |
           sha256sum ${{ steps.sign_normal_apk.outputs.signedFile  }} > CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256
           sha256sum ${{ steps.sign_compatible_apk.outputs.signedFile }} > CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256
-
 
       - name: Upload Assets to Source Release
         uses: softprops/action-gh-release@v2
@@ -85,10 +83,13 @@ jobs:
           append_body: true
           generate_release_notes: true
           body: |
-            > ### 墙内更新
-            > [抗揍云-LanZou](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
-            > [Alist分流-LanZou](https://alist.byseven.us.kg/LanZou/Sesame-TK) 密码:`9527`
-            > [Alist分流-ALiYun](https://alist.byseven.us.kg/AliYun/share/Sesame-TK) 密码:`9527`
+            > ## 下载说明
+              * Normal 为正常版本,适用于Android 8.0及以上的系统
+              * Compatible 为兼容版本,适用于Android 7.0及以下的系统,最低支持Android 5.1
+            > ## 墙内更新
+              [抗揍云-LanZou](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
+              [Alist分流-LanZou](https://alist.798356.xyz/LanZou/Sesame-TK) 密码:`9527`
+              [Alist分流-ALiYun](https://alist.798356.xyz/AliYun/share/Sesame-TK) 密码:`9527`
 
       - name: Sync Release to Target Repository
         uses: softprops/action-gh-release@v2
@@ -111,11 +112,7 @@ jobs:
             ✨ **更新内容**:
             ${{ github.event.release.body || '无更新说明' }}
 
-      - name: TgBot Notification
+      - name: TgBot Notification & Upload
         run: |
-          curl -X POST "https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendMessage" \
-          -d "chat_id=${{ secrets.TG_CHAT_ID }}" \
-          -d "text=📦 New Release [${{ github.event.release.tag_name }}](${{ github.event.release.html_url }}) Published! %0A%0A${{ github.event.release.body }}" \
-          -d "parse_mode=Markdown"
-
-
+          # 发送带文件的通知消息
+          curl -F document=@${{ steps.sign_normal_apk.outputs.signedFile }} -F document=@${{ steps.sign_compatible_apk.outputs.signedFile }} -F document=@CHECKSUMS-Sesame-Normal-${{ github.event.release.tag_name || github.ref_name }}.sha256 -F document=@CHECKSUMS-Sesame-Compatible-${{ github.event.release.tag_name || github.ref_name }}.sha256 "https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendDocument?chat_id=${{ secrets.TG_CHAT_ID }}&caption=📦 新版本发布 [${{ github.event.release.tag_name }}](${{ github.event.release.html_url }})%0A%0A✨ 更新内容：%0A${{ github.event.release.body }}%0A%0A🔗 下载地址：%0A${{ github.event.release.html_url }}%0A抗揍云：https://fansirs.lanzoue.com/b011kv6pwd 密码：9527&parse_mode=Markdown"

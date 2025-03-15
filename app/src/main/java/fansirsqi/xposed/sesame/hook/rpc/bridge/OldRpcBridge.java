@@ -1,6 +1,8 @@
 package fansirsqi.xposed.sesame.hook.rpc.bridge;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import fansirsqi.xposed.sesame.data.General;
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
 import fansirsqi.xposed.sesame.entity.RpcEntity;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;

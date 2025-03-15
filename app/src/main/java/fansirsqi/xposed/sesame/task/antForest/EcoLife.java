@@ -1,42 +1,31 @@
 package fansirsqi.xposed.sesame.task.antForest;
+
 import static fansirsqi.xposed.sesame.task.antForest.AntForest.ecoLifeOpen;
 import static fansirsqi.xposed.sesame.task.antForest.AntForest.ecoLifeOption;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.util.Objects;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import fansirsqi.xposed.sesame.data.Config;
+
+import fansirsqi.xposed.sesame.data.DataCache;
+import fansirsqi.xposed.sesame.data.Status;
+import fansirsqi.xposed.sesame.hook.Toast;
+import fansirsqi.xposed.sesame.model.modelFieldExt.TextModelField;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
-import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
-import fansirsqi.xposed.sesame.model.modelFieldExt.TextModelField;
 import fansirsqi.xposed.sesame.util.ToastUtil;
+
 public class EcoLife {
     public static final String TAG = EcoLife.class.getSimpleName();
-    public static TextModelField photoGuangPanBefore = new TextModelField("photoGuangPanBefore", "绿色|光盘前图片ID", "");
-    public static TextModelField photoGuangPanAfter = new TextModelField("photoGuangPanAfter", "绿色|光盘后图片ID", "");
-    public static void resetPhotoGuangPan() {
-        try {
-            if (photoGuangPanBefore != null) {
-                photoGuangPanBefore.reset();
-            } else {
-                throw new NullPointerException("photoGuangPanBefore is null");
-            }
-            if (photoGuangPanAfter != null) {
-                photoGuangPanAfter.reset();
-            } else {
-                throw new NullPointerException("photoGuangPanAfter is null");
-            }
-        } catch (NullPointerException e) {
-            Log.printStackTrace(TAG+" Error resetting photoGuangPan", e);
-            ToastUtil.showToast(e.getMessage());
-        }
-    }
+
     /**
      * 执行绿色行动任务，包括查询任务开通状态、开通绿色任务、执行打卡任务等操作。
      * 1. 调用接口查询绿色行动的首页数据，检查是否成功。
@@ -82,6 +71,7 @@ public class EcoLife {
             Log.printStackTrace(TAG, th);
         }
     }
+
     /**
      * 封装绿色任务开通的逻辑
      *
@@ -102,6 +92,7 @@ public class EcoLife {
         ThreadUtil.sleep(300);
         return true;
     }
+
     /**
      * 执行绿色行动打卡任务，遍历任务列表，依次提交每个未完成的任务。
      * 1. 遍历给定的任务列表（`actionListVO`），每个任务项包含多个子任务。
@@ -144,6 +135,7 @@ public class EcoLife {
             Log.printStackTrace(TAG, th);
         }
     }
+
     /**
      * 执行光盘行动任务，上传餐前餐后照片并提交任务。
      * 1. 查询当前任务的状态。
@@ -156,6 +148,8 @@ public class EcoLife {
      */
     public static void photoGuangPan(String dayPoint) {
         try {
+            if (Status.hasFlagToday("EcoLife::photoGuangPan")) return;
+
             String source = "renwuGD"; // 任务来源标识
             // 查询今日任务状态
             String str = AntForestRpcCall.ecolifeQueryDish(source, dayPoint);
@@ -165,69 +159,57 @@ public class EcoLife {
                 Log.runtime(TAG + ".photoGuangPan.ecolifeQueryDish", jo.optString("resultDesc"));
                 return;
             }
-            boolean isDone = false; // 任务是否完成的标志
-            // 获取餐前餐后照片的URL
-            String photoGuangPanBeforeStr = photoGuangPanBefore.getValue();
-            String photoGuangPanAfterStr = photoGuangPanAfter.getValue();
-            if (photoGuangPanBeforeStr == null || photoGuangPanAfterStr == null || Objects.equals(photoGuangPanBeforeStr, photoGuangPanAfterStr) || StringUtil.isEmpty(photoGuangPanBeforeStr) || StringUtil.isEmpty(photoGuangPanAfterStr)) {
-                // 如果没有照片URL或两者相同，需重新获取照片URL
-                JSONObject data = jo.optJSONObject("data");
-                if (data != null) {
-                    String beforeMealsImageUrl = data.optString("beforeMealsImageUrl");
-                    String afterMealsImageUrl = data.optString("afterMealsImageUrl");
-                    // 如果餐前和餐后照片URL都存在，进行提取
-                    if (!StringUtil.isEmpty(beforeMealsImageUrl) && !StringUtil.isEmpty(afterMealsImageUrl)) {
-                        // 使用正则从URL中提取照片的路径部分
-                        Pattern pattern = Pattern.compile("img/(.*)/original");
-                        Matcher beforeMatcher = pattern.matcher(beforeMealsImageUrl);
-                        if (beforeMatcher.find()) {
-                            photoGuangPanBeforeStr = beforeMatcher.group(1);
-                            photoGuangPanBefore.setValue(photoGuangPanBeforeStr); // 保存餐前照片路径
-                        }
-                        Matcher afterMatcher = pattern.matcher(afterMealsImageUrl);
-                        if (afterMatcher.find()) {
-                            photoGuangPanAfterStr = afterMatcher.group(1);
-                            photoGuangPanAfter.setValue(photoGuangPanAfterStr); // 保存餐后照片路径
-                        }
-                        // 保存配置
-                        Config.save(UserMap.getCurrentUid(), false);
-                        isDone = true;
+            Map<String, String> photo = new HashMap<>();
+            JSONObject data = jo.optJSONObject("data");
+            if (data != null) {
+                String beforeMealsImageUrl = data.optString("beforeMealsImageUrl");
+                String afterMealsImageUrl = data.optString("afterMealsImageUrl");
+                // 如果餐前和餐后照片URL都存在，进行提取
+                if (!StringUtil.isEmpty(beforeMealsImageUrl) && !StringUtil.isEmpty(afterMealsImageUrl)) {
+                    // 使用正则从URL中提取照片的路径部分
+                    Pattern pattern = Pattern.compile("img/(.*)/original");
+                    Matcher beforeMatcher = pattern.matcher(beforeMealsImageUrl);
+                    if (beforeMatcher.find()) {
+                        photo.put("before", beforeMatcher.group(1));
                     }
+                    Matcher afterMatcher = pattern.matcher(afterMealsImageUrl);
+                    if (afterMatcher.find()) {
+                        photo.put("after", afterMatcher.group(1));
+                    }
+                    DataCache.saveGuangPanPhoto(photo);
                 }
-            } else {
-                isDone = true;
             }
             if ("SUCCESS".equals(JsonUtil.getValueByPath(jo, "data.status"))) {
                 return;
             }
-            if (!isDone) {
-                Log.forest("光盘行动🍽️请先完成一次光盘打卡");
+            photo = DataCache.getRandomGuangPanPhoto();
+            if (photo == null) {
+                Log.forest("光盘行动🍛请先完成一次光盘打卡");
                 return;
             }
-            ThreadUtil.sleep(300);
-            str = AntForestRpcCall.ecolifeUploadDishImage("BEFORE_MEALS", photoGuangPanBeforeStr, 0.16571736, 0.07448776, 0.7597949, dayPoint);
+            str = AntForestRpcCall.ecolifeUploadDishImage("BEFORE_MEALS", photo.get("before"), 0.16571736, 0.07448776, 0.7597949, dayPoint);
             jo = new JSONObject(str);
-            if (!jo.optBoolean("success")) {
-                Log.runtime(TAG + "上传餐前图片", jo.optString("resultDesc"));
+            if (!ResUtil.checkSuccess(TAG, jo)) {
                 return;
             }
-            ThreadUtil.sleep(300);
-            str = AntForestRpcCall.ecolifeUploadDishImage("AFTER_MEALS", photoGuangPanAfterStr, 0.00040030346, 0.99891376, 0.0006858421, dayPoint);
+            ThreadUtil.sleep(3000);
+            str = AntForestRpcCall.ecolifeUploadDishImage("AFTER_MEALS", photo.get("after"), 0.00040030346, 0.99891376, 0.0006858421, dayPoint);
             jo = new JSONObject(str);
-            if (!jo.optBoolean("success")) {
-                Log.runtime(TAG + "上传餐后图片", jo.optString("resultDesc"));
+            if (!ResUtil.checkSuccess(TAG, jo)) {
                 return;
             }
             // 提交任务
             str = AntForestRpcCall.ecolifeTick("photoguangpan", dayPoint, source);
             jo = new JSONObject(str);
             // 如果提交失败，记录错误信息并返回
-            if (!jo.optBoolean("success")) {
-                Log.runtime(TAG + "光盘打卡", jo.optString("resultDesc"));
+            if (!ResUtil.checkSuccess(TAG, jo)) {
                 return;
             }
             // 任务完成，输出完成日志
-            Log.forest("光盘行动🍽️任务完成");
+            String toastMsg = "光盘行动🍛任务完成#" + jo.getJSONObject("data").getString("toastMsg");
+            Status.setFlagToday("EcoLife::photoGuangPan");
+            Log.forest(toastMsg);
+            Toast.show(toastMsg);
         } catch (Throwable t) {
             // 捕获异常，记录错误信息和堆栈追踪
             Log.runtime(TAG, "photoGuangPan err:");

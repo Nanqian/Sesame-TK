@@ -23,14 +23,18 @@ public abstract class IdMapManager {
     private final Map<String, String> readOnlyIdMap = Collections.unmodifiableMap(idMap);
     private static final Map<Class<? extends IdMapManager>, IdMapManager> instances = new ConcurrentHashMap<>();
     public static <T extends IdMapManager> T getInstance(Class<T> clazz) {
-        return clazz.cast(instances.computeIfAbsent(clazz, cls -> {
+        T instance = (T) instances.get(clazz); // 尝试从缓存中获取实例
+        if (instance == null) { // 如果缓存中没有
             try {
-                return cls.getDeclaredConstructor().newInstance();
+                instance = clazz.getDeclaredConstructor().newInstance(); // 创建新实例
+                instances.put(clazz, instance); // 将实例放入缓存
             } catch (Exception e) {
-                throw new RuntimeException("Failed to create instance for " + cls.getName(), e);
+                throw new RuntimeException("Failed to create instance for " + clazz.getName(), e);
             }
-        }));
+        }
+        return instance; // 返回实例
     }
+
     /**
      * 强制子类提供文件名。
      * @return 文件名。

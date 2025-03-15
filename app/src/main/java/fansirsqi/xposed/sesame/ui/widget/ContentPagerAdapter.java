@@ -1,4 +1,5 @@
 package fansirsqi.xposed.sesame.ui.widget;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +19,13 @@ import fansirsqi.xposed.sesame.model.ModelField;
  */
 public class ContentPagerAdapter extends RecyclerView.Adapter<ContentPagerAdapter.ViewHolder> {
     private final Context context;
-    private final String userId; // 存储传入的 userId
-    private List<ModelConfig> configs = new ArrayList<>();
+    private final List<ModelConfig> configs = new ArrayList<>();
     public ContentPagerAdapter(Context context, Map<String, ModelConfig> configMap, String userId) {
         this.context = context;
-        this.userId = userId;
+        // 存储传入的 userId
         this.configs.addAll(configMap.values());
     }
+    @SuppressLint("NotifyDataSetChanged")
     public void updateData(Map<String, ModelConfig> configMap) {
         configs.clear();
         configs.addAll(configMap.values());

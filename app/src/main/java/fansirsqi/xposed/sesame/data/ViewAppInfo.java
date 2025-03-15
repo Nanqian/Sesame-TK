@@ -1,4 +1,5 @@
 package fansirsqi.xposed.sesame.data;
+
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+
 import fansirsqi.xposed.sesame.BuildConfig;
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.Log;
@@ -48,7 +50,8 @@ public final class ViewAppInfo {
             appBuildNumber = String.valueOf(BuildConfig.VERSION_CODE);
             // 设置标题栏-应用名称
 //      appTitle = context.getString(R.string.app_name) + "·" + BuildConfig.BUILD_TAG;
-            appTitle = context.getString(R.string.app_name) + "·" + BuildConfig.VERSION_NAME;
+//            appTitle = context.getString(R.string.app_name) + "·" + BuildConfig.VERSION_NAME;
+            appTitle = context.getString(R.string.app_name) ;
             // 设置构建目标信息
             appBuildTarget = BuildConfig.BUILD_DATE + " " + BuildConfig.BUILD_TIME + " ⏰";
             // 设置版本号
@@ -126,10 +129,10 @@ public final class ViewAppInfo {
             ApplicationInfo info = context.getApplicationInfo();
             boolean isDebuggable = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
             if (isDebuggable) {
-                Log.runtime("当前应用[" + info.packageName + "]处于调试模式");
+                Log.system("当前应用[" + info.packageName + "]处于调试模式");
                 return true;
             } else {
-                Log.runtime("当前应用[" + info.packageName + "]不处于调试模式");
+                Log.system("当前应用[" + info.packageName + "]不处于调试模式");
                 return false;
             }
         } catch (Exception e) {
@@ -147,10 +150,10 @@ public final class ViewAppInfo {
             ApplicationInfo info = context.getPackageManager().getApplicationInfo(packageName, 0);
             boolean isDebuggable = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
             if (isDebuggable) {
-                Log.runtime("目标应用[" + packageName + "]处于调试模式");
+                Log.system("目标应用[" + packageName + "]处于调试模式");
                 return true;
             } else {
-                Log.runtime("目标应用[" + packageName + "]不处于调试模式");
+                Log.system("目标应用[" + packageName + "]不处于调试模式");
                 return false;
             }
         } catch (PackageManager.NameNotFoundException e) {

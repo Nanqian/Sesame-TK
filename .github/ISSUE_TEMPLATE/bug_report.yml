@@ -7,19 +7,19 @@ body:
       value: |        
         ### 请在下方填写问题发生的具体原因和复现步骤。
         
-        发生异常、崩溃、闪退或功能性问题，必须提交问题 Log (日志)，没有 Log 的 issues 将直接被关闭。
+        发生异常、崩溃、闪退或功能性问题，必须提交问题 Log (日志)，没有 Log 的 issues ，提醒不改直接关闭。
   - type: input
     attributes:
       label: |
         程序版本 / 框架版本 / 模块版本
-      description: 请填写当前使用的 程序版本 (例如：10.5.8)、框架版本 (例如：LSPosed 1.8.4) 及 模块版本 (例如：1.1.1)
+      description: 请填写当前使用的 程序版本 (例如：10.5.8，不要填最新版，提醒不改直接关闭)、框架版本 (例如：LSPosed 1.10.1 JingMatrix，不要填最新版) 及 模块版本 (例如：1.1.1，不要填最新版)
     validations:
       required: true
   - type: input
     attributes:
       label: |
         系统版本 / Android版本
-      description: 这里填写当前使用的 系统版本 (例如：MIUI、ColorOS、OxygenOS、PE/原生) 及 Android版本 (例如：Android 10、Android 11、Android 12)
+      description: 这里填写当前使用的 系统版本 (例如：MIUI、ColorOS、OxygenOS、LineageOS、PE/原生) 及 Android版本 (例如：Android 10、Android 11、Android 12)
     validations:
       required: true
   - type: textarea

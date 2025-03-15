@@ -1,4 +1,4 @@
-package fansirsqi.xposed.sesame.util;
+package fansirsqi.xposed.sesame.data;
 /**
  * 类实用工具类。
  * 提供了一些常量，这些常量代表了项目中使用的一些关键类的完整名称。

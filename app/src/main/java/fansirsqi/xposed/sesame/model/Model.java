@@ -1,14 +1,14 @@
 package fansirsqi.xposed.sesame.model;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.util.Log;
@@ -19,11 +19,9 @@ public abstract class Model {
     private static final Map<ModelGroup, Map<String, ModelConfig>> groupModelConfigMap = new LinkedHashMap<>();
     private static final Map<Class<? extends Model>, Model> modelMap = new ConcurrentHashMap<>();
     private static final List<Class<? extends Model>> modelClazzList = ModelOrder.getClazzList();
-    @Getter
-    private static final Model[] modelArray = new Model[modelClazzList.size()];
-    private static final List<Model> modelList = new LinkedList<>(Arrays.asList(modelArray));
-    @Getter
-    public static final List<Model> readOnlyModelList = Collections.unmodifiableList(modelList);
+    @Getter private static final Model[] modelArray = new Model[modelClazzList.size()];
+//    private static final List<Model> modelList = new LinkedList<>(Arrays.asList(modelArray));
+//    @Getter public static final List<Model> readOnlyModelList = Collections.unmodifiableList(modelList);
     private final BooleanModelField enableField;
     public final BooleanModelField getEnableField() {
         return enableField;
@@ -80,26 +78,30 @@ public abstract class Model {
         }
     }
     public static synchronized void initAllModel() {
-        destroyAllModel();
-        for (int i = 0, len = modelClazzList.size(); i < len; i++) {
-            Class<? extends Model> modelClazz = modelClazzList.get(i);
-            try {
-                // 使用getDeclaredConstructor().newInstance()代替newInstance()
-                Model model = modelClazz.getDeclaredConstructor().newInstance();
-                ModelConfig modelConfig = new ModelConfig(model);
-                modelArray[i] = model;
-                modelMap.put(modelClazz, model);
-                String modelCode = modelConfig.getCode();
-                modelConfigMap.put(modelCode, modelConfig);
-                ModelGroup group = modelConfig.getGroup();
-                Map<String, ModelConfig> modelConfigMap = groupModelConfigMap.computeIfAbsent(group, k -> new LinkedHashMap<>());
-                modelConfigMap.put(modelCode, modelConfig);
-            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
-                     InvocationTargetException e) {
-                Log.printStackTrace(e);
+    destroyAllModel();
+    for (int i = 0, len = modelClazzList.size(); i < len; i++) {
+        Class<? extends Model> modelClazz = modelClazzList.get(i);
+        try {
+            Model model = modelClazz.getDeclaredConstructor().newInstance();
+            ModelConfig modelConfig = new ModelConfig(model);
+            modelArray[i] = model;
+            modelMap.put(modelClazz, model);
+            String modelCode = modelConfig.getCode();
+            modelConfigMap.put(modelCode, modelConfig);
+            ModelGroup group = modelConfig.getGroup();
+            Map<String, ModelConfig> modelConfigMap = groupModelConfigMap.get(group);
+            if (modelConfigMap == null) {
+                modelConfigMap = new LinkedHashMap<>();
+                groupModelConfigMap.put(group, modelConfigMap);
             }
+            modelConfigMap.put(modelCode, modelConfig);
+        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException |
+                 InvocationTargetException e) {
+            Log.printStackTrace(e);
         }
     }
+}
+
     public static synchronized void bootAllModel(ClassLoader classLoader) {
         for (Model model : modelArray) {
             try {

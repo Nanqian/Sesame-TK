@@ -8,10 +8,6 @@ plugins {
 
 android {
 
-    signingConfigs {
-        release {
-        }
-    }
     buildFeatures {
         buildConfig = true
     }
@@ -23,7 +19,7 @@ android {
     def major = 0          // 主版本号
     def minor = 2          // 次版本号
     def patch = 5          // 补丁版本号
-    def buildTag = "beta.fix.1" // 构建标签 (alpha, beta, release, 等)
+    def buildTag = "beta.5" // 构建标签 (alpha, beta, release, 等)
     def buildDate
     def buildDate2
     def buildTime
@@ -53,10 +49,9 @@ android {
     }
     _versionCode = 'git rev-list --count HEAD'.execute().text.trim().toInteger()
     if (buildTag.contains("alpha") || buildTag.contains("beta")) {
-        _versionName = "${major}.${minor}.${patch}-${buildTag}"
-    } else if (buildTag == "debug") {
-        _versionName = "${buildTargetCode}-${buildTag}"
-    } else {
+        _versionName = "${major}.${minor}.${patch}-${buildTag}.${buildTargetCode}"
+    }
+     else {
         _versionName = "${major}.${minor}.${patch}-${buildTag}"
         buildTag = ""
     }
@@ -102,12 +97,15 @@ android {
         debug {
 
         }
+        release {
+        }
     }
 
     buildTypes {
         debug {
             debuggable true
             signingConfig signingConfigs.debug
+            versionNameSuffix  "-debug"
         }
         release {
             debuggable false
@@ -139,6 +137,7 @@ android {
 
 // 依赖项配置
 dependencies {
+
     //noinspection GradleDependency
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.10'
     implementation 'org.slf4j:slf4j-api:2.0.7'
@@ -156,7 +155,11 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.36' // Lombok 注解处理器
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.1'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.1'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.18.1'
+    normalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.1'
+    normalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.1'
+    normalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.18.1'
+
+    compatibleImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.13.5'
+    compatibleImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.5'
+    compatibleImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.13.5'
 }

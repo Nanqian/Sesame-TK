@@ -3,6 +3,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.Arrays;
+
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -12,7 +14,7 @@ import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 public class AntMember extends ModelTask {
@@ -62,12 +64,20 @@ public class AntMember extends ModelTask {
   }
   @Override
   public Boolean check() {
-    return !TaskCommon.IS_ENERGY_TIME;
+    if (TaskCommon.IS_ENERGY_TIME){
+      Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+      return false;
+    }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+      Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+      return false;
+    } else {
+      return true;
+    }
   }
   @Override
   public void run() {
     try {
-      Log.other("执行开始-" + getName());
+      Log.record("执行开始-" + getName());
       if (memberSign.getValue()) {
         doMemberSign();
       }
@@ -123,7 +133,7 @@ public class AntMember extends ModelTask {
     } catch (Throwable t) {
       Log.printStackTrace(TAG, t);
     }finally {
-      Log.other("执行结束-" + getName());
+      Log.record("执行结束-" + getName());
     }
   }
   /**
@@ -131,13 +141,13 @@ public class AntMember extends ModelTask {
    */
   private void doMemberSign() {
     try {
-      if (StatusUtil.canMemberSignInToday(UserMap.getCurrentUid())) {
+      if (Status.canMemberSignInToday(UserMap.getCurrentUid())) {
         String s = AntMemberRpcCall.queryMemberSigninCalendar();
         ThreadUtil.sleep(500);
         JSONObject jo = new JSONObject(s);
         if (ResUtil.checkResCode(jo)) {
           Log.other("会员签到📅[" + jo.getString("signinPoint") + "积分]#已签到" + jo.getString("signinSumDay") + "天");
-          StatusUtil.memberSignInToday(UserMap.getCurrentUid());
+          Status.memberSignInToday(UserMap.getCurrentUid());
         } else {
           Log.record(jo.getString("resultDesc"));
           Log.runtime(s);
@@ -695,7 +705,7 @@ public class AntMember extends ModelTask {
   }
   public void kbMember() {
     try {
-      if (!StatusUtil.canKbSignInToday()) {
+      if (!Status.canKbSignInToday()) {
         return;
       }
       String s = AntMemberRpcCall.rpcCall_signIn();
@@ -703,9 +713,9 @@ public class AntMember extends ModelTask {
       if (jo.optBoolean("success", false)) {
         jo = jo.getJSONObject("data");
         Log.other("口碑签到📅[第" + jo.getString("dayNo") + "天]#获得" + jo.getString("value") + "积分");
-        StatusUtil.KbSignInToday();
+        Status.KbSignInToday();
       } else if (s.contains("\"HAS_SIGN_IN\"")) {
-        StatusUtil.KbSignInToday();
+        Status.KbSignInToday();
       } else {
         Log.runtime(TAG, jo.getString("errorMessage"));
       }

@@ -15,7 +15,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import androidx.annotation.NonNull;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -54,13 +53,13 @@ import fansirsqi.xposed.sesame.task.BaseTask;
 import fansirsqi.xposed.sesame.task.ModelTask;
 import fansirsqi.xposed.sesame.task.TaskCommon;
 import fansirsqi.xposed.sesame.task.antMember.AntMemberRpcCall;
-import fansirsqi.xposed.sesame.util.General;
+import fansirsqi.xposed.sesame.data.General;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.Notify;
 import fansirsqi.xposed.sesame.util.PermissionUtil;
-import fansirsqi.xposed.sesame.util.StatisticsUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Statistics;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 import lombok.Getter;
@@ -81,10 +80,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
     static AlipayVersion alipayVersion = new AlipayVersion("");
     @Getter
     private static volatile boolean hooked = false;
-    static volatile boolean init = false;
+    private static volatile boolean init = false;
     static volatile Calendar dayCalendar;
-    @Getter
-    static LocalDate dayDate;
     @Getter
     static volatile boolean offline = false;
     @Getter
@@ -282,6 +279,10 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                             Log.record("️跳过执行-未初始化");
                                             return;
                                         }
+                                        if (!Config.isLoaded()) {
+                                            Log.record("️跳过执行-用户模块配置未加载");
+                                            return;
+                                        }
                                         Log.record("开始执行");
                                         long currentTime = System.currentTimeMillis();
                                         if (lastExecTime + 2000 > currentTime) {
@@ -311,7 +312,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                     }
                                 }));
                                 registerBroadcastReceiver(appService);
-                                StatisticsUtil.load();
+                                Statistics.load();
                                 FriendWatch.load(UserId.get());
                                 dayCalendar = Calendar.getInstance();
                                 if (initHandler(true)) {
@@ -337,7 +338,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                 Notify.updateStatusText("支付宝前台服务被销毁");
                                 destroyHandler(true);
                                 FriendWatch.unload();
-                                StatisticsUtil.unload();
+                                Statistics.unload();
                                 restartByBroadcast();
                             }
                         });
@@ -474,7 +475,11 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 Log.record(startMsg);
                 Log.record("⚙️模块版本：" + modelVersion);
                 Log.record("📦应用版本：" + alipayVersion.getVersionString());
-                Config.load(userId);
+                if (!Config.load(userId)) {
+                    Log.record("用户模块配置加载失败");
+                    Toast.show("用户模块配置加载失败");
+                    return false;
+                }
                 // ！！所有权限申请应该放在加载配置之后
                 //闹钟权限申请
                 if (!PermissionUtil.checkAlarmPermissions()) {
@@ -561,8 +566,8 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                                             if (BaseModel.getSendHookData().getValue()) {
                                                 HookSender.sendHookData(HookResponse);
                                             }
-                                            String logMessage = "\n========================>\n" + "TimeStamp: " + TimeStamp + "\n" + "Method: " + Method + "\n" + "Params: " + Params + "\n" + "Data: " + rawData.replace("\\", "") + "\n<========================\n";
-                                            if (!logMessage.trim().isEmpty()) {
+                                            String logMessage = "\n========================>\n" + "TimeStamp: " + TimeStamp + "\n" + "Method: " + Method + "\n" + "Params: " + Params + "\n" + "Data: " + rawData.replace("\\\"", "\"") + "\n<========================\n";
+                                            if (!logMessage.trim().isEmpty() && !rawData.equals("null")) {
                                                 Log.capture(logMessage);
                                             }
                                         } else {
@@ -598,7 +603,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                     }
                 }
                 Model.bootAllModel(classLoader);
-                StatusUtil.load();
+                Status.load();
                 updateDay(userId);
                 BaseModel.initData();
                 String successMsg = "芝麻粒-TK 加载成功🎉";
@@ -621,7 +626,7 @@ public class ApplicationHook implements IXposedHookLoadPackage {
                 if (service != null) {
                     stopHandler();
                     BaseModel.destroyData();
-                    StatusUtil.unload();
+                    Status.unload();
                     Notify.stop();
                     RpcIntervalLimit.clearIntervalLimit();
                     Config.unload();
@@ -697,12 +702,12 @@ public class ApplicationHook implements IXposedHookLoadPackage {
             Log.printStackTrace(e);
         }
         try {
-            StatisticsUtil.save(Calendar.getInstance());
+            Statistics.save(Calendar.getInstance());
         } catch (Exception e) {
             Log.printStackTrace(e);
         }
         try {
-            StatusUtil.save(nowCalendar);
+            Status.save(nowCalendar);
         } catch (Exception e) {
             Log.printStackTrace(e);
         }

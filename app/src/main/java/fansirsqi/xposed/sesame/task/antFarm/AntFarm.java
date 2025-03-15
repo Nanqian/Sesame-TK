@@ -15,6 +15,7 @@ import java.util.Set;
 import fansirsqi.xposed.sesame.entity.AlipayUser;
 import fansirsqi.xposed.sesame.entity.MapperEntity;
 import fansirsqi.xposed.sesame.hook.rpc.intervallimit.RpcIntervalLimit;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.model.modelFieldExt.BooleanModelField;
@@ -32,7 +33,7 @@ import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.StatusUtil;
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.TimeUtil;
@@ -175,7 +176,6 @@ public class AntFarm extends ModelTask {
     private BooleanModelField family;
     private SelectModelField familyOptions;
     private SelectModelField inviteFriendVisitFamily;
-    private SelectModelField familyBatchInviteP2P;
     private StringModelField giftFamilyDrawFragment;
     @Override
     public ModelFields getFields() {
@@ -224,7 +224,6 @@ public class AntFarm extends ModelTask {
         modelFields.addField(family = new BooleanModelField("family", "家庭 | 开启", false));
         modelFields.addField(familyOptions = new SelectModelField("familyOptions", "家庭 | 选项", new LinkedHashSet<>(), AntFarmFamilyOption::getAntFarmFamilyOptions));
         modelFields.addField(inviteFriendVisitFamily = new SelectModelField("inviteFriendVisitFamily", "家庭 | 好友分享列表", new LinkedHashSet<>(), AlipayUser::getList));
-        modelFields.addField(familyBatchInviteP2P = new SelectModelField("familyBatchInviteP2P", "家庭 | 串门送扭蛋列表", new LinkedHashSet<>(), AlipayUser::getList));
         modelFields.addField(giftFamilyDrawFragment = new StringModelField("giftFamilyDrawFragment", "家庭 | 扭蛋碎片赠送用户ID(配置目录查看)", ""));
         return modelFields;
     }
@@ -235,12 +234,20 @@ public class AntFarm extends ModelTask {
     }
     @Override
     public Boolean check() {
-        return !TaskCommon.IS_ENERGY_TIME;
+        if (TaskCommon.IS_ENERGY_TIME){
+            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
+            return false;
+        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            return false;
+        } else {
+            return true;
+        }
     }
     @Override
     public void run() {
         try {
-            Log.farm("执行开始-蚂蚁" + getName());
+            Log.record("执行开始-蚂蚁" + getName());
             if (enterFarm() == null) {
                 return;
             }
@@ -332,10 +339,10 @@ public class AntFarm extends ModelTask {
                 Log.record("有可收取的爱心鸡蛋");
                 harvestProduce(ownerFarmId);
             }
-            if (donation.getValue() && StatusUtil.canDonationEgg(userId) && harvestBenevolenceScore >= 1) {
+            if (donation.getValue() && Status.canDonationEgg(userId) && harvestBenevolenceScore >= 1) {
                 handleDonation(donationCount.getValue());
             }
-            if (answerQuestion.getValue() && StatusUtil.canAnswerQuestionToday()) {
+            if (answerQuestion.getValue() && Status.canAnswerQuestionToday()) {
                 answerQuestion();
             }
             if (receiveFarmTaskAward.getValue()) {
@@ -361,7 +368,7 @@ public class AntFarm extends ModelTask {
                 }
                 autoFeedAnimal();
                 // 小鸡换装
-                if (listOrnaments.getValue() && StatusUtil.canOrnamentToday()) {
+                if (listOrnaments.getValue() && Status.canOrnamentToday()) {
                     listOrnaments();
                 }
                 if (unreceiveTaskAward > 0) {
@@ -381,7 +388,8 @@ public class AntFarm extends ModelTask {
             }
             // 抽抽乐
             if (enableChouchoule.getValue()) {
-                chouchoule();
+                chouChouLe ccl = new chouChouLe();
+                ccl.chouchoule();
             }
             // 雇佣小鸡
             if (hireAnimal.getValue()) {
@@ -404,13 +412,14 @@ public class AntFarm extends ModelTask {
             Log.runtime(TAG, "AntFarm.start.run err:");
             Log.printStackTrace(TAG, t);
         } finally {
-            Log.farm("执行结束-蚂蚁" + getName());
+            Log.record("执行结束-蚂蚁" + getName());
         }
     }
     private void animalSleepAndWake() {
         try {
             String sleepTimeStr = sleepTime.getValue();
             if ("-1".equals(sleepTimeStr)) {
+                Log.runtime("当前已关闭小鸡睡觉");
                 return;
             }
             Calendar now = TimeUtil.getNow();
@@ -431,7 +440,7 @@ public class AntFarm extends ModelTask {
             boolean afterSleepTime = now.compareTo(animalSleepTimeCalendar) > 0;
             boolean afterWakeUpTime = now.compareTo(animalWakeUpTimeCalendar) > 0;
             if (afterSleepTime && afterWakeUpTime) {
-                if (!StatusUtil.canAnimalSleep()) {
+                if (!Status.canAnimalSleep()) {
                     return;
                 }
                 Log.record("已错过小鸡今日睡觉时间");
@@ -448,7 +457,7 @@ public class AntFarm extends ModelTask {
                 Log.record("添加定时起床🛌[" + UserMap.getCurrentMaskName() + "]在[" + TimeUtil.getCommonDate(animalWakeUpTime) + "]执行");
             }
             if (afterSleepTime) {
-                if (StatusUtil.canAnimalSleep()) {
+                if (Status.canAnimalSleep()) {
                     animalSleepNow();
                 }
             }
@@ -528,7 +537,7 @@ public class AntFarm extends ModelTask {
                     jo = new JSONObject(s);
                     if ("SUCCESS".equals(jo.getString("memo"))) {
                         Log.farm("小鸡睡觉🛌");
-                        StatusUtil.animalSleep();
+                        Status.animalSleep();
                     }
                 } else {
                     Log.farm("小鸡无需睡觉🛌");
@@ -784,7 +793,7 @@ public class AntFarm extends ModelTask {
                     }
                 }
                 if (isDonation) {
-                    StatusUtil.donationEgg(userId);
+                    Status.donationEgg(userId);
                 }
                 if (activityId == null) {
                     Log.record("今日已无可捐赠的活动");
@@ -838,7 +847,7 @@ public class AntFarm extends ModelTask {
                                     String answer = null;
                                     String anotherAnswer = null;
                                     boolean existsResult = false;
-                                    Set<String> dadaDailySet = StatusUtil.getDadaDailySet();
+                                    Set<String> dadaDailySet = Status.getDadaDailySet();
                                     if (dadaDailySet.contains(TimeUtil.getDateStr() + labels.getString(0))) {
                                         answer = labels.getString(0);
                                         anotherAnswer = labels.getString(1);
@@ -869,7 +878,7 @@ public class AntFarm extends ModelTask {
                                         }
                                         Log.record("答题" + (correct ? "正确" : "错误") + "可领取［"
                                                 + extInfo.getString("award") + "克］");
-                                        StatusUtil.answerQuestionToday();
+                                        Status.answerQuestionToday();
                                         JSONArray operationConfigList = joDailySubmit
                                                 .getJSONArray("operationConfigList");
                                         for (int j = 0; j < operationConfigList.length(); j++) {
@@ -885,7 +894,7 @@ public class AntFarm extends ModelTask {
                                                 }
                                             }
                                         }
-                                        StatusUtil.setDadaDailySet(dadaDailySet);
+                                        Status.setDadaDailySet(dadaDailySet);
                                     } else {
                                         Log.runtime(s);
                                     }
@@ -896,11 +905,11 @@ public class AntFarm extends ModelTask {
                                 break;
                             case RECEIVED:
                                 Log.record("今日答题已完成");
-                                StatusUtil.answerQuestionToday();
+                                Status.answerQuestionToday();
                                 break;
                             case FINISHED:
                                 Log.record("已经答过题了，饲料待领取");
-                                StatusUtil.answerQuestionToday();
+                                Status.answerQuestionToday();
                                 break;
                         }
                         break;
@@ -1078,33 +1087,49 @@ public class AntFarm extends ModelTask {
         }
     }
     private void sign(JSONObject signList) {
-        try {
-            JSONArray jaFarmsignList = signList.getJSONArray("signList");
-            boolean signed = true;
-            int awardCount = 0;
-            for (int i = 0; i < jaFarmsignList.length(); i++) {
-                JSONObject jo = jaFarmsignList.getJSONObject(i);
-                if (TimeUtil.getDateStr().equals(jo.getString("signKey"))) {
-                    signed = jo.getBoolean("signed");
-                    awardCount = jo.getInt("awardCount");
-                    break;
-                }
+    try {
+        JSONArray jaFarmsignList = signList.getJSONArray("signList");
+        JSONObject joSignItem = null;
+
+        for (int i = 0; i < jaFarmsignList.length(); i++) {
+            JSONObject jo = jaFarmsignList.getJSONObject(i);
+            if (TimeUtil.getDateStr().equals(jo.getString("signKey"))) {
+                joSignItem = jo;
+                break;
             }
-            if (!signed) {
-                JSONObject joSign = new JSONObject(AntFarmRpcCall.sign());
-                if ("SUCCESS".equals(joSign.getString("memo"))) {
-                    Log.farm("庄园签到📅获得饲料" + awardCount + "g");
-                } else {
-                    Log.runtime(TAG, joSign.toString());
-                }
-            } else {
-                Log.record("庄园今日已签到");
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "Farmsign err:");
-            Log.printStackTrace(TAG, t);
         }
+
+        if (joSignItem == null) {
+            Log.record("未找到今日签到信息");
+            return;
+        }
+
+        boolean signed = joSignItem.getBoolean("signed");
+        int awardCount = joSignItem.getInt("awardCount");
+
+        if (!signed) {
+            String signResponse = AntFarmRpcCall.sign();
+            JSONObject joSign = new JSONObject(signResponse);
+            String memo = joSign.getString("memo");
+
+            if ("SUCCESS".equals(memo)) {
+                Log.farm("庄园签到📅获得饲料" + awardCount + "g");
+            } else {
+                Log.record("签到失败：" + memo);
+                Log.runtime(TAG, signResponse);
+            }
+        } else {
+            Log.record("庄园今日已签到得奖励"+ awardCount + "g");
+        }
+    } catch (JSONException e) {
+        Log.record("JSON解析错误：" + e.getMessage());
+        Log.printStackTrace(TAG, e);
+    } catch (Exception e) {
+        Log.record("其他错误：" + e.getMessage());
+        Log.printStackTrace(TAG, e);
     }
+}
+
     private Boolean feedAnimal(String farmId) {
         try {
             if (foodStock < 180) {
@@ -1156,7 +1181,7 @@ public class AntFarm extends ModelTask {
         }
     }
     private Boolean useAccelerateTool() {
-        if (!StatusUtil.canUseAccelerateTool()) {
+        if (!Status.canUseAccelerateTool()) {
             return false;
         }
         if (!useAccelerateToolContinue.getValue() && AnimalBuff.ACCELERATING.name().equals(ownerAnimal.animalBuff)) {
@@ -1183,7 +1208,7 @@ public class AntFarm extends ModelTask {
             if (useFarmTool(ownerFarmId, ToolType.ACCELERATETOOL)) {
                 allFoodHaveEatten += consumeSpeed * 3600;
                 isUseAccelerateTool = true;
-                StatusUtil.useAccelerateTool();
+                Status.useAccelerateTool();
                 ThreadUtil.sleep(1000);
             } else {
                 break;
@@ -1242,7 +1267,7 @@ public class AntFarm extends ModelTask {
                 String userId = entry.getKey();
                 if (userId.equals(UserMap.getCurrentUid()))
                     continue;
-                if (!StatusUtil.canFeedFriendToday(userId, entry.getValue()))
+                if (!Status.canFeedFriendToday(userId, entry.getValue()))
                     continue;
                 s = AntFarmRpcCall.enterFarm("", userId);
                 jo = new JSONObject(s);
@@ -1292,7 +1317,7 @@ public class AntFarm extends ModelTask {
                     if (feedFood > 0) {
                         add2FoodStock(-feedFood);
                         Log.farm("帮喂好友🥣[" + user + "]的小鸡[" + feedFood + "g]#剩余" + foodStock + "g");
-                        StatusUtil.feedFriendToday(AntFarmRpcCall.farmId2UserId(friendFarmId));
+                        Status.feedFriendToday(AntFarmRpcCall.farmId2UserId(friendFarmId));
                     }
                 } else {
                     Log.record(memo);
@@ -1638,10 +1663,10 @@ public class AntFarm extends ModelTask {
                     continue;
                 if (count > 3)
                     count = 3;
-                if (StatusUtil.canVisitFriendToday(userId, count)) {
+                if (Status.canVisitFriendToday(userId, count)) {
                     count = visitFriend(userId, count);
                     if (count > 0)
-                        StatusUtil.visitFriendToday(userId, count);
+                        Status.visitFriendToday(userId, count);
                 }
             }
         } catch (Throwable t) {
@@ -1807,109 +1832,7 @@ public class AntFarm extends ModelTask {
             Log.printStackTrace(TAG, t);
         }
     }
-    /* 抽抽乐 */
-    private void chouchoule() {
-        boolean doubleCheck;
-        do {
-            doubleCheck = false;
-            try {
-                JSONObject jo = new JSONObject(AntFarmRpcCall.chouchouleListFarmTask());
-                if (ResUtil.checkResCode(TAG, jo)) {
-                    JSONArray farmTaskList = jo.getJSONArray("farmTaskList");
-                    for (int i = 0; i < farmTaskList.length(); i++) {
-                        JSONObject taskitem = farmTaskList.getJSONObject(i);
-                        String taskStatus = taskitem.getString("taskStatus");
-                        String title = taskitem.getString("title");
-                        String taskId = taskitem.getString("bizKey");
-                        int rightsTimes = taskitem.optInt("rightsTimes", 0);
-                        int rightsTimesLimit = taskitem.optInt("rightsTimesLimit", 0);
-                        int additionalRightsTimes = rightsTimesLimit - rightsTimes;
-                        if ("FINISHED".equals(taskStatus) && additionalRightsTimes > 0) {
-                            if (chouchouleDoFarmTask(taskId, title, additionalRightsTimes)) {
-                                doubleCheck = true;
-                            }
-                        }
-//                        if (chouchouleReceiveFarmTaskAward(taskId)) { //这个任务会报错，暂时不用
-//                            doubleCheck = true;
-//                        }
-                        if ("TODO".equals(taskStatus) && !"DONATION".equals(taskitem.optString("innerAction"))) {
-                            if (chouchouleDoFarmTask(taskId, title, additionalRightsTimes)) {
-                                doubleCheck = true;
-                            }
-                        }
-                    }
-                } else {
-                    Log.record(TAG, "抽抽乐任务列表获取失败:" + jo.getString("memo"));
-                }
-            } catch (Throwable t) {
-                Log.runtime(TAG, "chouchoule err:");
-                Log.printStackTrace(TAG, t);
-            }
-        } while (doubleCheck);
-        try {
-            JSONObject jo = new JSONObject(AntFarmRpcCall.enterDrawMachine());
-            if (ResUtil.checkResCode(TAG, jo)) {
-                JSONObject userInfo = jo.getJSONObject("userInfo");
-                JSONObject drawActivityInfo = jo.getJSONObject("drawActivityInfo");
-                String activityId = drawActivityInfo.optString("activityId");
-                long endTime = drawActivityInfo.getLong("endTime");
-                if (System.currentTimeMillis() > endTime) {
-                    Log.record("该[" + activityId + "]抽奖活动已结束");
-                    activityId = null;
-                }
-                int leftDrawTimes = userInfo.optInt("leftDrawTimes", 0);
-                if (leftDrawTimes > 0) {
-                    for (int ii = 0; ii < leftDrawTimes; ii++) {
-                        JSONObject drawPrizeObj;
-                        if (activityId != null) {
-                            drawPrizeObj = new JSONObject(AntFarmRpcCall.DrawPrize(activityId));
-                        } else {
-                            drawPrizeObj = new JSONObject(AntFarmRpcCall.DrawPrize());
-                        }
-                        ThreadUtil.sleep(5000L);
-                        if (drawPrizeObj.optBoolean("success")) {
-                            String title = drawPrizeObj.getString("title");
-                            int prizeNum = drawPrizeObj.optInt("prizeNum", 0);
-                            Log.farm("抽抽乐🎁[领取:" + title + "*" + prizeNum + "]");
-                        }
-                    }
-                }
-            } else {
-                Log.record(TAG, "抽奖活动进入失败:" + jo.getString("memo"));
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "DrawPrize err:");
-            Log.printStackTrace(TAG, t);
-        }
-    }
-    private Boolean chouchouleDoFarmTask(String bizKey, String name, int times) {
-        try {
-            for (int i = 0; i < times; i++) {
-                ThreadUtil.sleep(15000L);
-                String s = AntFarmRpcCall.chouchouleDoFarmTask(bizKey);
-                JSONObject jo = new JSONObject(s);
-                if (jo.optBoolean("success", false)) {
-                    Log.farm("完成抽抽乐🧾️[任务:" + name + "]");
-                    return true;
-                }
-            }
-        } catch (Throwable t) {
-            Log.runtime(TAG, "chouchouleDoFarmTask err:");
-            Log.printStackTrace(TAG, t);
-        }
-        return false;
-    }
-    private Boolean chouchouleReceiveFarmTaskAward(String taskId) {
-        try {
-            String s = AntFarmRpcCall.chouchouleReceiveFarmTaskAward(taskId);
-            JSONObject jo = new JSONObject(s);
-            return ResUtil.checkResCode(TAG, jo);
-        } catch (Throwable t) {
-            Log.runtime(TAG, "chouchouleReceiveFarmTaskAward err:");
-            Log.printStackTrace(TAG, t);
-        }
-        return false;
-    }
+
     /* 雇佣好友小鸡 */
     private void hireAnimal() {
         JSONArray animals = null;
@@ -2162,7 +2085,7 @@ public class AntFarm extends ModelTask {
                         }
                         // 输出日志
                         Log.farm("庄园小鸡💞[换装:" + wholeSetName + "]");
-                        StatusUtil.setOrnamentToday();
+                        Status.setOrnamentToday();
                     } else {
                         Log.runtime(TAG, "保存时装失败，错误码： " + saveResultJson);
                     }
@@ -2524,7 +2447,7 @@ public class AntFarm extends ModelTask {
             if (friendUserIds.isEmpty()) {
                 return;
             }
-            if (StatusUtil.hasFlagToday("antFarm::deliverMsgSend")) {
+            if (Status.hasFlagToday("antFarm::deliverMsgSend")) {
                 return;
             }
             JSONArray userIds = new JSONArray();
@@ -2543,7 +2466,7 @@ public class AntFarm extends ModelTask {
                     jo = new JSONObject(AntFarmRpcCall.deliverMsgSend(familyGroupId, userIds, content, deliverId));
                     if (jo.optBoolean("success")) {
                         Log.farm("亲密家庭🏠提交任务[道早安]");
-                        StatusUtil.setFlagToday("antFarm::deliverMsgSend");
+                        Status.setFlagToday("antFarm::deliverMsgSend");
                         ThreadUtil.sleep(500);
                         syncFamilyStatusIntimacy(familyGroupId);
                     }
@@ -2565,7 +2488,7 @@ public class AntFarm extends ModelTask {
     }
     private void inviteFriendVisitFamily(List<String> friendUserIds) {
         try {
-            if (StatusUtil.hasFlagToday("antFarm::inviteFriendVisitFamily")) {
+            if (Status.hasFlagToday("antFarm::inviteFriendVisitFamily")) {
                 return;
             }
             Set<String> familyValue = inviteFriendVisitFamily.getValue();
@@ -2587,7 +2510,7 @@ public class AntFarm extends ModelTask {
             JSONObject jo = new JSONObject(AntFarmRpcCall.inviteFriendVisitFamily(userIdArray));
             if (Objects.equals("SUCCESS", jo.getString("memo"))) {
                 Log.farm("亲密家庭🏠提交任务[分享好友]");
-                StatusUtil.setFlagToday("antFarm::inviteFriendVisitFamily");
+                Status.setFlagToday("antFarm::inviteFriendVisitFamily");
                 ThreadUtil.sleep(500);
                 syncFamilyStatusIntimacy(familyGroupId);
             }
@@ -2598,11 +2521,7 @@ public class AntFarm extends ModelTask {
     }
     private void familyBatchInviteP2PTask(List<String> friendUserIds, JSONObject familyDrawInfo) {
         try {
-            if (StatusUtil.hasFlagToday("antFarm::familyBatchInviteP2P")) {
-                return;
-            }
-            Set<String> familyValue = familyBatchInviteP2P.getValue();
-            if (familyValue.isEmpty()) {
+            if (Status.hasFlagToday("antFarm::familyBatchInviteP2P")) {
                 return;
             }
             if (Objects.isNull(friendUserIds) || friendUserIds.isEmpty()) {
@@ -2610,23 +2529,30 @@ public class AntFarm extends ModelTask {
             }
             String activityId = familyDrawInfo.optString("activityId");
             String sceneCode = "ANTFARM_FD_VISIT_" + activityId;
-            JSONArray inviteP2PVOList = new JSONArray();
-            for (String u : familyValue) {
-                if (!friendUserIds.contains(u) && inviteP2PVOList.length() < 6) {
-                    JSONObject object = new JSONObject();
-                    object.put("beInvitedUserId", u);
-                    object.put("bizTraceId", "");
-                    inviteP2PVOList.put(object);
-                }
-                if (inviteP2PVOList.length() >= 6) {
-                    break;
-                }
-            }
-            JSONObject jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList, sceneCode));
+            JSONObject jo = new JSONObject(AntFarmRpcCall.familyShareP2PPanelInfo(sceneCode));
             if (ResUtil.checkSuccess(TAG, jo)) {
-                Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
-                StatusUtil.setFlagToday("antFarm::familyBatchInviteP2P");
-                ThreadUtil.sleep(500);
+                JSONArray p2PFriendVOList = jo.getJSONArray("p2PFriendVOList");
+                if (Objects.isNull(p2PFriendVOList) || p2PFriendVOList.length() <= 0) {
+                    return;
+                }
+                JSONArray inviteP2PVOList = new JSONArray();
+                for (int i = 0; i < p2PFriendVOList.length(); i++) {
+                    if (inviteP2PVOList.length() < 6) {
+                        JSONObject object = new JSONObject();
+                        object.put("beInvitedUserId", p2PFriendVOList.getJSONObject(i).getString("userId"));
+                        object.put("bizTraceId", "");
+                        inviteP2PVOList.put(object);
+                    }
+                    if (inviteP2PVOList.length() >= 6) {
+                        break;
+                    }
+                }
+                jo = new JSONObject(AntFarmRpcCall.familyBatchInviteP2P(inviteP2PVOList, sceneCode));
+                if (ResUtil.checkSuccess(TAG, jo)) {
+                    Log.farm("亲密家庭🏠提交任务[好友串门送扭蛋]");
+                    Status.setFlagToday("antFarm::familyBatchInviteP2P");
+                    ThreadUtil.sleep(500);
+                }
             }
         } catch (Throwable t) {
             Log.runtime(TAG, "familyBatchInviteP2PTask err:");

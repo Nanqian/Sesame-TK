@@ -1,10 +1,14 @@
 package fansirsqi.xposed.sesame.ui;
+
+import static fansirsqi.xposed.sesame.data.UIConfig.UI_OPTION_NEW;
+
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -12,9 +16,11 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.Config;
 import fansirsqi.xposed.sesame.data.UIConfig;
@@ -36,11 +42,14 @@ import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.PortUtil;
 import fansirsqi.xposed.sesame.util.StringUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
+
 public class DemoSettingActivity extends BaseActivity {
+    private static final String TAG = DemoSettingActivity.class.getSimpleName();
     private ActivityResultLauncher<Intent> exportLauncher;
     private ActivityResultLauncher<Intent> importLauncher;
     private String userId; // 用户 ID
     private String userName; // 用户名
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,32 +105,41 @@ public class DemoSettingActivity extends BaseActivity {
         setBaseSubtitleTextColor(ContextCompat.getColor(this, R.color.textColorPrimary));
         initializeTabs();
     }
+
     private void initializeTabs() {
-        // 左侧 Tab 列表
-        RecyclerView recyclerTabList = findViewById(R.id.recycler_tab_list);
-        recyclerTabList.setLayoutManager(new LinearLayoutManager(this));
-        // 获取模型配置
-        Map<String, ModelConfig> modelConfigMap = ModelTask.getModelConfigMap();
-        List<String> tabTitles = new ArrayList<>(modelConfigMap.keySet());
-        // 初始化 Tab 适配器
-        TabAdapter tabAdapter = new TabAdapter(tabTitles, position -> {
+        try {
+            // 左侧 Tab 列表
+            RecyclerView recyclerTabList = findViewById(R.id.recycler_tab_list);
+            recyclerTabList.setLayoutManager(new LinearLayoutManager(this));
+            // 获取模型配置
+            Map<String, ModelConfig> modelConfigMap = ModelTask.getModelConfigMap();
+            Log.debug(TAG,"获取模型配置modelConfigMap："+modelConfigMap.toString());
+            List<String> tabTitles = new ArrayList<>(modelConfigMap.keySet());
+            Log.debug(TAG,"获取模型配置tabTitles："+ tabTitles);
+            // 初始化 Tab 适配器
+            TabAdapter tabAdapter = new TabAdapter(tabTitles, position -> {
+                ViewPager2 viewPager = findViewById(R.id.view_pager_content);
+                viewPager.setCurrentItem(position, true);
+                Log.debug(TAG,"初始化到第"+position+"个Tab");
+            });
+            recyclerTabList.setAdapter(tabAdapter);
+            // 右侧内容 ViewPager
             ViewPager2 viewPager = findViewById(R.id.view_pager_content);
-            viewPager.setCurrentItem(position, true);
-        });
-        recyclerTabList.setAdapter(tabAdapter);
-        // 右侧内容 ViewPager
-        ViewPager2 viewPager = findViewById(R.id.view_pager_content);
-        ContentPagerAdapter contentAdapter = new ContentPagerAdapter(this, modelConfigMap, userId);
-        viewPager.setAdapter(contentAdapter);
-        // 同步 Tab 和 ViewPager
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                recyclerTabList.smoothScrollToPosition(position);
-                tabAdapter.setSelectedPosition(position);
-            }
-        });
+            ContentPagerAdapter contentAdapter = new ContentPagerAdapter(this, modelConfigMap, userId);
+            viewPager.setAdapter(contentAdapter);
+            // 同步 Tab 和 ViewPager
+            viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    recyclerTabList.smoothScrollToPosition(position);
+                    tabAdapter.setSelectedPosition(position);
+                }
+            });
+        } catch (Throwable t) {
+            Log.error(TAG, t.getMessage());
+        }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // 创建菜单选项
@@ -132,6 +150,7 @@ public class DemoSettingActivity extends BaseActivity {
         menu.add(0, 5, 5, "切换至新UI"); // 允许切换到新 UI
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // 处理菜单项点击事件
@@ -176,7 +195,7 @@ public class DemoSettingActivity extends BaseActivity {
                 ListDialog.show(this, "单向好友列表", AlipayUser.getList(user -> user.getFriendStatus() != 1), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
                 break;
             case 5: // 切换到新 UI
-                UIConfig.INSTANCE.setNewUI(true);
+                UIConfig.INSTANCE.setUiOption(UI_OPTION_NEW);
                 if (UIConfig.save()) {
                     Intent intent = new Intent(this, NewSettingsActivity.class);
                     intent.putExtra("userId", this.userId);
@@ -190,6 +209,7 @@ public class DemoSettingActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     private void save() {
         try {
             if (Config.isModify(this.userId) && Config.save(this.userId, false)) {

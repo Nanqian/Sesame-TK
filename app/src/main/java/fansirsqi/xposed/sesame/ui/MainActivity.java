@@ -1,4 +1,7 @@
 package fansirsqi.xposed.sesame.ui;
+
+import static fansirsqi.xposed.sesame.data.ViewAppInfo.isApkInDebug;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -16,11 +19,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.data.RunType;
 import fansirsqi.xposed.sesame.data.UIConfig;
@@ -33,9 +41,10 @@ import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.Maps.UserMap;
 import fansirsqi.xposed.sesame.util.PermissionUtil;
-import fansirsqi.xposed.sesame.util.StatisticsUtil;
+import fansirsqi.xposed.sesame.data.Statistics;
 import fansirsqi.xposed.sesame.util.ThreadUtil;
 import fansirsqi.xposed.sesame.util.ToastUtil;
+
 public class MainActivity extends BaseActivity {
     private boolean hasPermissions = false;
     private boolean isClick = false;
@@ -44,6 +53,8 @@ public class MainActivity extends BaseActivity {
     private Runnable titleRunner;
     private String[] userNameArray = {"默认"};
     private UserEntity[] userEntityArray = {null};
+    private String userId = null;
+
     @SuppressLint({"UnspecifiedRegisterReceiverFlag", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +77,7 @@ public class MainActivity extends BaseActivity {
         updateSubTitle(ViewAppInfo.getRunType());
 //        viewHandler = new Handler(Looper.getMainLooper());
         titleRunner = () -> updateSubTitle(RunType.DISABLE);
+        userId = UserMap.getCurrentUid();
         if (mainImage != null) {
             mainImage.setOnLongClickListener(
                     v -> {
@@ -103,19 +115,21 @@ public class MainActivity extends BaseActivity {
                                                     public void onSuccess(String result) {
                                                         runOnUiThread(() -> updateOneWord(result, oneWord)); // 在主线程中更新UI
                                                     }
+
                                                     @Override
                                                     public void onFailure(String error) {
                                                         runOnUiThread(() -> updateOneWord(error, oneWord)); // 在主线程中更新UI
                                                     }
                                                 });
+                                        Log.debug("Now User Id: " + userId);
                                         Toast.makeText(context, "芝麻粒状态加载正常👌", Toast.LENGTH_SHORT).show();
                                         ThreadUtil.sleep(200); // 别急，等一会儿再说
                                         isClick = false;
                                     }
                                     break;
                                 case "fansirsqi.xposed.sesame.update":
-                                    StatisticsUtil.load();
-                                    tvStatistics.setText(StatisticsUtil.getText());
+                                    Statistics.load();
+                                    tvStatistics.setText(Statistics.getText());
                                     break;
                             }
                         }
@@ -129,8 +143,8 @@ public class MainActivity extends BaseActivity {
         } else {
             registerReceiver(broadcastReceiver, intentFilter);
         }
-        StatisticsUtil.load();
-        tvStatistics.setText(StatisticsUtil.getText());
+        Statistics.load();
+        tvStatistics.setText(Statistics.getText());
         // 调用 FansirsqiUtil 获取句子
         FansirsqiUtil.getOneWord(
                 new FansirsqiUtil.OneWordCallback() {
@@ -138,6 +152,7 @@ public class MainActivity extends BaseActivity {
                     public void onSuccess(String result) {
                         runOnUiThread(() -> oneWord.setText(result)); // 在主线程中更新UI
                     }
+
                     @Override
                     public void onFailure(String error) {
                         runOnUiThread(() -> oneWord.setText(error)); // 在主线程中更新UI
@@ -147,9 +162,11 @@ public class MainActivity extends BaseActivity {
         buildTarget.setText("Build Target: " + ViewAppInfo.getAppBuildTarget()); // 编译日期信息
         StringDialog.showAlertDialog(this, "提示", getString(R.string.start_message), "我知道了");
     }
+
     private void updateOneWord(String str, TextView oneWord) {
         oneWord.setText(str);
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -199,14 +216,15 @@ public class MainActivity extends BaseActivity {
                 Log.printStackTrace(e);
             }
             try {
-                StatisticsUtil.load();
-                StatisticsUtil.updateDay();
-                tvStatistics.setText(StatisticsUtil.getText());
+                Statistics.load();
+                Statistics.updateDay();
+                tvStatistics.setText(Statistics.getText());
             } catch (Exception e) {
                 Log.printStackTrace(e);
             }
         }
     }
+
     @SuppressLint("NonConstantResourceId")
     public void onClick(View v) {
         if (v.getId() == R.id.main_image) {
@@ -233,14 +251,16 @@ public class MainActivity extends BaseActivity {
             selectSettingUid();
             return;
         } else if (id == R.id.btn_friend_watch) {
-            String userId = UserMap.getCurrentUid();
-            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userId), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
+            selectFriendWatchUid();
+//            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userId), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
+
             return;
         }
         Intent it = new Intent(this, HtmlViewerActivity.class);
         it.setData(Uri.parse(data));
         startActivity(it);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         PackageManager packageManager = getPackageManager();
@@ -257,12 +277,16 @@ public class MainActivity extends BaseActivity {
             menu.add(0, 7, 7, R.string.view_capture);
             menu.add(0, 8, 8, R.string.extend);
             menu.add(0, 9, 9, R.string.settings);
+            if (isApkInDebug()) {
+                menu.add(0, 10, 10, "Demo Setting UI");
+            }
         } catch (Exception e) {
             Log.printStackTrace(e);
             ToastUtil.makeText(this, "菜单创建失败，请重试", Toast.LENGTH_SHORT).show();
         }
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -309,7 +333,7 @@ public class MainActivity extends BaseActivity {
                 break;
             case 6:
                 if (Files.copyTo(Files.getExportedStatisticsFile(), Files.getStatisticsFile())) {
-                    tvStatistics.setText(StatisticsUtil.getText());
+                    tvStatistics.setText(Statistics.getText());
                     ToastUtil.makeText(this, "导入成功！", Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -329,45 +353,100 @@ public class MainActivity extends BaseActivity {
             case 9:
                 selectSettingUid();
                 break;
+            case 10:
+                Intent it = new Intent(this, DemoSettingActivity.class);
+                it.putExtra("userName", userNameArray[0]);
+                startActivity(it);
         }
         return super.onOptionsItemSelected(item);
     }
+
     public void selectSettingUid() {
-        AtomicBoolean selected = new AtomicBoolean(false);
-        AlertDialog dialog =
-                StringDialog.showSelectionDialog(
-                        this,
-                        "请选择配置",
-                        userNameArray,
-                        (dialog1, which) -> {
-                            selected.set(true);
-                            dialog1.dismiss();
-                            goSettingActivity(which);
-                        },
-                        "返回",
-                        dialog1 -> {
-                            selected.set(true);
-                            dialog1.dismiss();
-                        });
+        final CountDownLatch latch = new CountDownLatch(1);
+        AlertDialog dialog = StringDialog.showSelectionDialog(
+                this,
+                "请选择配置",
+                userNameArray,
+                (dialog1, which) -> {
+                    goSettingActivity(which);
+                    dialog1.dismiss();
+                    latch.countDown();
+                },
+                "返回",
+                dialog1 -> {
+                    dialog1.dismiss();
+                    latch.countDown();
+                });
+
         int length = userNameArray.length;
         if (length > 0 && length < 3) {
-            new Thread(
-                    () -> {
-                        ThreadUtil.sleep(1000);
-                        if (!selected.get()) {
-                            goSettingActivity(length - 1);
-                            // 在主线程中关闭对话框
-                            runOnUiThread(
-                                    () -> {
-                                        if (dialog.isShowing()) {
-                                            dialog.dismiss();
-                                        }
-                                    });
-                        }
-                    })
-                    .start();
+            // 定义超时时间（单位：毫秒）
+            final long timeoutMillis = 800;
+            new Thread(() -> {
+                try {
+                    if (!latch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                        runOnUiThread(() -> {
+                            if (dialog.isShowing()) {
+                                goSettingActivity(length - 1);
+                                dialog.dismiss();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
         }
     }
+
+    public void selectFriendWatchUid() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AlertDialog dialog = StringDialog.showSelectionDialog(
+                this,
+                "请选择有效账户",
+                userNameArray,
+                (dialog1, which) -> {
+                    goFrinedWatch(which);
+                    dialog1.dismiss();
+                    latch.countDown();
+                },
+                "返回",
+                dialog1 -> {
+                    dialog1.dismiss();
+                    latch.countDown();
+                });
+
+        int length = userNameArray.length;
+        if (length > 0 && length < 3) {
+            // 定义超时时间（单位：毫秒）
+            final long timeoutMillis = 800;
+            new Thread(() -> {
+                try {
+                    if (!latch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                        runOnUiThread(() -> {
+                            if (dialog.isShowing()) {
+                                goFrinedWatch(length - 1);
+                                dialog.dismiss();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+        }
+    }
+
+    private void goFrinedWatch(int index) {
+        UserEntity userEntity = userEntityArray[index];
+        if (userEntity != null) {
+            ListDialog.show(this, getString(R.string.friend_watch), FriendWatch.getList(userEntity.getUserId()), SelectModelFieldFunc.newMapInstance(), false, ListDialog.ListType.SHOW);
+        } else {
+            ToastUtil.makeText(this, "请先选择有效用户", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
     /**
      * 启动设置活动，根据用户选择的配置项启动不同的设置界面。
      *
@@ -375,12 +454,8 @@ public class MainActivity extends BaseActivity {
      */
     private void goSettingActivity(int index) {
         UserEntity userEntity = userEntityArray[index];
-//        Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? DemoSettingActivity.class : SettingsActivity.class;
-        Class<?> targetActivity = UIConfig.INSTANCE.getNewUI() ? NewSettingsActivity.class : SettingsActivity.class;
-        // targetActivity：使用 UIConfig 和 ViewAppInfo 中的信息判断启动 NewSettingsActivity 还是 SettingsActivity，简化条件判断。
-        // intent.putExtra：userEntity 不为空时，设置用户的 userId 和 userName；若为空，则仅传递 userName。
+        Class<?> targetActivity = UIConfig.INSTANCE.getTargetActivityClass();
         Intent intent = new Intent(this, targetActivity);
-        // 设置意图的额外信息：用户 ID 和显示名称
         if (userEntity != null) {
             intent.putExtra("userId", userEntity.getUserId());
             intent.putExtra("userName", userEntity.getShowName());
@@ -389,6 +464,7 @@ public class MainActivity extends BaseActivity {
         }
         startActivity(intent);
     }
+
     private void updateSubTitle(RunType runType) {
         setBaseTitle(ViewAppInfo.getAppTitle() + "[" + runType.getName() + "]");
         switch (runType) {

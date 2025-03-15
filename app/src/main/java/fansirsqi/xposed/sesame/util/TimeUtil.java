@@ -136,8 +136,12 @@ public class TimeUtil {
         }
         return timeCalendar;
     }
+
     public static String getTimeStr(long ts) {
-        return DateFormat.getTimeInstance().format(new java.util.Date(ts));
+        return DateFormat.getTimeInstance().format(new Date(ts));
+    }
+    public static String getTimeStr() {
+        return getTimeStr(System.currentTimeMillis());
     }
     public static String getDateStr() {
         return getDateStr(0);
@@ -262,18 +266,21 @@ public class TimeUtil {
     public static String getCommonDate(Long timestamp) {
         return getCommonDateFormat().format(timestamp);
     }
+
     public static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         }
     };
+
     public static final ThreadLocal<SimpleDateFormat> DATE_TIME_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         }
     };
+
     public static final ThreadLocal<SimpleDateFormat> OTHER_DATE_TIME_FORMAT_THREAD_LOCAL = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {

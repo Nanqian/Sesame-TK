@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import fansirsqi.xposed.sesame.util.Maps.IdMapManager;
 import fansirsqi.xposed.sesame.util.Maps.VitalityRewardsMap;
+import lombok.Getter;
+
 /**
  * @author Byseven
  * @date 2025/1/20
@@ -22,14 +24,21 @@ public class VitalityStore extends MapperEntity {
         }
         return list;
     }
+
+    @Getter
     public enum ExchangeStatus {
-        InsufficientVitalityValue("活力值不足"),
-        InsufficientInventory("库存量不足"),
-        ExceedLimit("兑换达上限"),
-        SeckillNotBegin("秒杀未开始"),
-        SeckillHasEnd("秒杀已结束"),
-        NeverExpireDress("不限时皮肤");
-        ExchangeStatus(String nickNames) {
+        NO_ENOUGH_POINT("活力值不足"),
+        NO_ENOUGH_STOCK("库存量不足"),
+        REACH_LIMIT("兑换达上限"),
+        SECKILL_NOT_BEGIN("秒杀未开始"),
+        SECKILL_HAS_END("秒杀已结束"),
+        HAS_NEVER_EXPIRE_DRESS("不限时皮肤");
+
+        private final String nickName;
+
+        ExchangeStatus(String nickName) {
+            this.nickName = nickName;
         }
+
     }
 }

@@ -1,84 +1,93 @@
 package fansirsqi.xposed.sesame.data;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.File;
+
+import fansirsqi.xposed.sesame.ui.DemoSettingActivity;
+import fansirsqi.xposed.sesame.ui.NewSettingsActivity;
+import fansirsqi.xposed.sesame.ui.SettingsActivity;
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Data;
-/**
- * UI 配置类，用于管理应用的 UI 配置。
- * 包括加载、保存、卸载等操作。
- */
+import lombok.Setter;
+
 @Data
 public class UIConfig {
     private static final String TAG = UIConfig.class.getSimpleName();
-    // 单例模式：UIConfig 的唯一实例
     public static final UIConfig INSTANCE = new UIConfig();
-    // 用于标记是否已初始化，防止重复初始化
-    @JsonIgnore
+
+    @JsonIgnore // 排除掉不需要序列化的字段
     private boolean init;
-    // 是否使用新 UI
-    private Boolean newUI = true;
-    /**
-     * 保存当前 UI 配置到文件中
-     *
-     * @return 保存成功返回 true，失败返回 false
-     */
+
+
+    public static final String UI_OPTION_OLD = "old";
+    public static final String UI_OPTION_NEW = "new";
+    public static final String UI_OPTION_TEST = "test";
+
+    @Setter
+    @JsonProperty("uiOption") // 直接序列化 uiOption 字段
+    private String uiOption = UI_OPTION_NEW; // 默认值为 "new"
+
+    private UIConfig() {
+    }
+
     public static Boolean save() {
         Log.record("保存UI配置");
         return Files.setUIConfigFile(JsonUtil.formatJson(INSTANCE));
     }
-    /**
- * 加载 UI 配置文件，如果文件不存在，则初始化为默认配置
- *
- * @return 加载后的 UIConfig 实例
- */
-public static synchronized UIConfig load() {
-    java.io.File uiConfigFile = Files.getUIConfigFile();
-    try {
-        if (uiConfigFile.exists()) {
-            String json = Files.readFromFile(uiConfigFile);
-            if (!json.trim().isEmpty()) {
-                JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
-                String formatted = JsonUtil.formatJson(INSTANCE);
-                if (formatted != null && !formatted.equals(json)) {
-                    Log.runtime(TAG, "格式化UI配置");
-                    Files.write2File(formatted, uiConfigFile);
+
+    public static synchronized UIConfig load() {
+        File targetFile = Files.getTargetFileofDir(Files.MAIN_DIR, "ui_config.json");
+        try {
+            if (targetFile.exists()) {
+                String json = Files.readFromFile(targetFile);
+                if (!json.trim().isEmpty()) {
+                    JsonUtil.copyMapper().readerForUpdating(INSTANCE).readValue(json);
+                    String formatted = JsonUtil.formatJson(INSTANCE);
+                    if (formatted != null && !formatted.equals(json)) {
+                        Log.runtime(TAG, "格式化"+TAG+"配置");
+                        Files.write2File(formatted, targetFile);
+                    }
+                } else {
+                    resetToDefault();
                 }
             } else {
-                Log.runtime(TAG, "配置文件为空，使用默认配置");
                 resetToDefault();
+                Files.write2File(JsonUtil.formatJson(INSTANCE), targetFile);
             }
-        } else {
-            Log.runtime(TAG, "配置文件不存在，初始化默认配置");
-            resetToDefault();
-            Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);
-        }
-    } catch (Exception e) {
-        Log.printStackTrace(TAG, e);
-        Log.runtime(TAG, "重置UI配置");
-        resetToDefault();
-        try {
-            Files.write2File(JsonUtil.formatJson(INSTANCE), uiConfigFile);
-        } catch (Exception e2) {
-            Log.printStackTrace(TAG, e2);
-        }
-    }
-    INSTANCE.setInit(true);
-    return INSTANCE;
-}
-/**
- * 重置 UIConfig 实例为默认配置
- */
-private static void resetToDefault() {
-    unload();
-    INSTANCE.setNewUI(true);
-}
-    public static synchronized void unload() {
-        try {
-            JsonUtil.copyMapper().updateValue(INSTANCE, new UIConfig());
-        } catch (JsonMappingException e) {
+        } catch (Exception e) {
             Log.printStackTrace(TAG, e);
+            Log.runtime(TAG, "重置"+TAG+"配置");
+            resetToDefault();
+            try {
+                Files.write2File(JsonUtil.formatJson(INSTANCE), targetFile);
+            } catch (Exception e2) {
+                Log.printStackTrace(TAG, e2);
+            }
         }
+        INSTANCE.setInit(true);
+        return INSTANCE;
+    }
+
+    private static synchronized void resetToDefault() {
+        Log.runtime(TAG, "重置UI配置");
+        INSTANCE.setUiOption(UI_OPTION_NEW); // 默认设置为 "new"
+        INSTANCE.setInit(false);
+    }
+
+    @JsonIgnore
+    public Class<?> getTargetActivityClass() {
+        return switch (uiOption) {
+            case UI_OPTION_OLD -> SettingsActivity.class;
+            case UI_OPTION_NEW -> NewSettingsActivity.class;
+            case UI_OPTION_TEST -> DemoSettingActivity.class;
+            default -> {
+                Log.runtime(TAG, "未知的 UI 选项: " + uiOption);
+                yield NewSettingsActivity.class;
+            }
+        };
     }
 }

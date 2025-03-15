@@ -1,9 +1,13 @@
 package fansirsqi.xposed.sesame.task.omegakoiTown;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+
 import fansirsqi.xposed.sesame.data.RuntimeInfo;
+import fansirsqi.xposed.sesame.model.BaseModel;
 import fansirsqi.xposed.sesame.model.ModelFields;
 import fansirsqi.xposed.sesame.model.ModelGroup;
 import fansirsqi.xposed.sesame.task.ModelTask;
@@ -110,11 +114,17 @@ public class OmegakoiTown extends ModelTask {
         }
     }
     public Boolean check() {
-        if (TaskCommon.IS_ENERGY_TIME) {
+        if (TaskCommon.IS_ENERGY_TIME){
+            Log.record("⏰ 当前为只收能量时间【"+ BaseModel.getEnergyTime().getValue() +"】，停止执行" + getName() + "任务！");
             return false;
+        }else if (TaskCommon.IS_MODULE_SLEEP_TIME) {
+            Log.record("⏰ 模块休眠时间【"+ BaseModel.getModelSleepTime().getValue() +"】停止执行" + getName() + "任务！");
+            return false;
+        } else {
+            long executeTime = RuntimeInfo.getInstance().getLong("omegakoiTown", 0);
+            return System.currentTimeMillis() - executeTime >= 21600000;
         }
-        long executeTime = RuntimeInfo.getInstance().getLong("omegakoiTown", 0);
-        return System.currentTimeMillis() - executeTime >= 21600000;
+
     }
     public void run() {
         try {

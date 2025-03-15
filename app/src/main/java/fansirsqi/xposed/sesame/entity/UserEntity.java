@@ -1,7 +1,9 @@
 package fansirsqi.xposed.sesame.entity;
+
+import fansirsqi.xposed.sesame.util.StringUtil;
 import lombok.Data;
 import lombok.Getter;
-import fansirsqi.xposed.sesame.util.StringUtil;
+
 /**
  * 表示一个用户实体，包含用户的基本信息。
  */
@@ -43,15 +45,16 @@ public class UserEntity {
      * 用户的全名，格式为：显示名字 | 真实姓名 (账号)
      */
     private final String fullName;
+
     /**
      * 构造方法，初始化用户基本信息。
      *
-     * @param userId      用户 ID
-     * @param account     用户账号
+     * @param userId       用户 ID
+     * @param account      用户账号
      * @param friendStatus 用户好友状态
-     * @param realName    用户真实姓名
-     * @param nickName    用户昵称
-     * @param remarkName  用户备注名
+     * @param realName     用户真实姓名
+     * @param nickName     用户昵称
+     * @param remarkName   用户备注名
      */
     public UserEntity(String userId, String account, Integer friendStatus, String realName, String nickName, String remarkName) {
         this.userId = userId;
@@ -71,7 +74,9 @@ public class UserEntity {
         this.maskName = showNameTmp + "|" + maskNameTmp;
         // 设置 fullName，格式为：显示名称 | 真实姓名 (账号)
         this.fullName = showNameTmp + "|" + realName + "(" + account + ")";
+//        Log.runtime("UserEntity " + "created: " + this.fullName);
     }
+
     /**
      * 用户 DTO 类，用于传输数据的简化版本。
      */
@@ -83,6 +88,7 @@ public class UserEntity {
         private String realName;
         private String nickName;
         private String remarkName;
+
         /**
          * 将 UserDto 转换为 UserEntity 实体。
          *

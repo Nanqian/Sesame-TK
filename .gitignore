@@ -65,3 +65,5 @@ Xposed-Modules-Repo/
 plugin/
 demo/*
 /.vscode/settings.json
+*.REST
+*.txt

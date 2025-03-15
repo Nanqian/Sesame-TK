@@ -1,4 +1,5 @@
 package fansirsqi.xposed.sesame.ui;
+
 import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -14,18 +15,24 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.core.content.ContextCompat;
+
+import java.io.File;
+
 import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.Files;
 import fansirsqi.xposed.sesame.util.LanguageUtil;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ToastUtil;
+
 public class HtmlViewerActivity extends BaseActivity {
     private static final String TAG = HtmlViewerActivity.class.getSimpleName();
     MyWebView mWebView;
     ProgressBar progressBar;
     private Uri uri;
     private Boolean canClear;
+
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +51,7 @@ public class HtmlViewerActivity extends BaseActivity {
         // 设置 WebView 的客户端
         setupWebView();
     }
+
     /**
      * 设置 WebView 的 WebChromeClient 和进度变化监听
      */
@@ -64,6 +72,7 @@ public class HtmlViewerActivity extends BaseActivity {
                     }
                 });
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -79,35 +88,37 @@ public class HtmlViewerActivity extends BaseActivity {
         mWebView.getSettings().setSupportZoom(true);
         mWebView.getSettings().setBuiltInZoomControls(true);
         mWebView.getSettings().setDisplayZoomControls(false);
-    // 根据 intent 设置 WebView
-    if (intent != null) {
-      configureWebViewSettings(intent, settings);
-      uri = intent.getData();
-      if (uri != null) {
-        mWebView.loadUrl(uri.toString());
-      }
-      canClear = intent.getBooleanExtra("canClear", false);
-      return;
+        // 根据 intent 设置 WebView
+        if (intent != null) {
+            configureWebViewSettings(intent, settings);
+            uri = intent.getData();
+            if (uri != null) {
+                mWebView.loadUrl(uri.toString());
+            }
+            canClear = intent.getBooleanExtra("canClear", false);
+            return;
+        }
+        // 设置默认的 WebView 参数
+        settings.setTextZoom(85);
+        settings.setUseWideViewPort(true);
     }
-    // 设置默认的 WebView 参数
-    settings.setTextZoom(85);
-    settings.setUseWideViewPort(true);
-  }
-  /**
-   * 配置 WebView 的设置项
-   *
-   * @param intent 传递的 Intent
-   * @param settings WebView 的设置
-   */
-  private void configureWebViewSettings(Intent intent, WebSettings settings) {
-    if (intent.getBooleanExtra("nextLine", true)) {
-      settings.setTextZoom(85);
-      settings.setUseWideViewPort(false);
-    } else {
-      settings.setTextZoom(85);
-      settings.setUseWideViewPort(true);
+
+    /**
+     * 配置 WebView 的设置项
+     *
+     * @param intent   传递的 Intent
+     * @param settings WebView 的设置
+     */
+    private void configureWebViewSettings(Intent intent, WebSettings settings) {
+        if (intent.getBooleanExtra("nextLine", true)) {
+            settings.setTextZoom(85);
+            settings.setUseWideViewPort(false);
+        } else {
+            settings.setTextZoom(85);
+            settings.setUseWideViewPort(true);
+        }
     }
-  }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // 创建菜单选项
@@ -121,6 +132,7 @@ public class HtmlViewerActivity extends BaseActivity {
         menu.add(0, 6, 6, getString(R.string.scroll_to_bottom));
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -151,6 +163,7 @@ public class HtmlViewerActivity extends BaseActivity {
         }
         return true;
     }
+
     /**
      * 导出当前文件
      */
@@ -160,7 +173,7 @@ public class HtmlViewerActivity extends BaseActivity {
                 String path = uri.getPath();
                 Log.runtime(TAG, "URI path: " + path);
                 if (path != null) {
-                    java.io.File exportFile = Files.exportFile(new java.io.File(path));
+                    File exportFile = Files.exportFile(new File(path));
                     if (exportFile != null && exportFile.exists()) {
                         ToastUtil.showToast(getString(R.string.file_exported) + exportFile.getPath());
                     } else {
@@ -176,6 +189,7 @@ public class HtmlViewerActivity extends BaseActivity {
             Log.printStackTrace(TAG, e);
         }
     }
+
     /**
      * 清空当前文件
      */
@@ -184,7 +198,7 @@ public class HtmlViewerActivity extends BaseActivity {
             if (uri != null) {
                 String path = uri.getPath();
                 if (path != null) {
-                    java.io.File file = new java.io.File(path);
+                    File file = new File(path);
                     if (Files.clearFile(file)) {
                         ToastUtil.makeText(this, "文件已清空", Toast.LENGTH_SHORT).show();
                         mWebView.reload();
@@ -195,6 +209,7 @@ public class HtmlViewerActivity extends BaseActivity {
             Log.printStackTrace(TAG, e);
         }
     }
+
     /**
      * 使用其他浏览器打开当前 URL
      */
@@ -211,6 +226,7 @@ public class HtmlViewerActivity extends BaseActivity {
             }
         }
     }
+
     /**
      * 复制当前 WebView 的 URL 到剪贴板
      */

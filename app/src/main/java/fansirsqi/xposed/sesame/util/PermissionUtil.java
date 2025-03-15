@@ -12,6 +12,8 @@ import android.os.Environment;
 import android.os.PowerManager;
 import android.provider.Settings;
 import androidx.appcompat.app.AppCompatActivity;
+
+import fansirsqi.xposed.sesame.data.General;
 import fansirsqi.xposed.sesame.hook.ApplicationHook;
 import fansirsqi.xposed.sesame.task.antForest.AntForestRpcCall;
 /** 权限工具类，用于检查和请求所需权限。 */
