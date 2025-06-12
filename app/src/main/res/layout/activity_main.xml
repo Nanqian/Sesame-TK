@@ -15,7 +15,7 @@
         android:background="@color/background"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="6dp">
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/tv_statistics"

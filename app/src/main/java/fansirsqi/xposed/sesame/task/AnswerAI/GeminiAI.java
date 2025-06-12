@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 
 import fansirsqi.xposed.sesame.util.Log;
 import lombok.Getter;
@@ -104,7 +105,7 @@ public class GeminiAI implements AnswerAIInterface {
                 String json = response.body().string();
                 if (!response.isSuccessful()) {
                     Log.other("Gemini请求失败");
-                    Log.runtime("Gemini接口异常：" + json);
+                    Log.runtime(TAG,"Gemini接口异常：" + json);
                     return result;
                 }
                 JSONObject jsonObject = new JSONObject(json);
@@ -135,15 +136,18 @@ public class GeminiAI implements AnswerAIInterface {
             final String question = "问题：" + title + "\n\n" + "答案列表：\n\n" + answerStr + "\n\n" + "请只返回答案列表中的序号";
             AtomicReference<String> answerResult = new AtomicReference<>();
 
-            Thread thread = new Thread(() -> {
+            Runnable task = () -> {
                 try {
                     answerResult.set(getAnswerStr(question));
                 } catch (Exception e) {
                     Log.printStackTrace(TAG, e);
                 }
-            });
-            thread.start();
-            thread.join(30000); // 等待最多30秒
+            };
+            try {
+                GlobalThreadPools.getGeneralPurposeExecutor().submit(task).get(30, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                Log.printStackTrace(TAG, e);
+            }
 
             if (answerResult.get() != null && !answerResult.get().isEmpty()) {
                 try {

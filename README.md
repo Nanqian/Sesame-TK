@@ -3,30 +3,46 @@
 [![License](https://img.shields.io/github/license/Fansirsqi/Sesame-TK?labelColor=fff&label=License&logo=gnuprivacyguard)](https://raw.githubusercontent.com/Fansirsqi/Sesame-TK/refs/heads/main/LICENSE)
 [![Latest Release](https://img.shields.io/github/release/Fansirsqi/Sesame-TK?labelColor=fff&label=Releases&logo=gitlfs)](../../releases)
 [![All Releases Download](https://img.shields.io/github/downloads/Fansirsqi/Sesame-TK/total?labelColor=fff&label=Downloads&logo=codefresh)](../../releases)
-[![Telegram](https://img.shields.io/badge/Sesame--TK-nul?&logo=Telegram&label=Telegram-Channel&labelColor=fff&link=https%3A%2F%2Ft.me%2Ffansirsqi_xposed_sesame)](https://t.me/fansirsqi_xposed_sesame)
-[![墙内-云湖](https://img.shields.io/badge/%E4%BA%91%E6%B9%96-%E4%BA%A4%E6%B5%81%E7%BE%A4-nul?logo=icloud&logoColor=%236F4FD0&label=%E4%BA%91%E6%B9%96&labelColor=fff&color=%236F4FD0&link=https%3A%2F%2Fyhfx.jwznb.com%2Fshare%3Fkey%3DpEGmZ1gsdoBI%26ts%3D1734597564%20)](https://yhfx.jwznb.com/share?key=pEGmZ1gsdoBI&ts=1734597564)
+[![Telegram-Channel](https://img.shields.io/badge/Sesame--TK-nul?&logo=Telegram&label=Telegram-Channel&labelColor=fff&link=https%3A%2F%2Ft.me%2FSesame_TK_Channel)](https://t.me/Sesame_TK_Channel)
+[![Telegram-Group](https://img.shields.io/badge/Sesame--TK-nul?&logo=Telegram&label=Telegram-Group&labelColor=fff&link=https%3A%2F%2Ft.me%2Ffansirsqi_xposed_sesame)](https://t.me/fansirsqi_xposed_sesame)
+[![云湖](https://img.shields.io/badge/%E4%BA%91%E6%B9%96-%E4%BA%A4%E6%B5%81%E7%BE%A4-nul?logo=icloud&logoColor=%236F4FD0&label=%E4%BA%91%E6%B9%96&labelColor=fff&color=%236F4FD0&link=https%3A%2F%2Fyhfx.jwznb.com%2Fshare%3Fkey%3DpEGmZ1gsdoBI%26ts%3D1734597564%20)](https://yhfx.jwznb.com/share?key=pEGmZ1gsdoBI&ts=1734597564)
 
-> 懒真人版本: [Sesame](https://github.com/LazyImmortal/Sesame)
+> 👉懒真人版本: [Sesame](https://github.com/LazyImmortal/Sesame)
 
 ## 💻本人不是专业的开发者，仅仅是一名热爱开源的爱好者
 
 ### 📢欢迎大家提出宝贵意见，共同完善此项目
 
-> ### 墙内更新
+> ### ~~墙内不再更新~~ 有缘再见~
 >
-> [戳这里](https://fansirs.lanzoue.com/b011kv6pwd) 密码:`9527`
+> [~~戳这里~~](https://fansirs.lanzoue.com/b011kv6pwd) ~~密码:`9527`~~
 
+> ## 2025-06-11更新咸鱼耻辱名单
+
+
+### 以下内容对项目的发展造成了一定的影响，经研究决定 清空所有workflow ，以及项目所有资产，欢迎pr你在咸鱼看到的卖家，我会在这里更新
+
+## 更新咸鱼链接：`https://www.goofish.com/personal?userId=xxxxx`
+
+| 咸鱼昵称       | userid        | 更新日期       | 证据                                                                                                        |
+|------------|---------------|------------|-----------------------------------------------------------------------------------------------------------|
+| 星空卡券       | 590917148     | 2025-06-11 | ![image](https://cdn.jsdelivr.net/gh/Fansirsqi/picx-images-hosting@master/20250611/image.4jocuogftd.webp) |
+| 好笑的士兵      | 2208083536994 | 2025-06-11 | ![image](https://cdn.jsdelivr.net/gh/Fansirsqi/picx-images-hosting@master/20250611/image.6m45irtzyh.webp) |
+| 不及时确认收货不交易 | 2212868979480 | 2025-06-11 | ![image](https://cdn.jsdelivr.net/gh/Fansirsqi/picx-images-hosting@master/20250611/image.7zqomtakoy.webp) |
+| 宝宝微多猫      | 2434615193    | 2025-06-11 | ![image](https://cdn.jsdelivr.net/gh/Fansirsqi/picx-images-hosting@master/20250611/image.4cl4zam5vy.webp) |
+| 应用大全       | 2215835360792 | 2025-06-11 | ![image](https://cdn.jsdelivr.net/gh/Fansirsqi/picx-images-hosting@master/20250611/image.2324ft3jo1.webp) |
+
+。。。
 
 🤖 代码的大部分内容是通过 `GPT-4o` 模型的辅助来完成的。
 
 🐛 `BUG`和功能建议和请提交 [ISSUE](https://github.com/Fansirsqi/Sesame-TK/issues/new/choose)
-🐛 墙内用户可以在这反馈建议 [飞书链接](https://ylybfitrlv.feishu.cn/base/NtZYbKjrxafQp0sAyOTckiRTnbf?from=from_copylink) 密码：`911247#w`
 
 🙁 相关问题，我也可能不会修复,大家轻喷，因为我不是专业的开发者，我可能真的不会修复。
 
 ❓ 访问异常请手动开启 平衡网络延迟选项，设置适当的延迟时间以及查询时间
 
-☀️ 对了，我自己用的支付宝版本是`10.5.88.8000（忘了）`~`10.6.66.8000（1916）`
+☀️ 对了，我自己用的支付宝版本是`10.5.88.8000（忘了）`~`10.6.66.8000(1916)`~`10.7.26.8100(2560)`
 
 💊 如果你想自己编译，请fork本项目
 
@@ -99,7 +115,9 @@
 
 ### 版本特点 By [@TKaxv-7S](https://github.com/TKaxv-7S)
 
-1. 重构 系统架构，**功能与配置全部模块化**，以后添加功能**无需再开发配置页面，大幅降低开发门槛，并极大节省开发成本**，欢迎有兴趣的朋友参与开发，开发指南见[维基](https://github.com/Fansirsqi/Sesame-TK/wiki/%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97)或如下图所示，非常欢迎大家提[PR](https://github.com/Fansirsqi/Sesame-TK/pulls)
+1. 重构 系统架构，**功能与配置全部模块化**，以后添加功能**无需再开发配置页面，大幅降低开发门槛，并极大节省开发成本**
+   ，欢迎有兴趣的朋友参与开发，开发指南见[维基](https://github.com/Fansirsqi/Sesame-TK/wiki/%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97)
+   或如下图所示，非常欢迎大家提[PR](https://github.com/Fansirsqi/Sesame-TK/pulls)
    ![Sesame-TK开发指南](https://github.com/TKaxv-7S/Sesame-TK/assets/22593101/4d8451fe-2b7f-4f19-9439-b0afbf683510)
 2. 重构 **森林收能量代码**，大幅提升能量多的账号收取效率
 3. 重构 配置模块，**所有配置需要重新配置**，新配置文件名称为**config_v2.json**，旧配置文件未删除，可作参考
@@ -108,6 +126,7 @@
 6. 修复 一些逻辑问题
 
 ## 使用说明
+
 1. 禁止以技术支持为由倒卖本软件以及下属分支，违者必究
 2. 本APP不篡改，不修改，不获取任何个人信息及其支付宝信息。
 3. 本APP使用者因为违反本声明的规定而触犯中华人民共和国法律的，一切后果自负，作者不承担任何责任。

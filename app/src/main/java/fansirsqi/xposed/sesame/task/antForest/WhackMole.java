@@ -6,9 +6,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import fansirsqi.xposed.sesame.util.GlobalThreadPools;
 import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.ResUtil;
-import fansirsqi.xposed.sesame.util.ThreadUtil;
 
 /**
  * @author Byseven
@@ -21,7 +21,7 @@ public class WhackMole {
     /**
      * 6秒拼手速 打地鼠
      */
-    public static void whackMole() {
+    public static void startWhackMole() {
         try {
             long startTime = System.currentTimeMillis();
             JSONObject response = new JSONObject(AntForestRpcCall.startWhackMole("senlinguangchangdadishu"));
@@ -37,7 +37,7 @@ public class WhackMole {
                     if (!moleIdList.isEmpty()) {
                         String token = response.getString("token"); // 获取令牌
                         long elapsedTime = System.currentTimeMillis() - startTime; // 计算已耗时间
-                        ThreadUtil.sleep(Math.max(0, 6000 - elapsedTime)); // 睡眠至6秒
+                        GlobalThreadPools.sleep(Math.max(0, 6000 - elapsedTime)); // 睡眠至6秒
                         response = new JSONObject(AntForestRpcCall.settlementWhackMole(token, moleIdList, "senlinguangchangdadishu"));
                         if (ResUtil.checkResultCode(response)) {
                             int totalEnergy = response.getInt("totalEnergy");

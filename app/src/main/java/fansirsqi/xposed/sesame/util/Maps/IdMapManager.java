@@ -17,6 +17,7 @@ import fansirsqi.xposed.sesame.util.Log;
  * 提供通用的线程安全的ID映射功能，并支持单例管理。
  */
 public abstract class IdMapManager {
+    private static final String TAG = IdMapManager.class.getSimpleName();
     /**
      * 存储ID映射的并发HashMap。
      */
@@ -92,7 +93,7 @@ public abstract class IdMapManager {
      */
     public synchronized void load(String userId) {
         if (userId == null || userId.isEmpty()) {
-            Log.runtime("Skip loading map for empty userId");
+            Log.runtime(TAG,"Skip loading map for empty userId");
             load();
         } else {
             idMap.clear();

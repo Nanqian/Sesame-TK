@@ -8,11 +8,12 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import fansirsqi.xposed.sesame.util.GlobalThreadPools
 
 object FansirsqiUtil {
     // 定义一言API的URL
     private const val HITOKOTO_API_URL = "https://v1.hitokoto.cn/"
-    private val executorService: ExecutorService = Executors.newSingleThreadExecutor() // 创建单线程执行器
+    private val executorService: ExecutorService = GlobalThreadPools.getGeneralPurposeExecutor() // 创建单线程执行器
     /**
      * 获取一言句子并格式化输出。
      *
@@ -59,6 +60,18 @@ object FansirsqiUtil {
     interface OneWordCallback {
         fun onSuccess(result: String?) // 成功回调
         fun onFailure(error: String?) // 失败回调
+    }
+
+    /**
+     * 生成随机字符串
+     * @param length 字符串长度
+     */
+    fun getRandomString(length: Int): String {
+        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        return (1..length)
+            .map { kotlin.random.Random.nextInt(0, charPool.size) }
+            .map(charPool::get)
+            .joinToString("")
     }
 
 }

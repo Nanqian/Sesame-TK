@@ -22,6 +22,9 @@ import fansirsqi.xposed.sesame.R;
 import fansirsqi.xposed.sesame.util.JsonUtil;
 import fansirsqi.xposed.sesame.util.TypeUtil;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 @Data
 public class ModelField<T> implements Serializable {
     @JsonIgnore
@@ -34,6 +37,8 @@ public class ModelField<T> implements Serializable {
     protected T defaultValue; // 默认值
     @JsonIgnore
     private String desc;
+    @Setter
+    @Getter
     protected volatile T value; // 当前值
     /**
      * 默认构造函数，初始化字段值类型

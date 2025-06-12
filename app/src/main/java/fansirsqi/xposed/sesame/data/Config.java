@@ -146,7 +146,7 @@ public class Config {
             }
         } catch (Exception e) {
             Log.printStackTrace(TAG, e);
-            Log.runtime("保存用户配置失败，格式化 JSON 时出错");
+            Log.runtime(TAG,"保存用户配置失败，格式化 JSON 时出错");
             return false;
         }
         boolean success;
@@ -167,10 +167,10 @@ public class Config {
                 UserEntity userEntity = UserMap.get(userId);
                 userName = userEntity != null ? userEntity.getShowName() : "默认";
             }
-            Log.runtime("保存 [" + userName + "] 配置");
+            Log.runtime(TAG,"保存 [" + userName + "] 配置");
         } catch (Exception e) {
             Log.printStackTrace(TAG, e);
-            Log.runtime("保存用户配置失败");
+            Log.runtime(TAG,"保存用户配置失败");
             return false;
         }
         return true;

@@ -3,6 +3,7 @@ package fansirsqi.xposed.sesame.task;
 import java.util.List;
 
 import fansirsqi.xposed.sesame.model.BaseModel;
+import fansirsqi.xposed.sesame.util.Log;
 import fansirsqi.xposed.sesame.util.TimeUtil;
 
 /**
@@ -16,8 +17,9 @@ public class TaskCommon {
     public static volatile Boolean IS_MODULE_SLEEP_TIME = false;
 
     public static void update() {
-        long currentTimeMillis = System.currentTimeMillis();
 
+        Log.runtime("TaskCommon Update:");
+        long currentTimeMillis = System.currentTimeMillis();
         List<String> isEnergyTime = BaseModel.getEnergyTime().getValue();
         if (isEnergyTime.contains("-1")) {
             IS_ENERGY_TIME = false;
@@ -26,7 +28,9 @@ public class TaskCommon {
         }
 
         List<String> isModuleSleepTime = BaseModel.getModelSleepTime().getValue();
+        Log.runtime("获取模块休眠配置:" + isModuleSleepTime);
         if (isModuleSleepTime.contains("-1")) {
+            Log.runtime("模块休眠配置 -1，不进行休眠");
             IS_MODULE_SLEEP_TIME = false;
         } else {
             IS_MODULE_SLEEP_TIME = TimeUtil.checkInTimeRange(currentTimeMillis, isModuleSleepTime);
